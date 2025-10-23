@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Navbar from "../components/navbar";
+import Footer from '@/components/ui/footer';
+
 
 export default function LayananPage() {
   const [formData, setFormData] = useState({
@@ -54,147 +57,154 @@ export default function LayananPage() {
   );
 
   return (
-    <main className="min-h-screen bg-[#C6E5B3] py-10 flex justify-center">
-      <div className="bg-[#2B5235] text-white w-full max-w-2xl rounded-lg shadow-lg p-8">
-        <h1 className="text-xl font-bold mb-6">Layanan Usulan Produk</h1>
+    <>
+      {/* ✅ Navbar ditambahkan di sini */}
+      <Navbar />
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <p className="text-lg font-semibold border-b border-[#C6E5B3] pb-2">Data Pribadi</p>
-          
-          <InputField
-            label="Nama Lengkap"
-            name="nama"
-            value={formData.nama}
-            onChange={handleChange}
-            placeholder="Masukkan nama Anda"
-          />
+      <main className="min-h-screen bg-[#C6E5B3] py-10 flex justify-center">
+        <div className="bg-[#2B5235] text-white w-full max-w-2xl rounded-lg shadow-lg p-8">
+          <h1 className="text-xl font-bold mb-6">Layanan Usulan Produk</h1>
 
-          <InputField
-            label="Alamat Lengkap"
-            name="alamat"
-            value={formData.alamat}
-            onChange={handleChange}
-            placeholder="Jalan, kota, provinsi"
-          />
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <p className="text-lg font-semibold border-b border-[#C6E5B3] pb-2">Data Pribadi</p>
 
-          <InputField
-            label="Email Pribadi"
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="contoh@domain.com"
-          />
-
-          <InputField
-            label="Nomor Telepon"
-            name="telp"
-            value={formData.telp}
-            onChange={handleChange}
-            placeholder="Contoh: 0812xxxx"
-          />
-
-          <InputField
-            label="Jabatan"
-            name="jabatan"
-            value={formData.jabatan}
-            onChange={handleChange}
-            placeholder="Contoh: Manajer Pemasaran"
-          />
-          
-          <p className="text-lg font-semibold border-b border-white/50 pb-2 pt-4">Data Perusahaan</p>
-
-          <InputField
-            label="Nama Perusahaan"
-            name="namaperusahaan"
-            value={formData.namaperusahaan}
-            onChange={handleChange}
-            placeholder="Contoh: PT Jaya Abadi"
-          />
-
-          <InputField
-            label="Email Perusahaan"
-            name="emailPerusahaan"
-            type="email"
-            value={formData.emailPerusahaan}
-            onChange={handleChange}
-            placeholder="hrd@perusahaan.com"
-          />
-
-          <InputField
-            label="Alamat Perusahaan"
-            name="alamatPerusahaan"
-            value={formData.alamatPerusahaan}
-            onChange={handleChange}
-            placeholder="Alamat kantor pusat"
-          />
-
-          <InputField
-            label="Nomor Telepon Perusahaan"
-            name="telpPerusahaan"
-            value={formData.telpPerusahaan}
-            onChange={handleChange}
-            placeholder="Nomor kontak perusahaan"
-          />
-          
-          <p className="text-lg font-semibold border-b border-white/50 pb-2 pt-4">Detail Usulan Produk</p>
-
-          <InputField
-            label="Jenis Produk yang Diusulkan"
-            name="jenisProduk"
-            value={formData.jenisProduk}
-            onChange={handleChange}
-            placeholder="Contoh: Aplikasi Mobile/Sistem Pembayaran"
-          />
-
-          <div>
-            <label htmlFor="tanggal" className="block text-sm font-medium mb-1">
-              Tanggal Rencana Pelaksanaan
-            </label>
-            <input
-              id="tanggal"
-              type="date"
-              name="tanggal"
-              value={formData.tanggal}
+            <InputField
+              label="Nama Lengkap"
+              name="nama"
+              value={formData.nama}
               onChange={handleChange}
-              className="w-full p-2 rounded bg-white text-[#2B5235]"
+              placeholder="Masukkan nama Anda"
             />
-          </div>
 
-          <div>
-            <label htmlFor="deskripsi" className="block text-sm font-medium mb-1">
-              Deskripsi Kebutuhan/Usulan
-            </label>
-            <textarea
-              id="deskripsi"
-              name="deskripsi"
+            <InputField
+              label="Alamat Lengkap"
+              name="alamat"
+              value={formData.alamat}
               onChange={handleChange}
-              placeholder="Jelaskan secara singkat latar belakang, tujuan, dan fitur utama dari usulan Anda."
-              className="w-full p-2 rounded bg-white text-[#2B5235]"
-              rows={4}
+              placeholder="Jalan, kota, provinsi"
             />
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Dokumen Pendukung (opsional)
-            </label>
-            <input
-              type="file"
-              onChange={handleFileChange}
-              className="w-full p-2 rounded bg-[white] text-[#2B5235] file:mr-4 file:py-1 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-green-100 file:text-[#2B5235] hover:file:bg-green-200"
+            <InputField
+              label="Email Pribadi"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="contoh@domain.com"
             />
-          </div>
 
-          {/* Tombol */}
-          <button
-            type="submit"
-            className="w-full py-2 bg-white text-[#2B5235] font-bold rounded hover:bg-gray-200 transition duration-150"
-          >
-            AJUKAN USULAN
-          </button>
-        </form>
-      </div>
-    </main>
+            <InputField
+              label="Nomor Telepon"
+              name="telp"
+              value={formData.telp}
+              onChange={handleChange}
+              placeholder="Contoh: 0812xxxx"
+            />
+
+            <InputField
+              label="Jabatan"
+              name="jabatan"
+              value={formData.jabatan}
+              onChange={handleChange}
+              placeholder="Contoh: Manajer Pemasaran"
+            />
+
+            <p className="text-lg font-semibold border-b border-white/50 pb-2 pt-4">Data Perusahaan</p>
+
+            <InputField
+              label="Nama Perusahaan"
+              name="namaperusahaan"
+              value={formData.namaperusahaan}
+              onChange={handleChange}
+              placeholder="Contoh: PT Jaya Abadi"
+            />
+
+            <InputField
+              label="Email Perusahaan"
+              name="emailPerusahaan"
+              type="email"
+              value={formData.emailPerusahaan}
+              onChange={handleChange}
+              placeholder="hrd@perusahaan.com"
+            />
+
+            <InputField
+              label="Alamat Perusahaan"
+              name="alamatPerusahaan"
+              value={formData.alamatPerusahaan}
+              onChange={handleChange}
+              placeholder="Alamat kantor pusat"
+            />
+
+            <InputField
+              label="Nomor Telepon Perusahaan"
+              name="telpPerusahaan"
+              value={formData.telpPerusahaan}
+              onChange={handleChange}
+              placeholder="Nomor kontak perusahaan"
+            />
+
+            <p className="text-lg font-semibold border-b border-white/50 pb-2 pt-4">Detail Usulan Produk</p>
+
+            <InputField
+              label="Jenis Produk yang Diusulkan"
+              name="jenisProduk"
+              value={formData.jenisProduk}
+              onChange={handleChange}
+              placeholder="Contoh: Aplikasi Mobile/Sistem Pembayaran"
+            />
+
+            <div>
+              <label htmlFor="tanggal" className="block text-sm font-medium mb-1">
+                Tanggal Rencana Pelaksanaan
+              </label>
+              <input
+                id="tanggal"
+                type="date"
+                name="tanggal"
+                value={formData.tanggal}
+                onChange={handleChange}
+                className="w-full p-2 rounded bg-white text-[#2B5235]"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="deskripsi" className="block text-sm font-medium mb-1">
+                Deskripsi Kebutuhan/Usulan
+              </label>
+              <textarea
+                id="deskripsi"
+                name="deskripsi"
+                onChange={handleChange}
+                placeholder="Jelaskan secara singkat latar belakang, tujuan, dan fitur utama dari usulan Anda."
+                className="w-full p-2 rounded bg-white text-[#2B5235]"
+                rows={4}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Dokumen Pendukung (opsional)
+              </label>
+              <input
+                type="file"
+                onChange={handleFileChange}
+                className="w-full p-2 rounded bg-[white] text-[#2B5235] file:mr-4 file:py-1 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-green-100 file:text-[#2B5235] hover:file:bg-green-200"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-2 bg-white text-[#2B5235] font-bold rounded hover:bg-gray-200 transition duration-150"
+            >
+              AJUKAN USULAN
+            </button>
+          </form>
+        </div>
+        
+      </main>
+                <Footer />
+      
+    </>
   );
 }

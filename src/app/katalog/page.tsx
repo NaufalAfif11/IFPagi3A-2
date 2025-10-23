@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+import Navbar from "../components/navbar";
+import Footer from '@/components/ui/footer';
 import InovasiCard from "../../components/ui/InovasiCard";
 import StatsSection from "../../components/ui/StatsSection";
 
@@ -26,7 +29,7 @@ export default function KatalogPage() {
   return (
     <main className="min-h-screen flex flex-col bg-[#C6E5B3]">
       {/* Tempat Navbar */}
-
+      <Navbar/>
       {/* Ni Judul Section */}
 
       {/* Daftar Inovasi */}
@@ -40,6 +43,7 @@ export default function KatalogPage() {
       <StatsSection />
 
       {/* Footer */}
+      <Footer/>
     </main>
   );
 }
