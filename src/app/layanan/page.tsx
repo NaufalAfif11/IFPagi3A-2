@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
 import Navbar from "../components/navbar";
-import Footer from '@/components/ui/footer';
-
+import Footer from "@/components/ui/footer";
 
 export default function LayananPage() {
   const [formData, setFormData] = useState({
@@ -22,7 +22,9 @@ export default function LayananPage() {
     dokumen: null as File | null,
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
@@ -39,8 +41,20 @@ export default function LayananPage() {
     alert("Usulan berhasil diajukan!");
   };
 
-  const InputField = ({ label, name, type = "text", placeholder, value, onChange, className = "" }: any) => (
-    <div>
+  const InputField = ({
+    label,
+    name,
+    type = "text",
+    placeholder,
+    value,
+    onChange,
+    className = "",
+  }: any) => (
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
       <label htmlFor={name} className="block text-sm font-medium mb-1">
         {label}
       </label>
@@ -51,22 +65,35 @@ export default function LayananPage() {
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className={`w-full p-2 rounded bg-white text-[#2B5235] ${className}`}
+        className={`w-full p-2 rounded bg-white text-[#2B5235] border border-transparent focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all duration-200 ${className}`}
       />
-    </div>
+    </motion.div>
   );
 
   return (
     <>
-      {/* ✅ Navbar ditambahkan di sini */}
       <Navbar />
 
-      <main className="min-h-screen bg-[#C6E5B3] py-10 flex justify-center">
-        <div className="bg-[#2B5235] text-white w-full max-w-2xl rounded-lg shadow-lg p-8">
-          <h1 className="text-xl font-bold mb-6">Layanan Usulan Produk</h1>
+      <main className="min-h-screen bg-[#C6E5B3] py-10 flex justify-center items-start">
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="bg-[#2B5235] text-white w-full max-w-2xl rounded-2xl shadow-2xl p-8"
+        >
+          <motion.h1
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+            className="text-2xl font-bold mb-6 text-center"
+          >
+            Layanan Usulan Produk
+          </motion.h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <p className="text-lg font-semibold border-b border-[#C6E5B3] pb-2">Data Pribadi</p>
+            <p className="text-lg font-semibold border-b border-[#C6E5B3] pb-2">
+              Data Pribadi
+            </p>
 
             <InputField
               label="Nama Lengkap"
@@ -109,7 +136,9 @@ export default function LayananPage() {
               placeholder="Contoh: Manajer Pemasaran"
             />
 
-            <p className="text-lg font-semibold border-b border-white/50 pb-2 pt-4">Data Perusahaan</p>
+            <p className="text-lg font-semibold border-b border-white/50 pb-2 pt-4">
+              Data Perusahaan
+            </p>
 
             <InputField
               label="Nama Perusahaan"
@@ -144,7 +173,9 @@ export default function LayananPage() {
               placeholder="Nomor kontak perusahaan"
             />
 
-            <p className="text-lg font-semibold border-b border-white/50 pb-2 pt-4">Detail Usulan Produk</p>
+            <p className="text-lg font-semibold border-b border-white/50 pb-2 pt-4">
+              Detail Usulan Produk
+            </p>
 
             <InputField
               label="Jenis Produk yang Diusulkan"
@@ -154,8 +185,15 @@ export default function LayananPage() {
               placeholder="Contoh: Aplikasi Mobile/Sistem Pembayaran"
             />
 
-            <div>
-              <label htmlFor="tanggal" className="block text-sm font-medium mb-1">
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              <label
+                htmlFor="tanggal"
+                className="block text-sm font-medium mb-1"
+              >
                 Tanggal Rencana Pelaksanaan
               </label>
               <input
@@ -164,12 +202,19 @@ export default function LayananPage() {
                 name="tanggal"
                 value={formData.tanggal}
                 onChange={handleChange}
-                className="w-full p-2 rounded bg-white text-[#2B5235]"
+                className="w-full p-2 rounded bg-white text-[#2B5235] border border-transparent focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all duration-200"
               />
-            </div>
+            </motion.div>
 
-            <div>
-              <label htmlFor="deskripsi" className="block text-sm font-medium mb-1">
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              <label
+                htmlFor="deskripsi"
+                className="block text-sm font-medium mb-1"
+              >
                 Deskripsi Kebutuhan/Usulan
               </label>
               <textarea
@@ -177,34 +222,39 @@ export default function LayananPage() {
                 name="deskripsi"
                 onChange={handleChange}
                 placeholder="Jelaskan secara singkat latar belakang, tujuan, dan fitur utama dari usulan Anda."
-                className="w-full p-2 rounded bg-white text-[#2B5235]"
+                className="w-full p-2 rounded bg-white text-[#2B5235] border border-transparent focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all duration-200"
                 rows={4}
               />
-            </div>
+            </motion.div>
 
-            <div>
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+            >
               <label className="block text-sm font-medium mb-1">
                 Dokumen Pendukung (opsional)
               </label>
               <input
                 type="file"
                 onChange={handleFileChange}
-                className="w-full p-2 rounded bg-[white] text-[#2B5235] file:mr-4 file:py-1 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-green-100 file:text-[#2B5235] hover:file:bg-green-200"
+                className="w-full p-2 rounded bg-white text-[#2B5235] file:mr-4 file:py-1 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-green-100 file:text-[#2B5235] hover:file:bg-green-200"
               />
-            </div>
+            </motion.div>
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               type="submit"
-              className="w-full py-2 bg-white text-[#2B5235] font-bold rounded hover:bg-gray-200 transition duration-150"
+              className="w-full py-3 bg-white text-[#2B5235] font-bold rounded-lg hover:bg-gray-200 transition duration-150 shadow-md"
             >
               AJUKAN USULAN
-            </button>
+            </motion.button>
           </form>
-        </div>
-        
+        </motion.div>
       </main>
-                <Footer />
-      
+
+      <Footer />
     </>
   );
 }
