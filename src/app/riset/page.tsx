@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Footer from '@/components/ui/footer';
+import Navbar from '../components/navbar';
+
 
 export default function RisetPage() {
   const [judul, setJudul] = useState("");
@@ -42,6 +45,8 @@ export default function RisetPage() {
 
   return (
     <>
+          <Navbar />
+    
       <style jsx global>{`
         @keyframes fadeIn {
           from {
@@ -222,6 +227,8 @@ export default function RisetPage() {
           </div>
         </div>
       </div>
+          <Footer />
+      
     </>
   );
 }

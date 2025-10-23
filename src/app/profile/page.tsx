@@ -1,9 +1,13 @@
 import React from "react";
 import  Image from "next/image";
+import Navbar from '../components/navbar';
+import Footer from '@/components/ui/footer';
 
 export default function profileBrida() {
     return (
     <>
+        <Navbar />
+    
     <div className="min-h-screen" style={{ backgroundColor: '#C6E5B3' }}>
       <section className="max-w-7xl mx-15 px-4 sm:px-6 lg:px-8 py-16">
         <h2 className="text-4xl font-bold text-center mb-7" style={{ color: '#2B5235' }}>SINOVA</h2>
@@ -78,6 +82,7 @@ export default function profileBrida() {
         </div>
       </section>
     </div>
+    <Footer />
     </>   
     );
 }

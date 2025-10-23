@@ -1,10 +1,16 @@
 "use client";
 
 import React from "react";
+import Navbar from '../components/navbar';
+import Footer from '@/components/ui/footer';
+
+
 
 export default function HubungiKamiPage() {
   return (
     <>
+    <Navbar />
+    
       <style jsx global>{`
         @keyframes fadeIn {
           from {
@@ -68,6 +74,8 @@ export default function HubungiKamiPage() {
           </div>
         </div>
       </div>
+                <Footer />
+      
     </>
   );
 }
