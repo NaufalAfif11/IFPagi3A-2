@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Navbar from "../components/navbar"
+import Navbar from "../../components/ui/navbar"
 import Footer from "@/components/ui/footer";
 
 export default function RisetPage() {
@@ -78,10 +78,10 @@ export default function RisetPage() {
       `}</style>
       <Navbar/>
 
-      <div className="min-h-screen flex flex-col bg-[#C6E5B3] py-8" style={{ animation: 'fadeIn 0.8s ease-in' }}>
+      <div className="min-h-screen flex flex-col bg-white py-8" style={{ animation: 'fadeIn 0.8s ease-in' }}>
         {/* Filter Section */}
         <div className="max-w-6xl mx-auto px-4 w-full" style={{ animation: 'slideDown 0.6s ease-out' }}>
-          <div className="bg-[#2B5235] text-white px-4 py-3 rounded-t-lg font-semibold text-center">
+          <div className="bg-[#1F4E73] text-white px-4 py-3 rounded-t-lg font-semibold text-center">
             Filter Pencarian
           </div>
           <div className="bg-white p-4 rounded-b-lg shadow-lg flex flex-col md:flex-row gap-3 md:items-center justify-between">
@@ -93,7 +93,7 @@ export default function RisetPage() {
                 setJudul(e.target.value);
                 setCurrentPage(1);
               }}
-              className="border border-gray-300 rounded-lg px-3 py-2 flex-1 focus:outline-none focus:ring-2 focus:ring-[#2B5235] transition-all"
+              className="border border-gray-300 rounded-lg px-3 py-2 flex-1 focus:outline-none focus:ring-2 focus:ring-[#1F4E73] transition-all"
             />
             <input
               type="text"
@@ -103,7 +103,7 @@ export default function RisetPage() {
                 setNama(e.target.value);
                 setCurrentPage(1);
               }}
-              className="border border-gray-300 rounded-lg px-3 py-2 flex-1 focus:outline-none focus:ring-2 focus:ring-[#2B5235] transition-all"
+              className="border border-gray-300 rounded-lg px-3 py-2 flex-1 focus:outline-none focus:ring-2 focus:ring-[#1F4E73] transition-all"
             />
             <select
               value={kategori}
@@ -111,7 +111,7 @@ export default function RisetPage() {
                 setKategori(e.target.value);
                 setCurrentPage(1);
               }}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#2B5235] transition-all"
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1F4E73] transition-all"
             >
               <option>Kategori Riset</option>
               <option>Semua</option>
@@ -121,7 +121,7 @@ export default function RisetPage() {
             </select>
             <button 
               onClick={handleSearch}
-              className="bg-[#2B5235] text-white px-6 py-2 rounded-lg hover:bg-[#3d7249] transition-all transform hover:scale-105 shadow-md"
+              className="bg-[#1F4E73] text-white px-6 py-2 rounded-lg hover:bg-[#3d7249] transition-all transform hover:scale-105 shadow-md"
             >
               Cari
             </button>
@@ -133,7 +133,7 @@ export default function RisetPage() {
           <div className="overflow-x-auto bg-white rounded-lg shadow-lg">
             <table className="w-full text-sm text-left border-collapse">
               <thead>
-                <tr className="bg-[#2B5235] text-white">
+                <tr className="bg-[#1F4E73] text-white">
                   <th className="p-3 w-12 text-center border border-[#3d7249]">No.</th>
                   <th className="p-3 border border-[#3d7249]">Judul Riset</th>
                   <th className="p-3 border border-[#3d7249]">Nama Periset</th>
@@ -145,7 +145,7 @@ export default function RisetPage() {
                   currentData.map((item, index) => (
                     <tr 
                       key={item.no} 
-                      className="border-b hover:bg-[#e8f5e0] transition-colors duration-200"
+                      className="border-b hover:bg-[#white] transition-colors duration-200"
                       style={{ 
                         animation: `fadeIn ${0.3 + index * 0.1}s ease-in` 
                       }}
@@ -158,7 +158,7 @@ export default function RisetPage() {
                           href={item.dokumen}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[#2B5235] hover:text-[#3d7249] underline font-medium transition-colors"
+                          className="text-[#1F4E73] hover:text-[#3d7249] underline font-medium transition-colors"
                         >
                           Download Dokumen
                         </a>
@@ -185,7 +185,7 @@ export default function RisetPage() {
                 className={`px-4 py-2 border rounded-lg font-medium transition-all ${
                   currentPage === 1 
                     ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-400" 
-                    : "hover:bg-[#2B5235] hover:text-white hover:border-[#2B5235] transform hover:scale-105"
+                    : "hover:bg-[#1F4E73] hover:text-white hover:border-[#1F4E73] transform hover:scale-105"
                 }`}
               >
                 Previous
@@ -197,8 +197,8 @@ export default function RisetPage() {
                   onClick={() => goToPage(page)}
                   className={`px-4 py-2 border rounded-lg font-medium transition-all ${
                     currentPage === page
-                      ? "bg-[#2B5235] text-white border-[#2B5235] shadow-md"
-                      : "hover:bg-[#e8f5e0] hover:border-[#2B5235] transform hover:scale-105"
+                      ? "bg-[#1F4E73] text-white border-[#1F4E73] shadow-md"
+                      : "hover:bg-[#white] hover:border-[#1F4E73] transform hover:scale-105"
                   }`}
                 >
                   {page}
@@ -211,7 +211,7 @@ export default function RisetPage() {
                 className={`px-4 py-2 border rounded-lg font-medium transition-all ${
                   currentPage === totalPages
                     ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-400"
-                    : "hover:bg-[#2B5235] hover:text-white hover:border-[#2B5235] transform hover:scale-105"
+                    : "hover:bg-[#1F4E73] hover:text-white hover:border-[#1F4E73] transform hover:scale-105"
                 }`}
               >
                 Next

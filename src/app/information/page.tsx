@@ -2,7 +2,7 @@
 import React from 'react';
 import { Download } from 'lucide-react';
 import Image from 'next/image';
-import Navbar from '../components/navbar';
+import Navbar from '../../components/ui/navbar';
 import Footer from '@/components/ui/footer';
 
 
@@ -37,21 +37,21 @@ export default function Info() {
       <Navbar />
 
       {/* Konten utama */}
-      <div className="bg-[#C6E5B3] min-h-screen py-8 px-4">
+      <div className="bg-white min-h-screen py-8 px-4">
         <div className="max-w-5xl mx-auto">
           {/* Judul Panduan */}
           <div className="py-4 mt-2">
-            <h1 className="text-[#2b5232] text-center text-3xl font-bold tracking-wide">
+            <h1 className="text-[#1F4E73] text-center text-3xl font-bold tracking-wide">
               PANDUAN
             </h1>
           </div>
 
           {/* Tabel Panduan */}
           <div className="p-6">
-            <div className="overflow-hidden rounded-lg border border-[#2b5232] shadow-md">
+            <div className="overflow-hidden rounded-lg border border-[#1F4E73] shadow-md">
               <table className="w-full">
                 <thead>
-                  <tr className="bg-[#2b5232] text-white">
+                  <tr className="bg-[#1F4E73] text-white">
                     <th className="py-4 px-6 text-left font-semibold text-base w-20">No.</th>
                     <th className="py-4 px-6 text-left font-semibold text-base">Unduhan</th>
                     <th className="py-4 px-6 text-center font-semibold text-base w-48">Dokumen Unduh</th>
@@ -93,7 +93,7 @@ export default function Info() {
                   onClick={() => setCurrentPage(page)}
                   className={`px-4 py-2 rounded transition-colors text-sm font-medium ${
                     currentPage === page
-                      ? 'bg-[#2b5232] text-white'
+                      ? 'bg-[#1F4E73] text-white'
                       : 'border border-black hover:bg-gray-100 text-gray-700'
                   }`}
                 >
@@ -114,7 +114,7 @@ export default function Info() {
 
         {/* Tim Pengembang */}
         <div className="mt-3 py-4">
-          <h1 className="text-[#2b5232] text-center text-3xl font-bold tracking-wide">
+          <h1 className="text-[#1F4E73] text-center text-3xl font-bold tracking-wide">
             TIM PENGEMBANG
           </h1>
         </div>
@@ -123,7 +123,7 @@ export default function Info() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-9">
             {timPengembang.map((anggota, index) => (
               <div key={index} className="text-center group">
-                <div className="bg-gradient-to-br from-[#2b5232] to-[#1e3a24] rounded-lg h-56 mb-4 shadow-lg transform group-hover:scale-105 transition-transform duration-300 flex items-center justify-center">
+                <div className="bg-gradient-to-br from-[#1F4E73] to-[#1e3a24] rounded-lg h-56 mb-4 shadow-lg transform group-hover:scale-105 transition-transform duration-300 flex items-center justify-center">
                   <div className="text-white text-6xl opacity-30">👤</div>
                 </div>
                 <h3 className="font-bold text-gray-900 text-lg mb-1">{anggota.nama}</h3>

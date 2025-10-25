@@ -2,7 +2,7 @@ import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from "react-icons/f
 
 export default function Footer() {
   return (
-    <footer className="bg-[#C6E5B3] text-[#2B5235] pt-12">
+    <footer className="bg-[#1F4E73] text-white pt-12">
       {/* Konten utama */}
       <div className="max-w-6xl mx-auto px-8 grid grid-cols-1 md:grid-cols-3 gap-10 text-center md:text-left">
         {/* SINOVA */}
@@ -20,7 +20,7 @@ export default function Footer() {
             {["BERANDA", "PROFILE", "RISET", "INFORMASI", "LAYANAN"].map((item) => (
               <li
                 key={item}
-                className="hover:text-[#14532D] hover:underline cursor-pointer transition-colors duration-200"
+                className="hover:text-[#1F4E73] hover:underline cursor-pointer transition-colors duration-200"
               >
                 {item}
               </li>
@@ -42,7 +42,7 @@ export default function Footer() {
               <a
                 key={idx}
                 href="#"
-                className="bg-[#2B5235] text-white p-2 rounded-full hover:bg-[#14532D] transition-colors duration-200"
+                className="bg-[#1F4E73] text-white p-2 rounded-full hover:bg-[#1F4E73] transition-colors duration-200"
               >
                 <Icon size={16} />
               </a>
@@ -52,7 +52,7 @@ export default function Footer() {
       </div>
 
       {/* Copyright */}
-      <div className="bg-[#2B5235] text-white text-center text-sm mt-10 py-4 w-full">
+      <div className="bg-[#1F4E73] text-white text-center text-sm mt-10 py-4 w-full">
         © 2025 Politeknik Negeri Batam & BAPPEDA Kepri. All rights reserved.
       </div>
     </footer>

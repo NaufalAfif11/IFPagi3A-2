@@ -36,7 +36,7 @@ export default function Navbar() {
 
   return (
     <header
-      className={`bg-[#C6E5B3] border-b-4 border-[#2B5235] ${
+      className={`bg-white border-b-4 border-[#1F4E73] ${
         isProfilePage ? 'py-4' : ''
       }`}
     >
@@ -55,14 +55,14 @@ export default function Navbar() {
           />
           <div>
             <h1
-              className={`font-extrabold text-[#2B5235] tracking-wide ${
+              className={`font-extrabold text-[#1F4E73] tracking-wide ${
                 isProfilePage ? 'text-4xl' : 'text-3xl'
               }`}
             >
               SINOVA
             </h1>
             <p
-              className={`text-[#2B5235] font-semibold leading-tight ${
+              className={`text-[#1F4E73] font-semibold leading-tight ${
                 isProfilePage ? 'text-base' : 'text-sm'
               }`}
             >
@@ -75,7 +75,7 @@ export default function Navbar() {
         {!isLoggedIn ? (
           <Link
             href="/login"
-            className="flex items-center gap-2 bg-[#2B5235] text-white px-4 py-2 rounded-lg hover:bg-[#24482D] transition"
+            className="flex items-center gap-2 bg-[#1F4E73] text-white px-4 py-2 rounded-lg hover:bg-[#24482D] transition"
           >
             <i className="fa-solid fa-user"></i>
             Masuk
@@ -84,7 +84,7 @@ export default function Navbar() {
           <div className="relative">
             <button
               onClick={toggleDropdown}
-              className="flex items-center gap-2 bg-[#2B5235] text-white px-4 py-2 rounded-lg hover:bg-[#24482D] transition"
+              className="flex items-center gap-2 bg-[#1F4E73] text-white px-4 py-2 rounded-lg hover:bg-white transition"
             >
               <i className="fa-solid fa-user"></i>
               {username || 'Pengguna'}
@@ -113,7 +113,7 @@ export default function Navbar() {
       </div>
 
       {/* Menu */}
-      <nav className="bg-[#2B5235] text-white flex justify-center">
+      <nav className="bg-[#1F4E73] text-white flex justify-center">
         <ul className={`flex ${isProfilePage ? 'gap-4' : ''}`}>
           {[
             { name: 'Beranda', href: '/' },
@@ -129,8 +129,8 @@ export default function Navbar() {
                 href={item.href}
                 className={`block px-6 py-3 font-medium transition ${
                   pathname === item.href
-                    ? 'bg-[#C6E5B3] text-[#2B5235]'
-                    : 'hover:bg-[#C6E5B3] hover:text-[#2B5235]'
+                    ? 'bg-white text-[#1F4E73]'
+                    : 'hover:bg-white hover:text-[#1F4E73]'
                 }`}
               >
                 {item.name}

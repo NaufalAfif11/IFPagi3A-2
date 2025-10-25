@@ -6,7 +6,7 @@ interface InovasiCardProps {
 
 export default function InovasiCard({ title, desc, image }: InovasiCardProps) {
   return (
-    <div className="bg-[#2B5235] text-white rounded-2xl overflow-hidden shadow-md flex flex-col md:flex-row gap-4 p-4 md:p-6">
+    <div className="bg-[#1F4E73] text-white rounded-2xl overflow-hidden shadow-md flex flex-col md:flex-row gap-4 p-4 md:p-6">
       <img
         src={image}
         alt={title}
@@ -17,7 +17,7 @@ export default function InovasiCard({ title, desc, image }: InovasiCardProps) {
           <h2 className="text-xl font-bold mb-2">{title}</h2>
           <p className="text-sm opacity-90">{desc}</p>
         </div>
-        <button className="mt-4 bg-[#C6E5B3] text-[#2B5235] font-semibold px-4 py-2 rounded-md w-max hover:bg-gray-100 transition">
+        <button className="mt-4 bg-white text-[#1F4E73] font-semibold px-4 py-2 rounded-md w-max hover:bg-gray-100 transition">
           Lihat Detail
         </button>
       </div>

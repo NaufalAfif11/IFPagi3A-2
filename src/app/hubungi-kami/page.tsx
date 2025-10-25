@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Navbar from "../components/navbar";
+import Navbar from "../../components/ui/navbar";
 import Footer from "@/components/ui/footer";
 
 export default function HubungiKamiPage() {
@@ -31,7 +31,7 @@ export default function HubungiKamiPage() {
         }
       `}</style>
 
-      <div className="min-h-screen bg-[#C6E5B3] flex flex-col items-center px-4 py-8">
+      <div className="min-h-screen bg-white flex flex-col items-center px-4 py-8">
         {/* Map Section */}
         <div
           className="w-full max-w-6xl mb-8"
@@ -41,7 +41,7 @@ export default function HubungiKamiPage() {
             <iframe
               title="Kantor Walikota Batam"
               src="https://www.openstreetmap.org/export/embed.html?bbox=104.0272%2C1.1154%2C104.0472%2C1.1354&amp;layer=mapnik&amp;marker=1.1254,104.0372"
-              className="w-full h-96 rounded-lg border-2 border-[#2B5235] shadow-lg"
+              className="w-full h-96 rounded-lg border-2 border-[#1F4E73] shadow-lg"
             />
           </div>
         </div>
@@ -50,7 +50,7 @@ export default function HubungiKamiPage() {
         <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Alamat */}
           <div
-            className="bg-[#2B5235] text-white p-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-2xl text-center"
+            className="bg-[#1F4E73] text-white p-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-2xl text-center"
             style={{ animation: "slideUp 0.6s ease-out" }}
           >
             <h2 className="text-lg font-semibold mb-2">Alamat</h2>
@@ -64,7 +64,7 @@ export default function HubungiKamiPage() {
 
           {/* Kontak */}
           <div
-            className="bg-[#2B5235] text-white p-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-2xl text-center"
+            className="bg-[#1F4E73] text-white p-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-2xl text-center"
             style={{ animation: "slideUp 0.8s ease-out" }}
           >
             <h2 className="text-lg font-semibold mb-2">Kontak</h2>
@@ -73,7 +73,7 @@ export default function HubungiKamiPage() {
 
           {/* Jam Operasional */}
           <div
-            className="bg-[#2B5235] text-white p-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-2xl text-center"
+            className="bg-[#1F4E73] text-white p-6 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-2xl text-center"
             style={{ animation: "slideUp 1s ease-out" }}
           >
             <h2 className="text-lg font-semibold mb-2">Jam Operasional</h2>

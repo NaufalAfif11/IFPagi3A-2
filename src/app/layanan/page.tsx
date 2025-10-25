@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import Navbar from "../components/navbar";
+import Navbar from "../../components/ui/navbar";
 import Footer from "@/components/ui/footer";
 
 export default function LayananPage() {
@@ -65,7 +65,7 @@ export default function LayananPage() {
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className={`w-full p-2 rounded bg-white text-[#2B5235] border border-transparent focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all duration-200 ${className}`}
+        className={`w-full p-2 rounded bg-white text-[#1F4E73] border border-transparent focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all duration-200 ${className}`}
       />
     </motion.div>
   );
@@ -74,12 +74,12 @@ export default function LayananPage() {
     <>
       <Navbar />
 
-      <main className="min-h-screen bg-[#C6E5B3] py-10 flex justify-center items-start">
+      <main className="min-h-screen bg-white py-10 flex justify-center items-start">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="bg-[#2B5235] text-white w-full max-w-2xl rounded-2xl shadow-2xl p-8"
+          className="bg-[#1F4E73] text-white w-full max-w-2xl rounded-2xl shadow-2xl p-8"
         >
           <motion.h1
             initial={{ opacity: 0, y: -10 }}
@@ -91,7 +91,7 @@ export default function LayananPage() {
           </motion.h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <p className="text-lg font-semibold border-b border-[#C6E5B3] pb-2">
+            <p className="text-lg font-semibold border-b border-white pb-2">
               Data Pribadi
             </p>
 
@@ -202,7 +202,7 @@ export default function LayananPage() {
                 name="tanggal"
                 value={formData.tanggal}
                 onChange={handleChange}
-                className="w-full p-2 rounded bg-white text-[#2B5235] border border-transparent focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all duration-200"
+                className="w-full p-2 rounded bg-white text-[#1F4E73] border border-transparent focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all duration-200"
               />
             </motion.div>
 
@@ -222,7 +222,7 @@ export default function LayananPage() {
                 name="deskripsi"
                 onChange={handleChange}
                 placeholder="Jelaskan secara singkat latar belakang, tujuan, dan fitur utama dari usulan Anda."
-                className="w-full p-2 rounded bg-white text-[#2B5235] border border-transparent focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all duration-200"
+                className="w-full p-2 rounded bg-white text-[#1F4E73] border border-transparent focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all duration-200"
                 rows={4}
               />
             </motion.div>
@@ -238,7 +238,7 @@ export default function LayananPage() {
               <input
                 type="file"
                 onChange={handleFileChange}
-                className="w-full p-2 rounded bg-white text-[#2B5235] file:mr-4 file:py-1 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-green-100 file:text-[#2B5235] hover:file:bg-green-200"
+                className="w-full p-2 rounded bg-white text-[#1F4E73] file:mr-4 file:py-1 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-100 file:text-[#1F4E73] hover:file:bg-green-200"
               />
             </motion.div>
 
@@ -246,7 +246,7 @@ export default function LayananPage() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               type="submit"
-              className="w-full py-3 bg-white text-[#2B5235] font-bold rounded-lg hover:bg-gray-200 transition duration-150 shadow-md"
+              className="w-full py-3 bg-white text-[#1F4E73] font-bold rounded-lg hover:bg-gray-200 transition duration-150 shadow-md"
             >
               AJUKAN USULAN
             </motion.button>
