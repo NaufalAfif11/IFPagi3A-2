@@ -23,15 +23,11 @@ export default function LoginPage() {
             <button className="border border-gray-300 p-2 rounded-full text-blue-800 hover:bg-blue-100">
               <FaGoogle />
             </button>
-            <button className="border border-gray-300 p-2 rounded-full text-blue-800 hover:bg-blue-100">
-              <FaFacebookF />
-            </button>
+            
             <button className="border border-gray-300 p-2 rounded-full text-blue-800 hover:bg-blue-100">
               <FaGithub />
             </button>
-            <button className="border border-gray-300 p-2 rounded-full text-blue-800 hover:bg-blue-100">
-              <FaLinkedinIn />
-            </button>
+            
           </div>
 
           <p className="text-sm text-gray-600 mb-6">atau gunakan akun Anda</p>
@@ -46,7 +42,7 @@ export default function LoginPage() {
             placeholder="Kata Sandi"
             className="border border-gray-300 rounded-md px-4 py-2 mb-3 w-full bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
-          <a href="#" className="text-xs text-gray-500 mb-4">
+          <a href="lupa_katasandi" className="text-xs text-gray-500 mb-4">
             Lupa kata sandi?
           </a>
 

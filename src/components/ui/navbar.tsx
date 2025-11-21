@@ -2,17 +2,15 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function Navbar() {
-  const pathname = usePathname();
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // Cek status login dan ambil nama pengguna dari localStorage
   useEffect(() => {
     const logged = localStorage.getItem('isLoggedIn');
     const storedUser = localStorage.getItem('username');
@@ -21,61 +19,38 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = () => {
+    localStorage.removeItem('token');
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('username');
     setIsLoggedIn(false);
+    setUsername(null);
     router.push('/');
-    window.location.reload(); // biar navbar langsung update
   };
 
-  const toggleDropdown = () => {
-    setIsDropdownOpen(!isDropdownOpen);
-  };
-
-  const isProfilePage = pathname === '/profil';
+  const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
   return (
-    <header
-      className={`bg-white border-b-4 border-[#1F4E73] ${
-        isProfilePage ? 'py-4' : ''
-      }`}
-    >
-      <div
-        className={`flex justify-between items-center px-8 ${
-          isProfilePage ? 'py-6 gap-6' : 'py-3'
-        }`}
-      >
-        {/* Kiri: Logo */}
-        <div className={`flex items-center ${isProfilePage ? 'gap-6' : 'gap-3'}`}>
-          <Image
-            src="/logo.png"
-            alt="Logo"
-            width={isProfilePage ? 100 : 90}
-            height={isProfilePage ? 90 : 70}
-          />
+    <header className="bg-[#F3F7FB] border-b-4 border-[#1F4E73]">
+      {/* Top bar */}
+      <div className="flex justify-between items-center px-8 py-4">
+        {/* Logo */}
+        <div className="flex items-center gap-4">
+          <Image src="/logo.png" alt="Logo" width={90} height={70} />
           <div>
-            <h1
-              className={`font-extrabold text-[#1F4E73] tracking-wide ${
-                isProfilePage ? 'text-4xl' : 'text-3xl'
-              }`}
-            >
+            <h1 className="font-extrabold text-[#1F4E73] text-3xl tracking-wide">
               SINOVA
             </h1>
-            <p
-              className={`text-[#1F4E73] font-semibold leading-tight ${
-                isProfilePage ? 'text-base' : 'text-sm'
-              }`}
-            >
+            <p className="text-[#1F4E73] font-semibold text-sm leading-tight">
               Sistem Informasi dan Inovasi <br /> Riset Daerah
             </p>
           </div>
         </div>
 
-        {/* Kanan: tombol masuk / user */}
+        {/* Login / Dropdown */}
         {!isLoggedIn ? (
           <Link
             href="/login"
-            className="flex items-center gap-2 bg-[#1F4E73] text-white px-4 py-2 rounded-lg hover:bg-[#24482D] transition"
+            className="flex items-center gap-2 bg-[#1F4E73] text-white px-4 py-2 rounded-lg hover:bg-[#163954] transition"
           >
             <i className="fa-solid fa-user"></i>
             Masuk
@@ -84,14 +59,13 @@ export default function Navbar() {
           <div className="relative">
             <button
               onClick={toggleDropdown}
-              className="flex items-center gap-2 bg-[#1F4E73] text-white px-4 py-2 rounded-lg hover:bg-white transition"
+              className="flex items-center gap-2 bg-[#1F4E73] text-white px-4 py-2 rounded-lg hover:bg-[#163954] transition"
             >
               <i className="fa-solid fa-user"></i>
               {username || 'Pengguna'}
               <i className="fa-solid fa-chevron-down text-sm ml-1"></i>
             </button>
 
-            {/* Dropdown */}
             {isDropdownOpen && (
               <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
                 <Link
@@ -113,8 +87,8 @@ export default function Navbar() {
       </div>
 
       {/* Menu */}
-      <nav className="bg-[#1F4E73] text-white flex justify-center">
-        <ul className={`flex ${isProfilePage ? 'gap-4' : ''}`}>
+      <nav className="bg-[#1F4E73] text-white flex justify-center shadow-inner">
+        <ul className="flex">
           {[
             { name: 'Beranda', href: '/' },
             { name: 'Profil', href: '/profile' },
@@ -127,11 +101,7 @@ export default function Navbar() {
             <li key={item.name}>
               <Link
                 href={item.href}
-                className={`block px-6 py-3 font-medium transition ${
-                  pathname === item.href
-                    ? 'bg-white text-[#1F4E73]'
-                    : 'hover:bg-white hover:text-[#1F4E73]'
-                }`}
+                className="block px-6 py-3 font-medium hover:bg-[#163954] transition-all duration-200"
               >
                 {item.name}
               </Link>
