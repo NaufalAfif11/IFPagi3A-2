@@ -78,13 +78,13 @@ export default function RisetPage() {
       `}</style>
       <Navbar/>
 
-      <div className="min-h-screen flex flex-col bg-white py-8" style={{ animation: 'fadeIn 0.8s ease-in' }}>
+      <div className="min-h-screen flex flex-col bg-white py-4 sm:py-8" style={{ animation: 'fadeIn 0.8s ease-in' }}>
         {/* Filter Section */}
-        <div className="max-w-6xl mx-auto px-4 w-full" style={{ animation: 'slideDown 0.6s ease-out' }}>
-          <div className="bg-[#1F4E73] text-white px-4 py-3 rounded-t-lg font-semibold text-center">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full" style={{ animation: 'slideDown 0.6s ease-out' }}>
+          <div className="bg-[#1F4E73] text-white px-4 py-3 rounded-t-lg font-semibold text-center text-sm sm:text-base">
             Filter Pencarian
           </div>
-          <div className="bg-white p-4 rounded-b-lg shadow-lg flex flex-col md:flex-row gap-3 md:items-center justify-between">
+          <div className="bg-white p-3 sm:p-4 rounded-b-lg shadow-lg flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <input
               type="text"
               placeholder="Judul Riset"
@@ -93,7 +93,7 @@ export default function RisetPage() {
                 setJudul(e.target.value);
                 setCurrentPage(1);
               }}
-              className="border border-gray-300 rounded-lg px-3 py-2 flex-1 focus:outline-none focus:ring-2 focus:ring-[#1F4E73] transition-all"
+              className="border border-gray-300 rounded-lg px-3 py-2 w-full md:flex-1 focus:outline-none focus:ring-2 focus:ring-[#1F4E73] transition-all text-sm sm:text-base"
             />
             <input
               type="text"
@@ -103,7 +103,7 @@ export default function RisetPage() {
                 setNama(e.target.value);
                 setCurrentPage(1);
               }}
-              className="border border-gray-300 rounded-lg px-3 py-2 flex-1 focus:outline-none focus:ring-2 focus:ring-[#1F4E73] transition-all"
+              className="border border-gray-300 rounded-lg px-3 py-2 w-full md:flex-1 focus:outline-none focus:ring-2 focus:ring-[#1F4E73] transition-all text-sm sm:text-base"
             />
             <select
               value={kategori}
@@ -111,7 +111,7 @@ export default function RisetPage() {
                 setKategori(e.target.value);
                 setCurrentPage(1);
               }}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1F4E73] transition-all"
+              className="border border-gray-300 rounded-lg px-3 py-2 w-full md:w-auto focus:outline-none focus:ring-2 focus:ring-[#1F4E73] transition-all text-sm sm:text-base"
             >
               <option>Kategori Riset</option>
               <option>Semua</option>
@@ -121,7 +121,7 @@ export default function RisetPage() {
             </select>
             <button 
               onClick={handleSearch}
-              className="bg-[#1F4E73] text-white px-6 py-2 rounded-lg hover:bg-[#3d7249] transition-all transform hover:scale-105 shadow-md"
+              className="bg-[#1F4E73] text-white px-6 py-2 rounded-lg hover:bg-[#3d7249] transition-all transform hover:scale-105 shadow-md w-full md:w-auto text-sm sm:text-base"
             >
               Cari
             </button>
@@ -129,8 +129,9 @@ export default function RisetPage() {
         </div>
 
         {/* Tabel */}
-        <div className="max-w-6xl mx-auto mt-6 px-4 w-full" style={{ animation: 'slideUp 0.8s ease-out' }}>
-          <div className="overflow-x-auto bg-white rounded-lg shadow-lg">
+        <div className="max-w-6xl mx-auto mt-4 sm:mt-6 px-4 sm:px-6 lg:px-8 w-full" style={{ animation: 'slideUp 0.8s ease-out' }}>
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto bg-white rounded-lg shadow-lg">
             <table className="w-full text-sm text-left border-collapse">
               <thead>
                 <tr className="bg-[#1F4E73] text-white">
@@ -176,39 +177,88 @@ export default function RisetPage() {
             </table>
           </div>
 
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-4">
+            {currentData.length > 0 ? (
+              currentData.map((item, index) => (
+                <div 
+                  key={item.no}
+                  className="bg-white rounded-lg shadow-lg p-4 border border-gray-200"
+                  style={{ 
+                    animation: `fadeIn ${0.3 + index * 0.1}s ease-in` 
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-200">
+                    <span className="text-[#1F4E73] font-bold text-lg">No. {item.no}</span>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-xs text-gray-500 font-semibold mb-1">Judul Riset</p>
+                      <p className="text-sm font-medium text-gray-800">{item.judul}</p>
+                    </div>
+                    
+                    <div>
+                      <p className="text-xs text-gray-500 font-semibold mb-1">Nama Periset</p>
+                      <p className="text-sm text-gray-800">{item.namaPeriset}</p>
+                    </div>
+                    
+                    <div>
+                      <a
+                        href={item.dokumen}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block w-full text-center bg-[#1F4E73] text-white px-4 py-2 rounded-lg hover:bg-[#3d7249] transition-all font-medium text-sm"
+                      >
+                        Download Dokumen
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+                <p className="text-gray-500 italic">Tidak ada data yang cocok dengan pencarian Anda</p>
+              </div>
+            )}
+          </div>
+
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex justify-center items-center mt-6 space-x-2">
+            <div className="flex flex-wrap justify-center items-center mt-4 sm:mt-6 gap-2">
               <button
                 onClick={() => goToPage(currentPage - 1)}
                 disabled={currentPage === 1}
-                className={`px-4 py-2 border rounded-lg font-medium transition-all ${
+                className={`px-3 sm:px-4 py-2 border rounded-lg font-medium transition-all text-sm sm:text-base ${
                   currentPage === 1 
                     ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-400" 
                     : "hover:bg-[#1F4E73] hover:text-white hover:border-[#1F4E73] transform hover:scale-105"
                 }`}
               >
-                Previous
+                <span className="hidden sm:inline">Previous</span>
+                <span className="sm:hidden">Prev</span>
               </button>
 
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  onClick={() => goToPage(page)}
-                  className={`px-4 py-2 border rounded-lg font-medium transition-all ${
-                    currentPage === page
-                      ? "bg-[#1F4E73] text-white border-[#1F4E73] shadow-md"
-                      : "hover:bg-[#white] hover:border-[#1F4E73] transform hover:scale-105"
-                  }`}
-                >
-                  {page}
-                </button>
-              ))}
+              <div className="flex flex-wrap justify-center gap-2">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => goToPage(page)}
+                    className={`px-3 sm:px-4 py-2 border rounded-lg font-medium transition-all text-sm sm:text-base ${
+                      currentPage === page
+                        ? "bg-[#1F4E73] text-white border-[#1F4E73] shadow-md"
+                        : "hover:bg-[#white] hover:border-[#1F4E73] transform hover:scale-105"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
 
               <button
                 onClick={() => goToPage(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className={`px-4 py-2 border rounded-lg font-medium transition-all ${
+                className={`px-3 sm:px-4 py-2 border rounded-lg font-medium transition-all text-sm sm:text-base ${
                   currentPage === totalPages
                     ? "opacity-50 cursor-not-allowed bg-gray-100 text-gray-400"
                     : "hover:bg-[#1F4E73] hover:text-white hover:border-[#1F4E73] transform hover:scale-105"
@@ -220,13 +270,12 @@ export default function RisetPage() {
           )}
 
           {/* Info */}
-          <div className="text-center mt-4 text-gray-600 text-sm">
+          <div className="text-center mt-3 sm:mt-4 text-gray-600 text-xs sm:text-sm">
             Menampilkan {startIndex + 1} - {Math.min(startIndex + itemsPerPage, filtered.length)} dari {filtered.length} hasil
           </div>
         </div>
       </div>
-                <Footer/>
-
+      <Footer/>
     </>
   );
 }
