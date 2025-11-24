@@ -1,4 +1,5 @@
 "use client";
+
 import React from 'react';
 import { Download } from 'lucide-react';
 import Image from 'next/image';
@@ -33,20 +34,16 @@ export default function Info() {
 
   return (
     <>
-      {/* ✅ Navbar ditampilkan di atas */}
       <Navbar />
-
-      {/* Konten utama */}
       <div className="bg-white min-h-screen py-8 px-4">
         <div className="max-w-5xl mx-auto">
-          {/* Judul Panduan */}
-          <div className="py-4 mt-2">
-            <h1 className="text-[#1F4E73] text-center text-3xl font-bold tracking-wide">
-              PANDUAN
-            </h1>
+          <div className="text-center">
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">PANDUAN</h1>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Akses panduan lengkap SINOVA
+              </p>
           </div>
 
-          {/* Tabel Panduan */}
           <div className="p-6">
             <div className="overflow-hidden rounded-lg border border-[#1F4E73] shadow-md">
               <table className="w-full">
@@ -77,7 +74,6 @@ export default function Info() {
               </table>
             </div>
 
-            {/* Pagination */}
             <div className="flex justify-center items-center gap-2 mt-6">
               <button
                 onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
@@ -104,26 +100,22 @@ export default function Info() {
               <button
                 onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                 disabled={currentPage === totalPages}
-                className="px-4 py-2 border rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-bold text-black"
-              >
+                className="px-4 py-2 border rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-bold text-black">
                 Next
               </button>
             </div>
           </div>
         </div>
 
-        {/* Tim Pengembang */}
-        <div className="mt-3 py-4">
-          <h1 className="text-[#1F4E73] text-center text-3xl font-bold tracking-wide">
-            TIM PENGEMBANG
-          </h1>
+        <div className="text-center">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Tim Pengembang</h2>
         </div>
 
-        <div className="p-8 m-9">
+        <div className="p-8 mx-9">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-9">
             {timPengembang.map((anggota, index) => (
               <div key={index} className="text-center group">
-                <div className="bg-gradient-to-br from-[#1F4E73] to-[#1e3a24] rounded-lg h-56 mb-4 shadow-lg transform group-hover:scale-105 transition-transform duration-300 flex items-center justify-center">
+                <div className="bg-gradient-to-br from-[#1F4E73] to-[#3e81aa] rounded-lg h-56 mb-4 shadow-lg transform group-hover:scale-105 transition-transform duration-300 flex items-center justify-center">
                   <div className="text-white text-6xl opacity-30">👤</div>
                 </div>
                 <h3 className="font-bold text-gray-900 text-lg mb-1">{anggota.nama}</h3>
@@ -133,7 +125,7 @@ export default function Info() {
           </div>
         </div>
       </div>
-                <Footer />
+    <Footer />
       
     </>
   );

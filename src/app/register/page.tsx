@@ -16,15 +16,11 @@ export default function RegisterPage() {
             <button className="border border-gray-300 p-2 rounded-full text-blue-800 hover:bg-blue-100">
               <FaGoogle />
             </button>
-            <button className="border border-gray-300 p-2 rounded-full text-blue-800 hover:bg-blue-100">
-              <FaFacebookF />
-            </button>
+            
             <button className="border border-gray-300 p-2 rounded-full text-blue-800 hover:bg-blue-100">
               <FaGithub />
             </button>
-            <button className="border border-gray-300 p-2 rounded-full text-blue-800 hover:bg-blue-100">
-              <FaLinkedinIn />
-            </button>
+            
           </div>
 
           <p className="text-sm text-gray-600 mb-6">atau daftar dengan email kamu</p>
@@ -45,6 +41,22 @@ export default function RegisterPage() {
             placeholder="Kata Sandi"
             className="border border-gray-300 rounded-md px-4 py-2 mb-3 w-full bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
+
+          {/* Radio Pengguna / Inovasi Daerah */}
+          <div className="flex flex-col items-start w-full mb-4">
+            
+
+            <label className="flex items-center gap-2 mb-1 cursor-pointer">
+              <input type="radio" name="role" value="pengguna" className="accent-blue-800" />
+              <span className="text-gray-700">Pengguna inovasi daerah </span>
+            </label>
+
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="role" value="penyedia" className="accent-blue-800" />
+              <span className="text-gray-700">Penyedia inovasi daerah </span>
+            </label>
+          </div>
+
           <button className="bg-blue-800 text-white font-semibold px-6 py-2 rounded-md hover:bg-blue-900">
             DAFTAR
           </button>
