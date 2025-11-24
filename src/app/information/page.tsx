@@ -20,7 +20,7 @@ export default function Info() {
 
   const timPengembang = [
     { nama: 'Ir. Ahmad Hamim Thohari, S.T., M.T.', nip: '191943' },
-    { nama: 'Sudra Irawan', nip: '181412' },
+    { nama: 'Ir. Sudra Irawan S.Pd.Si.,M.Sc.', nip: '181412' },
     { nama: 'Naufal Afif Al-Yafi', nip: '1100' },
     { nama: 'Fitri Nabila Aprianti', nip: '1012' },
     { nama: 'Annisa Fadilla Efendi Harahap', nip: '1024' },

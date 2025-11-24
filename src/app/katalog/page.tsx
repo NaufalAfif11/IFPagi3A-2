@@ -134,7 +134,7 @@ export default function KatalogPage() {
         <Footer />
       </motion.div>
 
-      {/* 🔹 Modal Detail Inovasi */}
+      {/* 🔹 Modal Detail Inovasi */} 
       <AnimatePresence>
         {selected && (
           <motion.div

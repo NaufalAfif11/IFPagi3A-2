@@ -1,5 +1,5 @@
 import React from "react";
-import  Image from "next/image";
+import Image from "next/image"; // Spasi berlebih telah dihilangkan
 import Navbar from '../../components/ui/navbar';
 import Footer from '@/components/ui/footer';
 
@@ -25,8 +25,15 @@ export default function profileBrida() {
           <div className="flex justify-center">
             <div className="w-80 h-80 rounded-full flex items-center justify-center shadow-2xl" style={{ backgroundColor: '#1F4E73' }}>
               <div className="text-center text-white">
-                <div className="text-lg font-semibold">logo SINOVA
-                  <Image src="" alt="" />
+                <div className="text-lg font-semibold flex flex-col items-center">
+                  
+                  {/* ✅ PERBAIKAN 1: Menambahkan width dan height yang wajib */}
+                  <Image 
+                    src="/logoo.png" 
+                    alt="" 
+                    width={400} 
+                    height={400} 
+                  />
                 </div>
               </div>
             </div>
@@ -40,7 +47,12 @@ export default function profileBrida() {
             <div className="flex justify-center">
               <div className="bg-white/10 backdrop-blur-sm p-10 rounded-2xl">
                 <div className="text-center">
-                  <Image src="" alt="" />
+                  <Image 
+                    src="/logo_brida_kepri.png" 
+                    alt="" 
+                    width={100} 
+                    height={100} 
+                  />
                   <div className="text-6xl mb-4">🏛️</div>
                   <div className="text-3xl font-bold text-white mb-2">gambar bappeda</div>
                   <div className="text-xl" style={{ color: '#C6E5B3' }}>Bappeda</div>
