@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import SidebarPenyedia from '@/components/ui/sidebar_penyedia';
 
 // Types
 interface Riset {
@@ -456,7 +457,9 @@ const RisetModal = ({
 };
 
 // Main Component
-export default function PenyediaDashboard() {
+export default function KelolaRiset() {
+  const [activeMenu, setActiveMenu] = useState("Kelola Riset");
+
   const [risetData, setRisetData] = useState<Riset[]>([]);
   const [filteredData, setFilteredData] = useState<Riset[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -549,12 +552,14 @@ export default function PenyediaDashboard() {
   };
 
   return (
+    <div className='flex min-h-screen'>
+      <SidebarPenyedia activeMenu={activeMenu} setActiveMenu={setActiveMenu} />
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#3e81aa] to-[#1F4E73] text-white py-8 shadow-lg">
+      <div className="bg-gradient-to-r from-[#1F4E73] to-[#3e81aa] text-white py-8 shadow-lg">
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold mb-2">Kelola Hasil Riset</h1>
-          <p className="text-blue-100 text-lg">Selamat datang, Penyedia! Kelola hasil riset Anda di sini</p>
+          <h1 className="text-3xl font-bold text-white">Kelola Hasil Riset</h1>
+          <p className="text-blue-100 text-sm">Selamat datang, Penyedia! Kelola hasil riset Anda di sini</p>
         </div>
       </div>
 
@@ -581,6 +586,7 @@ export default function PenyediaDashboard() {
           initialData={editingRiset}
         />
       </div>
+    </div>
     </div>
   );
 }

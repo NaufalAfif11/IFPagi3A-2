@@ -22,6 +22,7 @@ const SidebarPenyedia: React.FC<SidebarProps> = ({ activeMenu, setActiveMenu }) 
             { name: "Dashboard", icon: <Home size={20} /> },
             { name: "Produk Saya", icon: <Package size={20} /> },
             { name: "Riwayat Pengajuan", icon: <FileText size={20} /> },
+            { name: "Kelola Riset", icon: <FileText size={20} /> },
             { name: "Profil", icon: <User size={20} /> },
           ].map((item) => (
             <li key={item.name}>
