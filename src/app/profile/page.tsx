@@ -3,14 +3,15 @@
 import { useState } from "react";
 import Image from "next/image";
 import Navbar from "../../components/ui/navbar";
-import Footer from "@/components/ui/footer";
+import Footer from "../../components/ui/footer";
 
 export default function ModernBRIDA() {
   const [activeTab, setActiveTab] = useState("brida");
 
   return (
     <>
-      <Navbar></Navbar>
+      {/* Perbaikan: Mengganti <Navbar></Navbar> menjadi <Navbar /> */}
+      <Navbar /> 
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
           <section className="relative py-15 overflow-hidden">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -71,7 +72,7 @@ export default function ModernBRIDA() {
 
             <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12">
                 {activeTab === "brida" && (
-              <div className="bg-gradient-to-br from-[#1F4E73] to-[#3e81aa]  rounded-2xl p-8 text-white relative overflow-hidden">
+              <div className="bg-gradient-to-br from-[#1F4E73] to-[#3e81aa]  rounded-2xl p-8 text-white relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
                   <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-12 -translate-x-12"></div>
 
@@ -159,7 +160,8 @@ export default function ModernBRIDA() {
             </div>
           </section>
         </div>
-        <Footer/>
+      {/* Perbaikan: Mengganti <Footer/> menjadi <Footer /> */}
+      <Footer />
     </>
   );
 }

@@ -2,17 +2,31 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import Navbar from "../../components/ui/navbar";
-import Footer from "@/components/ui/footer";
+// Menggunakan path relatif yang lebih aman jika file ini di level /app/katalogpage/page.tsx
+// Jika file Anda berada di src/app/katalogpage/page.tsx, maka path harus seperti ini:
+import Navbar from "../../components/ui/navbar"; 
+import Footer from "../../components/ui/footer"; // Disesuaikan dari "@/components/ui/footer"
 import InovasiCard from "../../components/ui/InovasiCard";
 import StatsSection from "../../components/ui/StatsSection";
 
+// Definisi Tipe Data (Interface) untuk objek Inovasi
+interface Inovasi {
+  title: string;
+  desc: string;
+  images: string[];
+  harga: string;
+  kategori: string;
+  penyedia: string;
+  telp: string;
+}
+
 export default function KatalogPage() {
-  const inovasiList = [
+  // 1. Terapkan tipe Inovasi[] pada list data
+  const inovasiList: Inovasi[] = [
     {
       title: "Smart Bike",
       desc: "Sepeda pintar dengan sistem navigasi digital yang dapat memantau kecepatan, arah, dan jarak tempuh.",
-      images: ["/katalog1.jpg", "/katalog2.jpg", "/katalog3.jpg", "/katalog4.png"],
+      images: ["/katalog 1.jpg", "/katalog2.jpg", "/katalog3.jpg", "/katalog4.png"],
       harga: "Rp 4.500.000",
       kategori: "Transportasi Pintar",
       penyedia: "PT Inovasi Transportasi Cerdas",
@@ -65,7 +79,8 @@ export default function KatalogPage() {
     },
   ];
 
-  const [selected, setSelected] = useState<any>(null);
+  // 2. Ganti <any> dengan <Inovasi | null>
+  const [selected, setSelected] = useState<Inovasi | null>(null);
   const [zoomImage, setZoomImage] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -165,8 +180,10 @@ export default function KatalogPage() {
               <div className="p-6 bg-gray-50">
                 <div className="relative group">
                   <div className="overflow-hidden rounded-xl">
+                    {/* Perhatikan: Jika Anda menggunakan Next.js Image, Anda harus ganti tag <img> di sini */}
                     <img
                       src={selected.images[currentImageIndex]}
+                      alt={selected.title}
                       className="w-full h-96 object-cover cursor-pointer hover:scale-105 transition"
                       onClick={() => setZoomImage(selected.images[currentImageIndex])}
                     />
@@ -202,7 +219,7 @@ export default function KatalogPage() {
                           currentImageIndex === index ? "ring-2 ring-[#1F4E73]" : "opacity-60"
                         }`}
                       >
-                        <img src={img} className="w-full h-full object-cover" />
+                        <img key={index} src={img} alt={`${selected.title} - Thumb ${index + 1}`} className="w-full h-full object-cover" />
                       </button>
                     ))}
                   </div>
@@ -228,6 +245,7 @@ export default function KatalogPage() {
                     <a
                       href={`https://wa.me/${selected.telp.replace(/^0/, "62")}`}
                       target="_blank"
+                      rel="noopener noreferrer"
                       className="flex-1 bg-[#25D366] text-white py-3 rounded-lg text-center"
                     >
                       WhatsApp
@@ -255,6 +273,7 @@ export default function KatalogPage() {
           >
             <motion.img
               src={zoomImage}
+              alt="Zoomed Image"
               className="max-w-[90%] max-h-[85%] rounded-xl shadow-xl cursor-zoom-out"
               initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
