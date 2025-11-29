@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import SidebarPenyedia from '@/components/ui/sidebar_penyedia';
+import SidebarPenyedia from '@/components/ui/sidebar_admin';
 
 // Types
 interface Riset {

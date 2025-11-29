@@ -1,344 +1,497 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Home, Package, Lightbulb, User, LogOut, Menu, X, ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
-import SidebarAdmin from "@/components/admin/SidebarAdmin";
+import React, { useState } from "react";
+import { Trash2, Eye, AlertCircle } from "lucide-react";
+import SidebarAdmin from "@/components/ui/sidebar_admin";  // ← PENTING: pakai sidebar dari foldermu
 
 
-export default function KatalogProduk_admin() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('semua');
-  const [activeMenu, setActiveMenu] = useState('Katalog Produk');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [verificationNote, setVerificationNote] = useState('');
 
-  const [products, setProducts] = useState([
-    {
-      id: 1,
-      nama: 'Aplikasi Manajemen Sampah',
-      kategori: 'Lingkungan',
-      deskripsi: 'Aplikasi untuk mengelola pengumpulan dan pemrosesan sampah di daerah dengan fitur tracking real-time',
-      harga: 'Rp 15.000.000',
-      status: 'verified',
-      tanggalVerifikasi: '2025-01-15',
-      catatanAdmin: 'Produk memenuhi standar kualitas dan telah diuji',
-      kontak: 'developer@sampah.id'
-    },
-    {
-      id: 2,
-      nama: 'Smart Parking System',
-      kategori: 'Transportasi',
-      deskripsi: 'Sistem parkir pintar berbasis sensor IoT untuk meningkatkan efisiensi parkir dengan dashboard monitoring',
-      harga: 'Rp 25.000.000',
-      status: 'verified',
-      tanggalVerifikasi: '2025-01-14',
-      catatanAdmin: 'Inovasi sangat baik dan sesuai kebutuhan daerah',
-      kontak: 'info@smartparking.com'
-    },
-    {
-      id: 3,
-      nama: 'E-Learning Platform',
-      kategori: 'Pendidikan',
-      deskripsi: 'Platform pembelajaran online terpadu untuk mendukung pendidikan jarak jauh dengan sistem terintegrasi',
-      harga: 'Rp 30.000.000',
-      status: 'verified',
-      tanggalVerifikasi: '2025-01-10',
-      catatanAdmin: 'Sistem terintegrasi dengan baik',
-      kontak: 'admin@elearning.id'
-    },
-    {
-      id: 4,
-      nama: 'Sistem Monitoring Banjir',
-      kategori: 'Lingkungan',
-      deskripsi: 'Sistem monitoring ketinggian air sungai real-time dengan early warning system untuk pencegahan banjir',
-      harga: 'Rp 20.000.000',
-      status: 'pending',
-      tanggalSubmit: '2025-01-20',
-      catatanAdmin: 'Sedang dalam proses review',
-      kontak: 'tech@floodmonitor.id'
-    },
-    {
-      id: 5,
-      nama: 'Telemedicine App',
-      kategori: 'Kesehatan',
-      deskripsi: 'Aplikasi kesehatan untuk monitoring dan konsultasi kesehatan masyarakat secara digital',
-      harga: 'Rp 22.000.000',
-      status: 'pending',
-      tanggalSubmit: '2025-01-22',
-      catatanAdmin: 'Menunggu verifikasi dari admin',
-      kontak: 'support@telemedicine.id'
-    },
-    {
-      id: 6,
-      nama: 'Virtual Tour Wisata',
-      kategori: 'Pariwisata',
-      deskripsi: 'Platform virtual tour untuk destinasi wisata daerah dengan teknologi 360 derajat',
-      harga: 'Rp 18.000.000',
-      status: 'rejected',
-      tanggalReview: '2025-01-18',
-      catatanAdmin: 'Perlu perbaikan pada fitur keamanan dan performa',
-      kontak: 'hello@virtualtour.id'
-    }
-  ]);
 
-  const categories = ['semua', 'Pendidikan', 'Kesehatan', 'Lingkungan', 'Transportasi', 'Pariwisata', 'Perikanan', 'Industri Kreatif'];
+// Komponen Detail Produk
+function DetailProdukPage({ product, onBack, onVerify, onReject }) {
+  const [showRejectForm, setShowRejectForm] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
 
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.nama.toLowerCase().includes(searchQuery.toLowerCase()) || product.deskripsi.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'semua' || product.kategori === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
-
-  const stats = {
-    total: products.length,
-    verified: products.filter((p) => p.status === 'verified').length,
-    pending: products.filter((p) => p.status === 'pending').length,
-    rejected: products.filter((p) => p.status === 'rejected').length
-  };
-
-  const handleDelete = (productId) => {
-    const product = products.find(p => p.id === productId);
-    if (window.confirm(`Apakah Anda yakin ingin menghapus "${product.nama}"?`)) {
-      setProducts(products.filter(p => p.id !== productId));
-      alert(`Produk "${product.nama}" berhasil dihapus!`);
+  const handleReject = () => {
+    if (rejectReason.trim()) {
+      onReject(product.id, rejectReason);
+      setShowRejectForm(false);
+      setRejectReason("");
     }
   };
 
-  const handleVerify = (status) => {
-    if (!verificationNote.trim()) {
-      alert('Mohon isi catatan verifikasi!');
-      return;
-    }
+  return (
+    <div className="flex-1 p-6 overflow-auto">
+      <button
+        onClick={onBack}
+        className="mb-4 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+      >
+        ← Kembali
+      </button>
 
-    const updatedProducts = products.map(p => {
-      if (p.id === selectedProduct.id) {
-        return {
-          ...p,
-          status: status,
-          catatanAdmin: verificationNote,
-          tanggalVerifikasi: status === 'verified' ? new Date().toISOString().split('T')[0] : undefined,
-          tanggalReview: status === 'rejected' ? new Date().toISOString().split('T')[0] : undefined
-        };
-      }
-      return p;
-    });
+      <div className="bg-white p-6 rounded-xl shadow">
+        <h1 className="text-3xl font-bold mb-6">Detail Produk</h1>
 
-    setProducts(updatedProducts);
-    alert(`Produk berhasil ${status === 'verified' ? 'diverifikasi' : 'ditolak'}!`);
-    setSelectedProduct(null);
-    setVerificationNote('');
-  };
+        <div className="flex gap-8">
+          <div className="flex-shrink-0">
+            <img
+              src={product.image}
+              alt={product.name}
+              className="w-80 h-80 rounded-xl object-cover"
+            />
+          </div>
 
-  const Sidebar = () => (
-    <div style={{ width: '256px', display: 'flex', flexDirection: 'column', backgroundColor: '#1F4E73', position: 'fixed', height: '100vh', zIndex: 1000, transition: 'transform 0.3s ease' }} className={sidebarOpen ? 'sidebar sidebar-open' : 'sidebar'}>
-      <div style={{ padding: '16px', borderBottom: '1px solid rgba(59, 130, 246, 0.3)' }}>
-        <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: 'white', margin: 0 }}>SINOVA</h1>
-        <p style={{ fontSize: '12px', color: '#BFDBFE', marginTop: '4px', marginBottom: 0 }}>Sistem Informasi dan Inovasi Riset Daerah</p>
-      </div>
-      <nav style={{ flex: 1, padding: '16px', overflowY: 'auto' }}>
-        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {[
-            { name: 'Dashboard', icon: <Home size={20} /> },
-            { name: 'Katalog Produk', icon: <Package size={20} /> },
-            { name: 'Usulan Kebutuhan', icon: <Lightbulb size={20} /> },
-            { name: 'Profil', icon: <User size={20} /> }
-          ].map((item) => (
-            <li key={item.name}>
-              <button onClick={() => { setActiveMenu(item.name); setSidebarOpen(false); }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', borderRadius: '8px', fontSize: '14px', backgroundColor: activeMenu === item.name ? '#1e40af' : 'transparent', color: activeMenu === item.name ? 'white' : '#BFDBFE', borderLeft: activeMenu === item.name ? '4px solid #FCD34D' : '4px solid transparent', border: 'none', cursor: 'pointer' }}>
-                {item.icon}
-                {item.name}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </nav>
-      <div style={{ padding: '16px', borderTop: '1px solid rgba(59, 130, 246, 0.3)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-          <div style={{ width: '40px', height: '40px', backgroundColor: '#2563eb', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: '600', fontSize: '14px' }}>DY</div>
-          <div style={{ flex: 1 }}>
-            <p style={{ fontSize: '14px', fontWeight: '500', color: 'white', margin: 0 }}>Dr. Ahmad Yani</p>
-            <p style={{ fontSize: '12px', color: '#BFDBFE', margin: 0 }}>Admin</p>
+          <div className="flex-1">
+            <h2 className="text-3xl font-bold mb-3">{product.name}</h2>
+            
+            <div className="space-y-3 mb-6">
+              <div>
+                <span className="text-gray-600">Kategori:</span>
+                <span className="ml-2 font-semibold">{product.category}</span>
+              </div>
+              
+              <div>
+                <span className="text-gray-600">Harga:</span>
+                <span className="ml-2 text-2xl font-bold text-blue-600">
+                  Rp {product.price.toLocaleString("id-ID")}
+                </span>
+              </div>
+              
+              <div>
+                <span className="text-gray-600">Stok:</span>
+                <span className="ml-2 font-semibold">{product.stock} unit</span>
+              </div>
+
+              <div>
+                <span className="text-gray-600">Status:</span>
+                <span
+                  className={`ml-2 inline-block px-3 py-1 text-sm rounded-full ${
+                    product.verified === true
+                      ? "bg-green-200 text-green-700"
+                      : product.verified === false
+                      ? "bg-red-200 text-red-700"
+                      : "bg-yellow-200 text-yellow-700"
+                  }`}
+                >
+                  {product.verified === true
+                    ? "Terverifikasi"
+                    : product.verified === false
+                    ? "Ditolak"
+                    : "Menunggu"}
+                </span>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <h3 className="text-gray-600 font-semibold mb-2">Deskripsi:</h3>
+              <p className="text-gray-700 leading-relaxed">{product.description}</p>
+            </div>
+
+            {product.rejectReason && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="text-red-600 mt-1" size={20} />
+                  <div>
+                    <h3 className="font-semibold text-red-800 mb-1">Alasan Penolakan:</h3>
+                    <p className="text-red-700">{product.rejectReason}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {product.verified === null && (
+              <div className="space-y-3">
+                <button
+                  onClick={() => onVerify(product.id)}
+                  className="w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold"
+                >
+                  ✓ Verifikasi Produk
+                </button>
+
+                {!showRejectForm ? (
+                  <button
+                    onClick={() => setShowRejectForm(true)}
+                    className="w-full px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold"
+                  >
+                    ✗ Tolak Produk
+                  </button>
+                ) : (
+                  <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                    <label className="block text-gray-700 font-semibold mb-2">
+                      Alasan Penolakan:
+                    </label>
+                    <textarea
+                      value={rejectReason}
+                      onChange={(e) => setRejectReason(e.target.value)}
+                      placeholder="Tuliskan alasan penolakan produk..."
+                      className="w-full p-3 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:border-blue-500"
+                      rows={4}
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleReject}
+                        className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold"
+                        disabled={!rejectReason.trim()}
+                      >
+                        Konfirmasi Tolak
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowRejectForm(false);
+                          setRejectReason("");
+                        }}
+                        className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400"
+                      >
+                        Batal
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
-        <button style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px 16px', fontSize: '14px', color: '#FCA5A5', backgroundColor: 'transparent', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
-          <LogOut size={18} />
-          Keluar
-        </button>
       </div>
     </div>
   );
+}
+
+// Komponen Utama
+export default function KatalogProdukAdminPage() {
+  const [categories, setCategories] = useState([
+    { id: 1, name: "Elektronik" },
+    { id: 2, name: "Fashion" },
+    { id: 3, name: "Aksesoris" },
+    { id: 4, name: "Peralatan Rumah" },
+    { id: 5, name: "Gaming" },
+    { id: 6, name: "Pendidikan" },
+    { id: 7, name: "Kesehatan" },
+    { id: 8, name: "Lingkungan" },
+    { id: 9, name: "Transportasi" },
+    { id: 10, name: "Pariwisata" },
+    { id: 11, name: "Perikanan" },
+    { id: 12, name: "Industri Kreatif" },
+  ]);
+
+  const dummyProducts = [
+    {
+      id: 1,
+      name: "Keyboard Mechanical RX Pro",
+      category: "Gaming",
+      price: 850000,
+      stock: 12,
+      description: "Keyboard mechanical RGB dengan switch Blue. Dilengkapi dengan LED RGB yang dapat dikustomisasi dan build quality premium.",
+      image: "https://via.placeholder.com/150",
+      verified: null,
+      rejectReason: null,
+    },
+    {
+      id: 2,
+      name: "Headset Surround Sound X5",
+      category: "Elektronik",
+      price: 650000,
+      stock: 20,
+      description: "Headset gaming dengan surround sound 7.1. Nyaman digunakan untuk gaming marathon dengan mic noise cancelling.",
+      image: "https://via.placeholder.com/150",
+      verified: true,
+      rejectReason: null,
+    },
+    {
+      id: 3,
+      name: "Gelang Titanium Premium",
+      category: "Aksesoris",
+      price: 350000,
+      stock: 8,
+      description: "Gelang titanium anti karat desain elegan. Cocok untuk gaya kasual maupun formal.",
+      image: "https://via.placeholder.com/150",
+      verified: null,
+      rejectReason: null,
+    },
+  ];
+
+  const [products, setProducts] = useState(dummyProducts);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("Semua");
+  const [showAddCategory, setShowAddCategory] = useState(false);
+  const [newCategory, setNewCategory] = useState("");
+
+  const handleDelete = (id) => {
+    setProducts(products.filter((p) => p.id !== id));
+    setShowDeleteConfirm(null);
+    if (selectedProduct?.id === id) {
+      setSelectedProduct(null);
+    }
+  };
+
+  const handleVerify = (id) => {
+    const updated = products.map((p) =>
+      p.id === id ? { ...p, verified: true, rejectReason: null } : p
+    );
+    setProducts(updated);
+    
+    const updatedProduct = updated.find(p => p.id === id);
+    setSelectedProduct(null);
+    setTimeout(() => alert("Produk berhasil diverifikasi!"), 100);
+  };
+
+  const handleReject = (id, reason) => {
+    const updated = products.map((p) =>
+      p.id === id ? { ...p, verified: false, rejectReason: reason } : p
+    );
+    setProducts(updated);
+    
+    setSelectedProduct(null);
+    setTimeout(() => alert("Produk ditolak!"), 100);
+  };
+
+  const handleViewDetail = (product) => {
+    setSelectedProduct(product);
+  };
+
+  const handleAddCategory = () => {
+    if (newCategory.trim() && !categories.find(c => c.name.toLowerCase() === newCategory.toLowerCase())) {
+      const newId = Math.max(...categories.map(c => c.id)) + 1;
+      setCategories([...categories, { id: newId, name: newCategory.trim() }]);
+      setNewCategory("");
+      setShowAddCategory(false);
+      alert("Kategori berhasil ditambahkan!");
+    }
+  };
+
+  const handleDeleteCategory = (id) => {
+    const categoryName = categories.find(c => c.id === id)?.name;
+    const hasProducts = products.some(p => p.category === categoryName);
+    
+    if (hasProducts) {
+      alert("Tidak dapat menghapus kategori yang masih memiliki produk!");
+      return;
+    }
+    
+    setCategories(categories.filter(c => c.id !== id));
+    alert("Kategori berhasil dihapus!");
+  };
+
+  // Filter produk berdasarkan pencarian dan kategori
+  const filteredProducts = products.filter((p) => {
+    const matchSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                       p.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchCategory = selectedCategory === "Semua" || p.category === selectedCategory;
+    return matchSearch && matchCategory;
+  });
 
   if (selectedProduct) {
     return (
-      <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#F8F9FA' }}>
-        <Sidebar />
-        <div style={{ flex: 1, marginLeft: '256px', padding: '32px', backgroundColor: '#F8F9FA' }} className="main-content">
-          <button onClick={() => setSelectedProduct(null)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', backgroundColor: 'white', border: '2px solid #E5E7EB', borderRadius: '8px', color: '#1F4E73', fontWeight: '500', cursor: 'pointer', marginBottom: '24px' }}>
-            <ArrowLeft size={20} />
-            Kembali
-          </button>
-
-          <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '32px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
-              <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#1F4E73', margin: 0 }}>Detail Produk</h1>
-              <div style={{ padding: '8px 16px', borderRadius: '20px', fontSize: '14px', fontWeight: '600', backgroundColor: selectedProduct.status === 'verified' ? '#10B981' : selectedProduct.status === 'pending' ? '#F59E0B' : '#EF4444', color: 'white' }}>
-                {selectedProduct.status === 'verified' ? '✓ Terverifikasi' : selectedProduct.status === 'pending' ? '⏳ Pending' : '✗ Ditolak'}
-              </div>
-            </div>
-
-            <div style={{ display: 'grid', gap: '24px', marginBottom: '32px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#6B7280', marginBottom: '8px' }}>Nama Produk</label>
-                <p style={{ fontSize: '18px', fontWeight: '600', color: '#1F4E73', margin: 0 }}>{selectedProduct.nama}</p>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#6B7280', marginBottom: '8px' }}>Kategori</label>
-                  <p style={{ fontSize: '16px', color: '#374151', margin: 0 }}>📂 {selectedProduct.kategori}</p>
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#6B7280', marginBottom: '8px' }}>Harga</label>
-                  <p style={{ fontSize: '16px', fontWeight: '600', color: '#1F4E73', margin: 0 }}>{selectedProduct.harga}</p>
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#6B7280', marginBottom: '8px' }}>Kontak</label>
-                  <p style={{ fontSize: '16px', color: '#374151', margin: 0 }}>{selectedProduct.kontak}</p>
-                </div>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#6B7280', marginBottom: '8px' }}>Deskripsi</label>
-                <p style={{ fontSize: '16px', color: '#374151', lineHeight: '1.6', margin: 0 }}>{selectedProduct.deskripsi}</p>
-              </div>
-
-              {selectedProduct.catatanAdmin && (
-                <div style={{ backgroundColor: selectedProduct.status === 'verified' ? '#D1FAE5' : selectedProduct.status === 'pending' ? '#FEF3C7' : '#FEE2E2', padding: '16px', borderRadius: '8px', borderLeft: `4px solid ${selectedProduct.status === 'verified' ? '#10B981' : selectedProduct.status === 'pending' ? '#F59E0B' : '#EF4444'}` }}>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: selectedProduct.status === 'verified' ? '#059669' : selectedProduct.status === 'pending' ? '#D97706' : '#DC2626', marginBottom: '8px' }}>Catatan Admin Sebelumnya</label>
-                  <p style={{ fontSize: '14px', color: '#374151', margin: 0 }}>{selectedProduct.catatanAdmin}</p>
-                </div>
-              )}
-            </div>
-
-            <div style={{ borderTop: '2px solid #E5E7EB', paddingTop: '32px' }}>
-              <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1F4E73', marginBottom: '16px' }}>Verifikasi Produk</h2>
-              <div style={{ marginBottom: '24px' }}>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Catatan Verifikasi <span style={{ color: '#EF4444' }}>*</span></label>
-                <textarea value={verificationNote} onChange={(e) => setVerificationNote(e.target.value)} placeholder="Tulis catatan verifikasi di sini..." style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '2px solid #E5E7EB', fontSize: '14px', minHeight: '120px', resize: 'vertical', outline: 'none', fontFamily: 'inherit' }} />
-              </div>
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                <button onClick={() => handleVerify('verified')} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px', backgroundColor: '#10B981', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '600', fontSize: '14px', cursor: 'pointer' }}>
-                  <CheckCircle size={20} />
-                  Verifikasi & Setujui
-                </button>
-                <button onClick={() => handleVerify('rejected')} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px', backgroundColor: '#EF4444', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '600', fontSize: '14px', cursor: 'pointer' }}>
-                  <XCircle size={20} />
-                  Tolak Produk
-                </button>
-                <button onClick={() => { setSelectedProduct(null); setVerificationNote(''); }} style={{ padding: '12px 24px', backgroundColor: 'white', color: '#6B7280', border: '2px solid #E5E7EB', borderRadius: '8px', fontWeight: '600', fontSize: '14px', cursor: 'pointer' }}>
-                  Batal
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="flex h-screen bg-gray-100">
+        <SidebarAdmin />
+        <DetailProdukPage
+          product={selectedProduct}
+          onBack={() => setSelectedProduct(null)}
+          onVerify={handleVerify}
+          onReject={handleReject}
+        />
       </div>
     );
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#F8F9FA', position: 'relative' }}>
-      <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ position: 'fixed', top: '16px', left: '16px', zIndex: 1001, padding: '10px', backgroundColor: '#1F4E73', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'none' }} className="mobile-menu-btn">
-        {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
-      </button>
+    <div className="flex h-screen bg-gray-100">
+      <SidebarAdmin />
 
-      {sidebarOpen && <div onClick={() => setSidebarOpen(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 999, display: 'none' }} className="sidebar-overlay" />}
+      <div className="flex-1 p-6 overflow-auto">
+        <h1 className="text-3xl font-bold mb-6">Katalog Produk Admin</h1>
 
-      <Sidebar />
-
-      <div style={{ flex: 1, padding: '32px', backgroundColor: '#F8F9FA', marginLeft: '256px' }} className="main-content">
-        <div style={{ marginBottom: '32px' }}>
-          <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: '#1F4E73', margin: 0, marginBottom: '8px' }}>Katalog Produk</h1>
-          <p style={{ color: '#6B7280', fontSize: '14px', margin: 0 }}>Kelola dan verifikasi produk inovasi dan riset</p>
+        {/* STATISTIK */}
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="p-5 bg-white shadow rounded-xl">
+            <h3 className="text-gray-600">Jumlah Produk</h3>
+            <p className="text-3xl font-bold">{products.length}</p>
+          </div>
+          <div className="p-5 bg-white shadow rounded-xl">
+            <h3 className="text-gray-600">Kategori</h3>
+            <p className="text-3xl font-bold">{categories.length}</p>
+          </div>
+          <div className="p-5 bg-white shadow rounded-xl">
+            <h3 className="text-gray-600">Menunggu Verifikasi</h3>
+            <p className="text-3xl font-bold">
+              {products.filter((p) => p.verified === null).length}
+            </p>
+          </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '32px' }}>
-          <StatCard label="Total Produk" value={stats.total} color="#1F4E73" />
-          <StatCard label="Terverifikasi" value={stats.verified} color="#10B981" />
-          <StatCard label="Pending Review" value={stats.pending} color="#F59E0B" />
-          <StatCard label="Perlu Perbaikan" value={stats.rejected} color="#EF4444" />
-        </div>
+        {/* LIST PRODUK */}
+        <div className="bg-white p-5 rounded-xl shadow">
+          <h2 className="text-xl font-bold mb-4">Daftar Produk</h2>
 
-        <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '12px', marginBottom: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', flexWrap: 'wrap' }}>
-            {categories.map((cat) => (
-              <button key={cat} onClick={() => setSelectedCategory(cat)} style={{ padding: '8px 16px', borderRadius: '20px', border: selectedCategory === cat ? 'none' : '2px solid #E5E7EB', backgroundColor: selectedCategory === cat ? '#1F4E73' : 'white', color: selectedCategory === cat ? 'white' : '#6B7280', cursor: 'pointer', fontWeight: '500', fontSize: '13px' }}>
-                {cat}
+          {/* FILTER & SEARCH */}
+          <div className="mb-6 space-y-4">
+            {/* Search Bar */}
+            <div>
+              <input
+                type="text"
+                placeholder="Cari produk..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+              />
+            </div>
+
+            {/* Category Filter */}
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="font-semibold text-gray-700">Kategori:</span>
+              <button
+                onClick={() => setSelectedCategory("Semua")}
+                className={`px-4 py-2 rounded-lg transition ${
+                  selectedCategory === "Semua"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                }`}
+              >
+                Semua
               </button>
+              {categories.map((cat) => (
+                <div key={cat.id} className="relative group">
+                  <button
+                    onClick={() => setSelectedCategory(cat.name)}
+                    className={`px-4 py-2 rounded-lg transition ${
+                      selectedCategory === cat.name
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    }`}
+                  >
+                    {cat.name}
+                  </button>
+                  {cat.id > 5 && (
+                    <button
+                      onClick={() => handleDeleteCategory(cat.id)}
+                      className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button
+                onClick={() => setShowAddCategory(!showAddCategory)}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+              >
+                + Tambah Kategori
+              </button>
+            </div>
+
+            {/* Add Category Form */}
+            {showAddCategory && (
+              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Nama kategori baru..."
+                    value={newCategory}
+                    onChange={(e) => setNewCategory(e.target.value)}
+                    onKeyPress={(e) => e.key === "Enter" && handleAddCategory()}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  />
+                  <button
+                    onClick={handleAddCategory}
+                    className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  >
+                    Simpan
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowAddCategory(false);
+                      setNewCategory("");
+                    }}
+                    className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Result Count */}
+            <p className="text-sm text-gray-600">
+              Menampilkan {filteredProducts.length} dari {products.length} produk
+            </p>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            {filteredProducts.map((p) => (
+              <div
+                key={p.id}
+                className="p-4 border rounded-xl shadow hover:shadow-lg transition"
+              >
+                <img
+                  src={p.image}
+                  alt={p.name}
+                  className="w-full h-40 object-cover rounded-lg mb-3"
+                />
+                <h3 className="text-lg font-bold">{p.name}</h3>
+                <p className="text-sm text-gray-600">{p.category}</p>
+                <p className="font-semibold mt-1">
+                  Rp {p.price.toLocaleString("id-ID")}
+                </p>
+
+                <span
+                  className={`inline-block mt-2 px-3 py-1 text-xs rounded-full ${
+                    p.verified === true
+                      ? "bg-green-200 text-green-700"
+                      : p.verified === false
+                      ? "bg-red-200 text-red-700"
+                      : "bg-yellow-200 text-yellow-700"
+                  }`}
+                >
+                  {p.verified === true
+                    ? "Terverifikasi"
+                    : p.verified === false
+                    ? "Ditolak"
+                    : "Menunggu"}
+                </span>
+
+                <div className="flex gap-2 mt-3">
+                  <button
+                    onClick={() => handleViewDetail(p)}
+                    className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 text-sm"
+                  >
+                    <Eye size={16} />
+                    Detail
+                  </button>
+                  <button
+                    onClick={() => setShowDeleteConfirm(p.id)}
+                    className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+
+                {showDeleteConfirm === p.id && (
+                  <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-sm text-red-800 mb-2">
+                      Hapus produk ini?
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleDelete(p.id)}
+                        className="flex-1 px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
+                      >
+                        Ya, Hapus
+                      </button>
+                      <button
+                        onClick={() => setShowDeleteConfirm(null)}
+                        className="flex-1 px-3 py-1 bg-gray-300 text-gray-700 rounded text-sm hover:bg-gray-400"
+                      >
+                        Batal
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
-          <input type="text" placeholder="🔍 Cari produk..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', border: '2px solid #E5E7EB', fontSize: '14px', outline: 'none' }} />
         </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
-          {filteredProducts.map((product) => (
-            <div key={product.id} style={{ backgroundColor: 'white', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', position: 'relative' }}>
-              <div style={{ position: 'absolute', top: '12px', right: '12px', padding: '6px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '600', backgroundColor: product.status === 'verified' ? '#10B981' : product.status === 'pending' ? '#F59E0B' : '#EF4444', color: 'white', zIndex: 10 }}>
-                {product.status === 'verified' ? '✓ Terverifikasi' : product.status === 'pending' ? '⏳ Pending' : '✗ Perlu Perbaikan'}
-              </div>
-              <div style={{ width: '100%', height: '180px', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '64px' }}>
-                {product.kategori === 'Pendidikan' ? '📚' : product.kategori === 'Kesehatan' ? '🏥' : product.kategori === 'Lingkungan' ? '🌿' : product.kategori === 'Transportasi' ? '🚗' : product.kategori === 'Pariwisata' ? '🏖️' : product.kategori === 'Perikanan' ? '🐟' : product.kategori === 'Industri Kreatif' ? '🎨' : '📦'}
-              </div>
-              <div style={{ padding: '20px' }}>
-                <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#1F4E73', marginBottom: '4px' }}>{product.nama}</h3>
-                <p style={{ fontSize: '12px', color: '#6B7280', marginBottom: '8px' }}>📂 {product.kategori}</p>
-                <p style={{ fontSize: '18px', fontWeight: 'bold', color: '#1F4E73', marginBottom: '12px' }}>{product.harga}</p>
-                <p style={{ fontSize: '14px', color: '#6B7280', marginBottom: '16px', lineHeight: '1.6' }}>{product.deskripsi}</p>
-                <div style={{ backgroundColor: product.status === 'verified' ? '#D1FAE5' : product.status === 'pending' ? '#FEF3C7' : '#FEE2E2', padding: '12px', borderRadius: '8px', marginBottom: '16px', borderLeft: `4px solid ${product.status === 'verified' ? '#10B981' : product.status === 'pending' ? '#F59E0B' : '#EF4444'}` }}>
-                  <p style={{ fontSize: '12px', fontWeight: '600', marginBottom: '4px', color: product.status === 'verified' ? '#059669' : product.status === 'pending' ? '#D97706' : '#DC2626' }}>
-                    {product.status === 'verified' ? '✓ Status Verifikasi Admin' : product.status === 'pending' ? '⏳ Status Review' : '✗ Catatan Admin'}
-                  </p>
-                  <p style={{ fontSize: '13px', color: '#374151', margin: 0 }}>{product.catatanAdmin}</p>
-                </div>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <button onClick={() => handleDelete(product.id)} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '2px solid #EF4444', backgroundColor: 'white', color: '#EF4444', cursor: 'pointer', fontWeight: '500', fontSize: '14px' }}>🗑️ Hapus</button>
-                  <button onClick={() => setSelectedProduct(product)} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', backgroundColor: '#1F4E73', color: 'white', cursor: 'pointer', fontWeight: '500', fontSize: '14px' }}>👁️ Detail</button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {filteredProducts.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '64px', color: '#9CA3AF' }}>
-            <div style={{ fontSize: '64px', marginBottom: '16px' }}>📦</div>
-            <div style={{ fontSize: '18px', fontWeight: '500' }}>Tidak ada produk ditemukan</div>
-          </div>
-        )}
       </div>
-
-      <style>{`
-        @media (max-width: 768px) {
-          .mobile-menu-btn { display: block !important; }
-          .sidebar { transform: translateX(-100%); }
-          .sidebar-open { transform: translateX(0) !important; }
-          .sidebar-overlay { display: block !important; }
-          .main-content { margin-left: 0 !important; padding: 80px 16px 32px 16px !important; }
-        }
-        @media (min-width: 769px) and (max-width: 1024px) {
-          .main-content { margin-left: 256px !important; padding: 24px !important; }
-        }
-      `}</style>
-    </div>
-  );
-}
-
-function StatCard({ label, value, color }) {
-  return (
-    <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-      <div style={{ fontSize: '32px', fontWeight: 'bold', color, marginBottom: '4px' }}>{value}</div>
-      <div style={{ fontSize: '14px', color: '#555' }}>{label}</div>
     </div>
   );
 }

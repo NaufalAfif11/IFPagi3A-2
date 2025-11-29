@@ -9,254 +9,159 @@ export default function ForgotPasswordPage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  // Step 1: Simulasi Kirim OTP
   const handleSendOTP = () => {
-    if (!email) {
-      alert("Email wajib diisi!");
-      return;
-    }
-
-    alert("Kode OTP telah dikirim ke email Anda! (Simulasi)");
+    if (!email) return alert("Email wajib diisi!");
+    alert("Kode OTP dikirim (Simulasi)");
     setStep(2);
   };
 
-  // Step 2: Simulasi Verifikasi OTP
   const handleVerifyOTP = () => {
-    if (!otp) {
-      alert("Kode OTP wajib diisi!");
-      return;
-    }
-
+    if (!otp) return alert("OTP wajib diisi!");
     if (otp === "123456") {
-      alert("Kode OTP berhasil diverifikasi! (Simulasi)");
+      alert("OTP benar! (Simulasi)");
       setStep(3);
     } else {
-      alert("OTP salah! Gunakan kode: 123456 (Simulasi)");
+      alert("OTP salah! Gunakan: 123456");
     }
   };
 
-  // Step 3: Simulasi Reset Password
   const handleResetPassword = () => {
-    if (!newPassword || !confirmPassword) {
-      alert("Semua field wajib diisi!");
-      return;
-    }
+    if (!newPassword || !confirmPassword)
+      return alert("Semua field wajib diisi!");
+    if (newPassword !== confirmPassword)
+      return alert("Password tidak cocok!");
+    if (newPassword.length < 6)
+      return alert("Password minimal 6 karakter!");
 
-    if (newPassword !== confirmPassword) {
-      alert("Password tidak cocok!");
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      alert("Password minimal 6 karakter!");
-      return;
-    }
-
-    alert("Password berhasil direset! (Simulasi)");
-    goToLogin();
-  };
-
-  // Navigasi ke Login
-  const goToLogin = () => {
-    window.location.href = "/login"; // Navigasi langsung
+    alert("Password berhasil direset (Simulasi)");
+    window.location.href = "/login";
   };
 
   return (
-    <div style={containerStyle}>
-      <div style={cardStyle}>
+    <div className="min-h-screen flex justify-center items-center bg-[#F3F7FB]">
+      <div className="w-[430px] bg-white p-10 rounded-3xl shadow-xl border border-[#1F4E73]">
 
-        {/* Step 1: Input Email */}
+        {/* STEP 1 */}
         {step === 1 && (
-          <div style={contentStyle}>
-            <h2 style={titleStyle}>Lupa Kata Sandi</h2>
-            <p style={subtitleStyle}>
+          <div>
+            <h2 className="text-2xl font-bold text-[#1F4E73] text-center">
+              Lupa Kata Sandi
+            </h2>
+            <p className="text-gray-600 text-center mb-6">
               Masukkan email Anda untuk menerima kode OTP
             </p>
 
             <input
               type="email"
               placeholder="Email"
+              className="w-full px-4 py-2 rounded-md bg-[#E3ECF5] border border-gray-300 mb-4 focus:outline-none focus:ring-2 focus:ring-[#1F4E73]"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              style={inputStyle}
             />
 
-            <button onClick={handleSendOTP} style={buttonStyle}>
+            <button
+              onClick={handleSendOTP}
+              className="w-full bg-[#1F4E73] text-white py-2 rounded-md font-semibold hover:bg-[#163954] transition mb-3"
+            >
               Kirim Kode OTP
             </button>
 
-            <button onClick={goToLogin} style={linkButtonStyle}>
+            <button
+              onClick={() => (window.location.href = "/login")}
+              className="w-full text-[#1F4E73] text-sm underline"
+            >
               Kembali ke Login
             </button>
           </div>
         )}
 
-        {/* Step 2: Input OTP */}
+        {/* STEP 2 */}
         {step === 2 && (
-          <div style={contentStyle}>
-            <h2 style={titleStyle}>Verifikasi Kode OTP</h2>
-            <p style={subtitleStyle}>
-              Masukkan kode OTP yang dikirim ke {email}
+          <div>
+            <h2 className="text-2xl font-bold text-[#1F4E73] text-center">
+              Verifikasi Kode OTP
+            </h2>
+            <p className="text-gray-600 text-center mb-6">
+              Masukkan kode OTP yang dikirim ke: <br />
+              <span className="font-semibold">{email}</span>
             </p>
 
             <input
               type="text"
               placeholder="Kode OTP"
-              value={otp}
               maxLength={6}
+              className="w-full px-4 py-2 rounded-md bg-[#E3ECF5] border border-gray-300 mb-4 focus:outline-none focus:ring-2 focus:ring-[#1F4E73]"
+              value={otp}
               onChange={(e) => setOtp(e.target.value)}
-              style={inputStyle}
             />
 
-            <button onClick={handleVerifyOTP} style={buttonStyle}>
+            <button
+              onClick={handleVerifyOTP}
+              className="w-full bg-[#1F4E73] text-white py-2 rounded-md font-semibold hover:bg-[#163954] transition mb-3"
+            >
               Verifikasi
             </button>
 
-            <button onClick={() => setStep(1)} style={linkButtonStyle}>
+            <button
+              onClick={() => setStep(1)}
+              className="w-full text-[#1F4E73] text-sm underline"
+            >
               Kirim Ulang Kode
             </button>
           </div>
         )}
 
-        {/* Step 3: Reset Password */}
+        {/* STEP 3 */}
         {step === 3 && (
-          <div style={contentStyle}>
-            <h2 style={titleStyle}>Reset Kata Sandi</h2>
-            <p style={subtitleStyle}>Masukkan kata sandi baru Anda</p>
+          <div>
+            <h2 className="text-2xl font-bold text-[#1F4E73] text-center">
+              Reset Kata Sandi
+            </h2>
+            <p className="text-gray-600 text-center mb-6">
+              Masukkan kata sandi baru Anda
+            </p>
 
             <input
               type="password"
               placeholder="Kata Sandi Baru"
+              className="w-full px-4 py-2 rounded-md bg-[#E3ECF5] border border-gray-300 mb-3 focus:outline-none focus:ring-2 focus:ring-[#1F4E73]"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              style={inputStyle}
             />
 
             <input
               type="password"
               placeholder="Konfirmasi Kata Sandi Baru"
+              className="w-full px-4 py-2 rounded-md bg-[#E3ECF5] border border-gray-300 mb-4 focus:outline-none focus:ring-2 focus:ring-[#1F4E73]"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              style={inputStyle}
             />
 
-            <button onClick={handleResetPassword} style={buttonStyle}>
+            <button
+              onClick={handleResetPassword}
+              className="w-full bg-[#1F4E73] text-white py-2 rounded-md font-semibold hover:bg-[#163954] transition"
+            >
               Reset Kata Sandi
             </button>
           </div>
         )}
 
-        {/* Progress Indicator */}
-        <div style={progressContainerStyle}>
-          <div style={{ ...progressDotStyle, ...(step >= 1 ? progressDotActiveStyle : {}) }}>1</div>
-          <div style={progressLineStyle} />
-          <div style={{ ...progressDotStyle, ...(step >= 2 ? progressDotActiveStyle : {}) }}>2</div>
-          <div style={progressLineStyle} />
-          <div style={{ ...progressDotStyle, ...(step >= 3 ? progressDotActiveStyle : {}) }}>3</div>
+        {/* Progress */}
+        <div className="flex justify-center items-center gap-3 mt-8">
+          {[1, 2, 3].map((num) => (
+            <div
+              key={num}
+              className={`w-8 h-8 rounded-full flex justify-center items-center font-semibold text-sm ${
+                step >= num
+                  ? "bg-[#1F4E73] text-white"
+                  : "bg-gray-300 text-gray-500"
+              }`}
+            >
+              {num}
+            </div>
+          ))}
         </div>
       </div>
     </div>
   );
 }
-
-/* --- Styles --- */
-
-const containerStyle: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  minHeight: "100vh",
-  backgroundColor: "#f3f4f6",
-};
-
-const cardStyle: React.CSSProperties = {
-  width: 450,
-  backgroundColor: "white",
-  borderRadius: 24,
-  padding: 40,
-  boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)",
-};
-
-const contentStyle: React.CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-};
-
-const titleStyle: React.CSSProperties = {
-  fontSize: 28,
-  fontWeight: "bold",
-  marginBottom: 8,
-  color: "#1e40af",
-  textAlign: "center",
-};
-
-const subtitleStyle: React.CSSProperties = {
-  fontSize: 14,
-  color: "#6b7280",
-  marginBottom: 24,
-  textAlign: "center",
-};
-
-const inputStyle: React.CSSProperties = {
-  border: "1px solid #d1d5db",
-  borderRadius: 6,
-  padding: "12px 16px",
-  marginBottom: 16,
-  width: "100%",
-  backgroundColor: "#eff6ff",
-  outline: "none",
-};
-
-const buttonStyle: React.CSSProperties = {
-  backgroundColor: "#1e40af",
-  color: "white",
-  fontWeight: 600,
-  padding: "12px 24px",
-  borderRadius: 6,
-  border: "none",
-  cursor: "pointer",
-  marginBottom: 12,
-  fontSize: 14,
-};
-
-const linkButtonStyle: React.CSSProperties = {
-  background: "none",
-  border: "none",
-  color: "#1e40af",
-  fontSize: 14,
-  cursor: "pointer",
-  textDecoration: "underline",
-  padding: 8,
-};
-
-const progressContainerStyle: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  marginTop: 32,
-  gap: 8,
-};
-
-const progressDotStyle: React.CSSProperties = {
-  width: 32,
-  height: 32,
-  borderRadius: "50%",
-  backgroundColor: "#e5e7eb",
-  color: "#9ca3af",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  fontSize: 14,
-  fontWeight: 600,
-};
-
-const progressDotActiveStyle: React.CSSProperties = {
-  backgroundColor: "#1e40af",
-  color: "white",
-};
-
-const progressLineStyle: React.CSSProperties = {
-  width: 40,
-  height: 2,
-  backgroundColor: "#e5e7eb",
-};

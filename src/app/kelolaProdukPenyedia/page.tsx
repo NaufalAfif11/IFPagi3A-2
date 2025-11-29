@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import SidebarPenyedia from "@/components/ui/sidebar_penyedia";
+
 
 export default function KatalogProdukPenyedia() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -122,6 +124,8 @@ export default function KatalogProdukPenyedia() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#FFFFFF', position: 'relative' }}>
+      <SidebarPenyedia/>
+
       {/* Mobile Menu Button */}
       <button
         onClick={() => setShowSidebar(!showSidebar)}
@@ -162,43 +166,7 @@ export default function KatalogProdukPenyedia() {
         />
       )}
 
-      {/* Sidebar */}
-      <div 
-        style={{ 
-          width: '250px', 
-          backgroundColor: '#1F4E73', 
-          padding: '24px', 
-          color: 'white',
-          height: '100vh',
-          position: 'sticky',
-          top: 0,
-          transition: 'transform 0.3s ease',
-          boxShadow: '2px 0 8px rgba(0,0,0,0.1)'
-        }}
-        className={showSidebar ? 'sidebar sidebar-open' : 'sidebar'}
-      >
-        <div style={{ marginBottom: '32px', textAlign: 'center' }}>
-          <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px' }}>SINOVA</div>
-          <div style={{ fontSize: '12px', opacity: 0.9 }}>Sistem Informasi Inovasi</div>
-          <div style={{ fontSize: '12px', opacity: 0.9 }}>Riset Daerah</div>
-        </div>
-
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <a href="#" style={{ padding: '12px 16px', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.1)', color: 'white', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px', transition: 'background-color 0.2s' }}>
-            <span>📊</span> Dashboard
-          </a>
-          <a href="#" style={{ padding: '12px 16px', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.25)', color: 'white', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px', fontWeight: '500' }}>
-            <span>📦</span> Katalog Produk
-          </a>
-          <a href="#" style={{ padding: '12px 16px', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.1)', color: 'white', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px', transition: 'background-color 0.2s' }}>
-            <span>👤</span> Profile
-          </a>
-        </nav>
-
-        <button style={{ marginTop: 'auto', position: 'absolute', bottom: '24px', width: 'calc(100% - 48px)', padding: '12px', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'center', transition: 'background-color 0.2s' }}>
-          <span>🚪</span> Logout
-        </button>
-      </div>
+      
 
       {/* Main Content */}
       <div style={{ flex: 1, padding: '32px', width: '100%', minWidth: 0 }} className="main-content">

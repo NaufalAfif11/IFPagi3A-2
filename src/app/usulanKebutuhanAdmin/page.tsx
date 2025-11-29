@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import SidebarAdmin from "@/components/ui/sidebar_admin";
+
 
 export default function UsulanKebutuhanAdmin() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -136,7 +138,9 @@ export default function UsulanKebutuhanAdmin() {
   };
 
   return (
+    
     <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#FFFFFF', position: 'relative' }}>
+      <SidebarAdmin />
       {/* Mobile Menu Button */}
       <button
         onClick={() => setShowSidebar(!showSidebar)}
@@ -159,64 +163,7 @@ export default function UsulanKebutuhanAdmin() {
         ☰
       </button>
 
-      {/* Sidebar Overlay */}
-      {showSidebar && (
-        <div
-          onClick={() => setShowSidebar(false)}
-          style={{
-            display: 'none',
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            zIndex: 999
-          }}
-          className="sidebar-overlay"
-        />
-      )}
-
-      {/* Sidebar */}
-      <div 
-        style={{ 
-          width: '250px', 
-          backgroundColor: '#1F4E73', 
-          padding: '24px', 
-          color: 'white', 
-          height: '100vh', 
-          position: 'sticky', 
-          top: 0,
-          transition: 'transform 0.3s ease',
-          boxShadow: '2px 0 8px rgba(0,0,0,0.1)'
-        }}
-        className={showSidebar ? 'sidebar sidebar-open' : 'sidebar'}
-      >
-        <div style={{ marginBottom: '32px', textAlign: 'center' }}>
-          <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px' }}>SINOVA</div>
-          <div style={{ fontSize: '12px', opacity: 0.9 }}>Sistem Informasi Inovasi</div>
-          <div style={{ fontSize: '12px', opacity: 0.9 }}>Riset Daerah</div>
-        </div>
-
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <a href="#" style={{ padding: '12px 16px', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.1)', textDecoration: 'none', color: 'white', transition: 'background-color 0.2s' }}>
-            📊 Dashboard
-          </a>
-          <a href="#" style={{ padding: '12px 16px', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.1)', textDecoration: 'none', color: 'white', transition: 'background-color 0.2s' }}>
-            📦 Katalog Produk
-          </a>
-          <a href="#" style={{ padding: '12px 16px', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.25)', textDecoration: 'none', color: 'white', fontWeight: '500' }}>
-            📝 Usulan Kebutuhan
-          </a>
-          <a href="#" style={{ padding: '12px 16px', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.1)', textDecoration: 'none', color: 'white', transition: 'background-color 0.2s' }}>
-            👤 Profile
-          </a>
-        </nav>
-
-        <button style={{ marginTop: 'auto', position: 'absolute', bottom: '24px', width: 'calc(100% - 48px)', padding: '12px', borderRadius: '8px', backgroundColor: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', cursor: 'pointer', transition: 'background-color 0.2s' }}>
-          🚪 Logout
-        </button>
-      </div>
+      
 
       {/* Main Content */}
       <div style={{ flex: 1, padding: '32px', width: '100%', minWidth: 0 }} className="main-content">

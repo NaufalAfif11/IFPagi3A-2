@@ -143,123 +143,152 @@ export default function KatalogPage() {
           Modal Detail Inovasi
       ============================= */}
       <AnimatePresence>
-        {selected && (
-          <motion.div
-            className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50 p-4 overflow-y-auto"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+  {selected && (
+    <motion.div
+      className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-md z-50 p-4 overflow-y-auto"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={() => setSelected(null)}
+    >
+      <motion.div
+        className="bg-white w-full md:w-[85%] lg:w-[70%] rounded-2xl shadow-2xl overflow-hidden relative"
+        initial={{ scale: 0.85, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.85, opacity: 0 }}
+        transition={{ duration: 0.25 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="relative p-6 bg-[#1F4E73] text-white">
+          <button
             onClick={() => setSelected(null)}
+            className="absolute right-4 top-4 bg-white/20 hover:bg-white/40 w-10 h-10 rounded-lg flex items-center justify-center"
           >
-            <motion.div
-              className="bg-white rounded-2xl w-[90%] max-w-4xl shadow-2xl relative my-8 overflow-hidden"
-              initial={{ scale: 0.8, opacity: 0, y: 50 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              onClick={(e) => e.stopPropagation()}
+            ✕
+          </button>
+
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <span className="bg-white/20 px-3 py-1 text-xs rounded-full">
+                {selected.kategori}
+              </span>
+              <h2 className="text-3xl font-bold mt-2">{selected.title}</h2>
+            </div>
+
+            <div className="bg-white/20 px-4 py-2 rounded-xl text-sm backdrop-blur-md">
+              <p className="opacity-80">Penyedia:</p>
+              <p className="font-semibold">{selected.penyedia}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Carousel */}
+        <div className="bg-gray-50 p-6">
+          <div className="w-full flex items-center justify-center bg-white rounded-xl p-4">
+  <img
+    src={selected.images[currentImageIndex]}
+    alt={selected.title}
+    className="max-h-[75vh] w-auto object-contain"
+  />
+
+
+
+
+            {/* Prev */}
+            <button
+              disabled={currentImageIndex === 0}
+              onClick={() => setCurrentImageIndex(currentImageIndex - 1)}
+              className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 w-11 h-11 rounded-full shadow hidden group-hover:flex items-center justify-center text-lg"
             >
-              {/* Header */}
-              <div className="bg-gradient-to-r from-[#1F4E73] to-[#2c6a99] p-6 text-white relative">
-                <button
-                  onClick={() => setSelected(null)}
-                  className="absolute top-4 right-4 bg-white/20 hover:bg-white/30 w-10 h-10 rounded-full flex items-center justify-center transition-all"
-                >
-                  ✕
-                </button>
+              ←
+            </button>
 
-                <div className="bg-white/20 px-3 py-1 rounded-full text-xs inline-block mb-2">
-                  {selected.kategori}
-                </div>
+            {/* Next */}
+            <button
+              disabled={currentImageIndex === selected.images.length - 1}
+              onClick={() => setCurrentImageIndex(currentImageIndex + 1)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 w-11 h-11 rounded-full shadow hidden group-hover:flex items-center justify-center text-lg"
+            >
+              →
+            </button>
+          </div>
 
-                <h2 className="text-3xl font-bold">{selected.title}</h2>
-                <p className="text-white/90 mt-2">{selected.desc}</p>
+          {/* Dot Indicator */}
+          <div className="flex justify-center mt-3 gap-2">
+            {selected.images.map((_, i) => (
+              <div
+                key={i}
+                className={`w-3 h-3 rounded-full ${
+                  currentImageIndex === i ? "bg-[#1F4E73]" : "bg-gray-300"
+                }`}
+              ></div>
+            ))}
+          </div>
+
+          {/* Thumbnails */}
+          <div className="flex gap-3 mt-5 overflow-x-auto pb-2">
+            {selected.images.map((img, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentImageIndex(index)}
+                className={`min-w-[80px] h-[80px] rounded-lg overflow-hidden border ${
+                  currentImageIndex === index ? "border-[#1F4E73]" : "border-transparent opacity-70"
+                }`}
+              >
+                <img src={img} className="w-full h-full object-cover" />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Detail */}
+        <div className="p-6 space-y-6">
+
+          {/* Harga */}
+          <div className="bg-gradient-to-br from-[#1F4E73]/10 to-[#2c6a99]/20 border-l-4 border-[#1F4E73] p-4 rounded-xl">
+            <p className="text-gray-600 text-sm">Harga</p>
+            <p className="text-3xl font-bold text-[#1F4E73]">{selected.harga}</p>
+          </div>
+
+          {/* Penyedia */}
+          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+            <h3 className="font-semibold text-lg mb-3">Informasi Penyedia</h3>
+
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div>
+                <p className="text-sm text-gray-500">Perusahaan</p>
+                <p className="font-medium">{selected.penyedia}</p>
               </div>
 
-              {/* Carousel */}
-              <div className="p-6 bg-gray-50">
-                <div className="relative group">
-                  <div className="overflow-hidden rounded-xl">
-                    {/* Perhatikan: Jika Anda menggunakan Next.js Image, Anda harus ganti tag <img> di sini */}
-                    <img
-                      src={selected.images[currentImageIndex]}
-                      alt={selected.title}
-                      className="w-full h-96 object-cover cursor-pointer hover:scale-105 transition"
-                      onClick={() => setZoomImage(selected.images[currentImageIndex])}
-                    />
-                  </div>
-
-                  {/* Prev */}
-                  {currentImageIndex > 0 && (
-                    <button
-                      onClick={() => setCurrentImageIndex(currentImageIndex - 1)}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 w-10 h-10 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition"
-                    >
-                      ←
-                    </button>
-                  )}
-
-                  {/* Next */}
-                  {currentImageIndex < selected.images.length - 1 && (
-                    <button
-                      onClick={() => setCurrentImageIndex(currentImageIndex + 1)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 w-10 h-10 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition"
-                    >
-                      →
-                    </button>
-                  )}
-
-                  {/* Thumbnails */}
-                  <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
-                    {selected.images.map((img, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setCurrentImageIndex(index)}
-                        className={`w-20 h-20 rounded-lg overflow-hidden ${
-                          currentImageIndex === index ? "ring-2 ring-[#1F4E73]" : "opacity-60"
-                        }`}
-                      >
-                        <img key={index} src={img} alt={`${selected.title} - Thumb ${index + 1}`} className="w-full h-full object-cover" />
-                      </button>
-                    ))}
-                  </div>
-                </div>
+              <div>
+                <p className="text-sm text-gray-500">Nomor Telepon</p>
+                <p className="font-medium">{selected.telp}</p>
               </div>
+            </div>
 
-              {/* Detail Info */}
-              <div className="p-6 space-y-4">
-                <div className="bg-gradient-to-br from-[#1F4E73]/5 to-[#2c6a99]/10 border-l-4 border-[#1F4E73] p-4 rounded">
-                  <p className="text-sm text-gray-600">Harga</p>
-                  <p className="text-3xl font-bold text-[#1F4E73]">{selected.harga}</p>
-                </div>
+            <div className="flex gap-3 mt-5">
+              <a
+                href={`https://wa.me/${selected.telp.replace(/^0/, "62")}`}
+                target="_blank"
+                className="flex-1 bg-[#25D366] text-white py-3 rounded-lg text-center font-medium"
+              >
+                WhatsApp
+              </a>
+              <a
+                href={`tel:${selected.telp}`}
+                className="flex-1 bg-[#1F4E73] text-white py-3 rounded-lg text-center font-medium"
+              >
+                Telepon
+              </a>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
 
-                <div className="bg-white border border-gray-200 rounded-xl p-5">
-                  <h3 className="font-semibold text-lg mb-3">Informasi Penyedia</h3>
-                  <p className="text-sm text-gray-500">Perusahaan</p>
-                  <p className="font-medium mb-3">{selected.penyedia}</p>
-
-                  <p className="text-sm text-gray-500">Nomor Telepon</p>
-                  <p className="font-medium mb-4">{selected.telp}</p>
-
-                  <div className="flex gap-3">
-                    <a
-                      href={`https://wa.me/${selected.telp.replace(/^0/, "62")}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 bg-[#25D366] text-white py-3 rounded-lg text-center"
-                    >
-                      WhatsApp
-                    </a>
-                    <a href={`tel:${selected.telp}`} className="flex-1 bg-[#1F4E73] text-white py-3 rounded-lg text-center">
-                      Telepon
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Zoom Image */}
       <AnimatePresence>

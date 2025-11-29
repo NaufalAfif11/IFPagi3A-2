@@ -5,7 +5,8 @@ export default function Footer() {
     <footer className="text-[#1F4E73]">
       {/* Konten utama */}
       <div className="bg-[#F3F7FB] pt-12 pb-10">
-        <div className="max-w-6xl mx-auto px-8 grid grid-cols-1 md:grid-cols-3 gap-10 text-center md:text-left">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-12 text-center md:text-left">
+          
           {/* SINOVA */}
           <div>
             <h3 className="font-bold text-xl mb-4 uppercase">SINOVA</h3>
@@ -19,7 +20,7 @@ export default function Footer() {
           </div>
 
           {/* BRIDA */}
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center md:items-start">
             <h3 className="font-bold text-xl mb-4 uppercase">BRIDA/BAPPEDA</h3>
             <ul className="text-sm space-y-2">
               {["BERANDA", "PROFIL", "RISET", "INFORMASI", "LAYANAN"].map((item) => (
@@ -43,19 +44,20 @@ export default function Footer() {
             <p className="text-sm mb-1">Fax : +62-778-463620</p>
             <p className="text-sm mb-3">Email : info@polibatam.ac.id</p>
 
-            {/* Sosial Media */}
-            <div className="flex justify-center md:justify-start gap-3 mt-2">
+            {/* Social Media */}
+            <div className="flex justify-center md:justify-start gap-4 mt-4">
               {[FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn].map((Icon, idx) => (
                 <a
                   key={idx}
                   href="#"
                   className="bg-[#F3F7FB] border border-[#1F4E73] text-[#1F4E73] p-2 rounded-full hover:bg-[#1F4E73] hover:text-white transition-colors duration-200"
                 >
-                  <Icon size={16} />
+                  <Icon size={18} />
                 </a>
               ))}
             </div>
           </div>
+
         </div>
       </div>
 
