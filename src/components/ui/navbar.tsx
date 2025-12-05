@@ -66,7 +66,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="bg-[#F3F7FB] border-b-4 border-[#1F4E73] fixed top-0 left-0 w-full z-50 backdrop-blur-md">
+      <header className="bg-[#F3F7FB] border-b-4 border-[#1F4E73] sticky top-0 left-0 w-full z-40">
         <div className="flex justify-between items-center px-6 sm:px-12 py-3">
           <Link href="/" className="flex items-center gap-3">
             <Image src="/logo.png" alt="Logo" width={60} height={50} />

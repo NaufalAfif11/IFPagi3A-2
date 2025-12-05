@@ -14,6 +14,7 @@ const pool = new Pool({
     port: process.env.DB_PORT,
 });
 
+// Optional: test connection
 const connectDB = async () => {
     try {
         await pool.connect();
@@ -23,5 +24,10 @@ const connectDB = async () => {
     }
 };
 
-export default pool;     // ⬅️ ubah ini
-export { connectDB };    // ⬅️ opsional
+pool.query("SELECT current_database();")
+    .then(res => console.log("DB CONNECTED:", res.rows[0].current_database))
+    .catch(err => console.error(err));
+
+// ⬅️ Export dengan ES module
+export default pool;
+export { connectDB };

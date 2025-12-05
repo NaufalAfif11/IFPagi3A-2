@@ -4,9 +4,42 @@ import Navbar from '../components/ui/navbar';
 import Footer from '../components/ui/footer'; 
 import Image from 'next/image';
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { FaLightbulb, FaHandPointRight, FaMapMarkerAlt, FaEnvelope, FaPhoneAlt, FaArrowRight } from "react-icons/fa";
 
 export default function Beranda() {
+  const [berita, setBerita] = useState([]);
+
+  const API_URL = "http://localhost:5000/api/berita"; // ✔ FIXED
+useEffect(() => {
+  const fetchBerita = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/berita");
+      const json = await res.json();
+
+      // Pastikan json.data SELALU array
+      let list = [];
+
+      if (Array.isArray(json.data)) {
+        list = json.data;
+      } else if (json.data) {
+        list = [json.data]; // jika objek, jadikan array
+      }
+
+      // Anti error: slice hanya untuk array
+      setBerita(list.slice(0, 3));
+
+    } catch (error) {
+      console.error("Gagal load berita:", error);
+      setBerita([]); // fallback supaya tidak error
+    }
+  };
+
+  fetchBerita();
+}, []);
+
+
+
   return (
     <div className="bg-[#F3F7FB] min-h-screen text-[#1F4E73]">
       <Navbar />
@@ -68,128 +101,45 @@ export default function Beranda() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:-translate-y-2 group">
-              <div className="relative h-56 overflow-hidden">
-                <Image
-                  src={`/berita${i}.jpg`}
-                  alt={`Berita ${i}`}
-                  width={400}
-                  height={300}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute top-4 left-4 bg-[#2D6A9E] text-white px-4 py-1 rounded-full text-xs font-semibold">
-                  Berita
-                </div>
-              </div>
-              <div className="p-6">
-                <p className="text-sm text-gray-500 mb-2">12 November 2025</p>
-                <h3 className="text-lg font-bold text-[#1F4E73] mb-3 group-hover:text-[#2D6A9E] transition-colors">
-                  Peringatan Hari Statistik Nasional 2025
-                </h3>
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                  Dalam rangka memperingati Hari Statistik Nasional (HSN) 2025, berbagai kegiatan dilaksanakan...
-                </p>
-                <button className="text-[#2D6A9E] font-semibold text-sm flex items-center gap-2 group/btn">
-                  Baca Selengkapnya 
-                  <FaArrowRight className="group-hover/btn:translate-x-1 transition-transform" />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+          {berita.length > 0 ? (
+            berita.map((item: any, i: number) => (
+              <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:-translate-y-2 group">
+                <div className="relative h-56 overflow-hidden">
+                  <img
+  src={item.thumbnail}
+  alt={item.judul}
+  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+/>
 
-      {/* Riset & Inovasi */}
-      <section className="bg-[#F3F7FB] py-20 px-8 text-[#1F4E73]">
-        <div className="container mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-4">RISET DAN INOVASI DAERAH</h2>
-          <p className="text-center text-gray-600 mb-12 text-xl">KEPULAUAN RIAU</p>
-
-          <div className="flex flex-col lg:flex-row justify-center items-center gap-12">
-            <div className="relative">
-              <Image
-                src="/ilustrasi-riset.png"
-                alt="Ilustrasi riset dan inovasi"
-                width={450}
-                height={400}
-                className="rounded-3xl shadow-xl"
-              />
-            </div>
-
-            <div className="max-w-2xl">
-              <h3 className="text-3xl font-bold mb-4">INOVASI & RISET</h3>
-              <p className="text-gray-600 mb-8 leading-relaxed">
-                Inovasi adalah proses menghadirkan ide baru yang memberi manfaat nyata bagi masyarakat dan daerah. 
-                Tujuannya untuk memecahkan masalah, meningkatkan kualitas hidup, serta memperkuat daya saing.
-              </p>
-
-              <div className="flex flex-wrap gap-3 mb-10">
-                {['Pendidikan', 'Kesehatan', 'Lingkungan', 'Transportasi', 'Pariwisata', 'Perikanan', 'Industri Kreatif'].map((item, i) => (
-                  <div key={i} className="bg-[#2D6A9E] text-white px-6 py-2 rounded-full font-medium hover:shadow-lg transition-all cursor-pointer">
-                    {item}
+                  <div className="absolute top-4 left-4 bg-[#2D6A9E] text-white px-4 py-1 rounded-full text-xs font-semibold">
+                    Berita
                   </div>
-                ))}
+                </div>
+                <div className="p-6">
+                  <p className="text-sm text-gray-500 mb-2">
+  {new Date(item.tanggal_dibuat).toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  })}
+</p>
+
+                  <h3 className="text-lg font-bold text-[#1F4E73] mb-3 group-hover:text-[#2D6A9E] transition-colors">
+                    {item.judul}
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                    {item.isi}
+                  </p>
+                </div>
               </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div className="bg-white rounded-2xl p-6 text-center border border-blue-100 shadow-sm">
-                  <p className="text-4xl font-bold mb-2">108</p>
-                  <p className="text-sm text-gray-600">Uji Coba</p>
-                </div>
-                <div className="bg-white rounded-2xl p-6 text-center border border-blue-100 shadow-sm">
-                  <p className="text-4xl font-bold mb-2">138</p>
-                  <p className="text-sm text-gray-600">Sudah Diterapkan</p>
-                </div>
-                <div className="bg-white rounded-2xl p-6 text-center border border-blue-100 shadow-sm">
-                  <p className="text-4xl font-bold mb-2">223</p>
-                  <p className="text-sm text-gray-600">Terimplementasi</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      
-
-      {/* Hubungi Kami */}
-      <section className="container mx-auto py-20 px-8">
-        <div className="text-center mb-12">
-          <h3 className="text-4xl font-bold mb-3 text-[#1F4E73]">Hubungi Kami</h3>
-          <p className="text-gray-600 text-lg">Jika ada pertanyaan, jangan ragu untuk menghubungi kami</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="bg-[#2D6A9E] text-white rounded-3xl p-8 flex flex-col items-center text-center shadow-xl hover:shadow-2xl transition-all hover:-translate-y-2">
-            <div className="bg-white/20 rounded-full p-6 mb-6">
-              <FaMapMarkerAlt className="text-white text-4xl" />
-            </div>
-            <h4 className="text-xl font-bold mb-4">Alamat</h4>
-            <p className="text-sm leading-relaxed text-white/90">
-              Gedung Sultan Mahmud Riayat Syah Gedung L lantai I dan IV, Kompleks
-              Perkantoran Pemerintah Provinsi Kepulauan Riau, Dompak, Bukit Bestari,
-              Kota Tanjung Pinang, Kepulauan Riau, Indonesia
-            </p>
-          </div>
-
-          <div className="bg-[#2D6A9E] text-white rounded-3xl p-8 flex flex-col items-center text-center shadow-xl hover:shadow-2xl transition-all hover:-translate-y-2">
-            <div className="bg-white/20 rounded-full p-6 mb-6">
-              <FaEnvelope className="text-white text-4xl" />
-            </div>
-            <h4 className="text-xl font-bold mb-4">Email</h4>
-            <p className="text-sm text-white/90">bappeda@batam.go.id</p>
-          </div>
-
-          <div className="bg-[#2D6A9E] text-white rounded-3xl p-8 flex flex-col items-center text-center shadow-xl hover:shadow-2xl transition-all hover:-translate-y-2">
-            <div className="bg-white/20 rounded-full p-6 mb-6">
-              <FaPhoneAlt className="text-white text-4xl" />
-            </div>
-            <h4 className="text-xl font-bold mb-4">Telepon</h4>
-            <p className="text-sm text-white/90">0778-463045</p>
-          </div>
+            ))
+          ) : (
+            <p className="text-center text-gray-600">Belum ada berita.</p>
+          )}
         </div>
       </section>
 
+      {/* Komponen lain tetap sama */}
       <Footer />
     </div>
   );

@@ -43,12 +43,19 @@ const SidebarPenyedia = () => {
         </button>
 
         {/* HEADER */}
-        {isOpen && (
-          <div className="p-4 border-b border-blue-800">
-            <h1 className="text-xl font-bold text-white">SINOVA</h1>
-            <p className="text-xs text-blue-200 mt-1">Sistem Informasi & Inovasi Riset Daerah</p>
-          </div>
-        )}
+{isOpen && (
+  <div className="p-4 border-b border-blue-800">
+    <Link href="/" className="block w-fit">
+      <h1 className="text-xl font-bold text-white cursor-pointer">
+        SINOVA
+      </h1>
+    </Link>
+
+    <p className="text-xs text-blue-200 mt-1">
+      Sistem Informasi & Inovasi Riset Daerah
+    </p>
+  </div>
+)}
 
         {/* MENU */}
         <nav className="flex-1 p-4">
@@ -76,9 +83,13 @@ const SidebarPenyedia = () => {
                 </div>
               </Link>
             </li>
-
-            
-
+            <li>
+              <Link href="/kelola_riset">
+                <div className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm hover:bg-blue-800 text-blue-200 cursor-pointer">
+                  <FileText size={20} /> {isOpen && "Kelola Riset"}
+                </div>
+              </Link>
+            </li>
             <li>
               <Link href="/edit-profil">
                 <div className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm hover:bg-blue-800 text-blue-200 cursor-pointer">
