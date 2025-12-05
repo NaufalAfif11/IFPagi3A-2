@@ -94,51 +94,95 @@ useEffect(() => {
       </section>
 
       {/* Berita */}
+<section className="container mx-auto py-20 px-8">
+  <div className="text-center mb-12">
+    <h2 className="text-4xl font-bold text-[#1F4E73] mb-3">Berita Terkini</h2>
+    <p className="text-gray-600">Update terbaru seputar inovasi dan riset daerah</p>
+  </div>
+
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+    {berita.length > 0 ? (
+      berita
+        .filter((item: any) => item.status === "publik")   // ⬅ FILTER DI SINI
+        .map((item: any, i: number) => (
+          <div
+            key={i}
+            className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:-translate-y-2 group"
+          >
+            <div className="relative h-56 overflow-hidden">
+              <img
+                src={item.thumbnail}
+                alt={item.judul}
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+
+              <div className="absolute top-4 left-4 bg-[#2D6A9E] text-white px-4 py-1 rounded-full text-xs font-semibold">
+                Berita
+              </div>
+            </div>
+
+            <div className="p-6">
+              <p className="text-sm text-gray-500 mb-2">
+                {new Date(item.tanggal_dibuat).toLocaleDateString("id-ID", {
+                  day: "2-digit",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </p>
+
+              <h3 className="text-lg font-bold text-[#1F4E73] mb-3 group-hover:text-[#2D6A9E] transition-colors">
+                {item.judul}
+              </h3>
+
+              <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                {item.isi}
+              </p>
+            </div>
+          </div>
+        ))
+    ) : (
+      <p className="text-center text-gray-600">Belum ada berita.</p>
+    )}
+  </div>
+</section>
+
+{/* Hubungi Kami */}
       <section className="container mx-auto py-20 px-8">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-[#1F4E73] mb-3">Berita Terkini</h2>
-          <p className="text-gray-600">Update terbaru seputar inovasi dan riset daerah</p>
+          <h3 className="text-4xl font-bold mb-3 text-[#1F4E73]">Hubungi Kami</h3>
+          <p className="text-gray-600 text-lg">Jika ada pertanyaan, jangan ragu untuk menghubungi kami</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {berita.length > 0 ? (
-            berita.map((item: any, i: number) => (
-              <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:-translate-y-2 group">
-                <div className="relative h-56 overflow-hidden">
-                  <img
-  src={item.thumbnail}
-  alt={item.judul}
-  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-/>
+          <div className="bg-[#2D6A9E] text-white rounded-3xl p-8 flex flex-col items-center text-center shadow-xl hover:shadow-2xl transition-all hover:-translate-y-2">
+            <div className="bg-white/20 rounded-full p-6 mb-6">
+              <FaMapMarkerAlt className="text-white text-4xl" />
+            </div>
+            <h4 className="text-xl font-bold mb-4">Alamat</h4>
+            <p className="text-sm leading-relaxed text-white/90">
+              Gedung Sultan Mahmud Riayat Syah Gedung L lantai I dan IV, Kompleks
+              Perkantoran Pemerintah Provinsi Kepulauan Riau, Dompak, Bukit Bestari,
+              Kota Tanjung Pinang, Kepulauan Riau, Indonesia
+            </p>
+          </div>
 
-                  <div className="absolute top-4 left-4 bg-[#2D6A9E] text-white px-4 py-1 rounded-full text-xs font-semibold">
-                    Berita
-                  </div>
-                </div>
-                <div className="p-6">
-                  <p className="text-sm text-gray-500 mb-2">
-  {new Date(item.tanggal_dibuat).toLocaleDateString("id-ID", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  })}
-</p>
+          <div className="bg-[#2D6A9E] text-white rounded-3xl p-8 flex flex-col items-center text-center shadow-xl hover:shadow-2xl transition-all hover:-translate-y-2">
+            <div className="bg-white/20 rounded-full p-6 mb-6">
+              <FaEnvelope className="text-white text-4xl" />
+            </div>
+            <h4 className="text-xl font-bold mb-4">Email</h4>
+            <p className="text-sm text-white/90">bappeda@batam.go.id</p>
+          </div>
 
-                  <h3 className="text-lg font-bold text-[#1F4E73] mb-3 group-hover:text-[#2D6A9E] transition-colors">
-                    {item.judul}
-                  </h3>
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                    {item.isi}
-                  </p>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p className="text-center text-gray-600">Belum ada berita.</p>
-          )}
+          <div className="bg-[#2D6A9E] text-white rounded-3xl p-8 flex flex-col items-center text-center shadow-xl hover:shadow-2xl transition-all hover:-translate-y-2">
+            <div className="bg-white/20 rounded-full p-6 mb-6">
+              <FaPhoneAlt className="text-white text-4xl" />
+            </div>
+            <h4 className="text-xl font-bold mb-4">Telepon</h4>
+            <p className="text-sm text-white/90">0778-463045</p>
+          </div>
         </div>
       </section>
-
       {/* Komponen lain tetap sama */}
       <Footer />
     </div>
