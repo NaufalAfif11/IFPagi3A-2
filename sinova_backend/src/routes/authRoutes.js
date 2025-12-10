@@ -47,18 +47,6 @@ router.post("/login", async (req, res) => {
       }
     }
 
-    // Cek super admin
-    if (!user) {
-      const [superAdmin] = await db.query(
-        "SELECT * FROM super_admin WHERE email = $1",
-        [email]
-      );
-      if (superAdmin.length > 0) {
-        user = superAdmin[0];
-        role = "super_admin";
-      }
-    }
-
     // Jika tidak ditemukan
     if (!user) return res.status(404).json({ error: "Email tidak ditemukan" });
 

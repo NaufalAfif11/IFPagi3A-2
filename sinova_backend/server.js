@@ -7,6 +7,7 @@ import pool, { connectDB } from "./src/config/db.js";
 import adminRoutes from "./src/routes/adminRoutes.js";
 import authRoutes from "./src/routes/authRoutes.js";
 import beritaRoutes from "./src/routes/beritaRoutes.js";
+import lupaKataSandiRoutes from "./src/routes/lupaKataSandiRoutes.js";
 
 dotenv.config();
 console.log("JWT_SECRET:", process.env.JWT_SECRET);
@@ -36,7 +37,7 @@ app.use("/auth", authRoutes);
 app.use("/api/berita", beritaRoutes);
 app.use("/uploads", express.static("uploads"));
 
-
+app.use("/api/reset", lupaKataSandiRoutes);
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server berjalan di port ${PORT} 🚀`);
