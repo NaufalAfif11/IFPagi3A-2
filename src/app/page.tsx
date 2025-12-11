@@ -10,11 +10,11 @@ import { FaLightbulb, FaHandPointRight, FaMapMarkerAlt, FaEnvelope, FaPhoneAlt, 
 export default function Beranda() {
   const [berita, setBerita] = useState([]);
 
-  const API_URL = "http://localhost:5000/api/berita"; // ✔ FIXED
+  const API_URL = "http://localhost:4000/api/berita"; // ✔ FIXED
 useEffect(() => {
   const fetchBerita = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/berita");
+      const res = await fetch("http://localhost:4000/api/berita");
       const json = await res.json();
 
       // Pastikan json.data SELALU array

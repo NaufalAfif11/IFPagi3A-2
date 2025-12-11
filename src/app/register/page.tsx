@@ -20,7 +20,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const BASE_URL = "http://localhost:5000"; // sesuaikan
+  const BASE_URL = "http://localhost:4000"; // sesuaikan
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setForm({ ...form, [e.target.name]: e.target.value } as RegisterForm);

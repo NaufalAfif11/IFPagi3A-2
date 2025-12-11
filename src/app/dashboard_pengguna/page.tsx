@@ -52,7 +52,6 @@ const Dashboard_pengguna = () => {
 
   return (
     <div className="flex h-screen">
-      <SidebarPengguna activeMenu={activeMenu} setActiveMenu={setActiveMenu} />
 
       {/* MAIN */}
       <div className="flex-1 overflow-y-auto p-8 bg-gray-50">

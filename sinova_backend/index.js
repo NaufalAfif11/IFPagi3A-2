@@ -3,30 +3,38 @@ const cors = require("cors");
 const pool = require("./db"); // koneksi database
 
 const app = express();
-app.use(cors());
+
+// Middleware
 app.use(express.json());
+app.use(cors({
+  origin: "http://localhost:3000",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true,
+}));
+
+// ROUTE IMPORT (HARUS DARI FOLDER src/routes)
+const penggunaRoutes = require("./src/routes/penggunaRoutes");
+const penyediaRoutes = require("./src/routes/penyediaRoutes");
 
 // ROUTE UTAMA
 app.get("/", (req, res) => {
   res.send("SINOVA Backend Running");
 });
 
-// ============================
-// 🔹 ROUTE GET PRODUK
-// ============================
+// REGISTER ROUTES
+app.use("/auth/pengguna", penggunaRoutes);
+app.use("/auth/penyedia", penyediaRoutes);
+
+// PRODUK ROUTES
 app.get("/produk", async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM produk");
     res.json(result.rows);
   } catch (error) {
-    console.error("ERROR GET /produk:", error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// ============================
-// 🔹 ROUTE POST PRODUK (Tambah Produk)
-// ============================
 app.post("/produk", async (req, res) => {
   try {
     const { nama_produk, deskripsi, penyedia_id } = req.body;
@@ -37,8 +45,7 @@ app.post("/produk", async (req, res) => {
 
     const result = await pool.query(
       `INSERT INTO produk (nama_produk, deskripsi, penyedia_id, status_verifikasi)
-       VALUES ($1, $2, $3, 'menunggu') 
-       RETURNING *`,
+      VALUES ($1, $2, $3, 'menunggu') RETURNING *`,
       [nama_produk, deskripsi, penyedia_id]
     );
 
@@ -47,12 +54,11 @@ app.post("/produk", async (req, res) => {
       data: result.rows[0],
     });
   } catch (error) {
-    console.error("ERROR POST /produk:", error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// SERVER LISTEN
+// START SERVER
 app.listen(5000, () => {
   console.log("Server running on port 5000");
 });

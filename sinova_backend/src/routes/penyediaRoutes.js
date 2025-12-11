@@ -1,4 +1,4 @@
-import express from "express";
+import express from 'express';
 import { registerPenyedia, loginPenyedia } from "../controllers/penyediaAuthController.js";
 
 const router = express.Router();

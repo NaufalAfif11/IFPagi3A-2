@@ -1,200 +1,337 @@
 "use client";
 
-import React, { useState } from "react";
-import SidebarPenyedia from "@/components/ui/sidebar_penyedia";
+import React, { useState, useEffect } from "react";
 import { List, CheckCircle, Clock, AlertCircle, PlusCircle } from "lucide-react";
-
 import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-  PieChart,
-  Pie,
-  Cell,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  PieChart,
+  Pie,
+  Cell,
 } from "recharts";
 
-const Dashboard_penyedia = () => {
-  const [activeMenu, setActiveMenu] = useState("Dashboard");
+// URL Backend API
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
-  // Statistik Produk
-  const statistik = {
-    totalProduk: 32,
-    diverifikasi: 18,
-    menunggu: 9,
-  };
+// HARDCODED: ID Penyedia (nanti bisa dari session/auth)
+const PENYEDIA_ID = 1;
 
-  // Chart Data
-  const dataProduk = [
-    { bulan: "Jun", jumlah: 5 },
-    { bulan: "Jul", jumlah: 8 },
-    { bulan: "Agu", jumlah: 12 },
-    { bulan: "Sep", jumlah: 15 },
-    { bulan: "Okt", jumlah: 20 },
-  ];
+interface Statistik {
+  totalProduk: number;
+  diverifikasi: number;
+  menunggu: number;
+  ditolak: number;
+}
 
-  const dataStatus = [
-    { name: "Diverifikasi", value: 18 },
-    { name: "Menunggu", value: 9 },
-    { name: "Ditolak", value: 5 },
-  ];
+interface ProdukBulanan {
+  bulan: string;
+  jumlah: number;
+}
 
-  const produkTerbaru = [
-    { id: 1, nama: "Aplikasi Cuaca Laut", kategori: "Maritim", status: "Diverifikasi", tanggal: "24 Okt 2025" },
-    { id: 2, nama: "Sensor Suhu Pintar", kategori: "IoT", status: "Menunggu", tanggal: "23 Okt 2025" },
-    { id: 3, nama: "Mesin Pakan Ikan", kategori: "Perikanan", status: "Diverifikasi", tanggal: "20 Okt 2025" },
-  ];
+interface StatusData {
+  name: string;
+  value: number;
+}
 
-  const aktivitas = [
-    { id: 1, aksi: "Produk Anda diverifikasi: Mesin Pakan Ikan", waktu: "3 jam lalu", type: "success" },
-    { id: 2, aksi: "Anda mengajukan produk baru: Sensor Suhu Pintar", waktu: "1 hari lalu", type: "info" },
-    { id: 3, aksi: "Produk Anda memerlukan revisi: Alat Ukur Arus Laut", waktu: "2 hari lalu", type: "warning" },
-  ];
+interface Produk {
+  id: number;
+  nama: string;
+  kategori: string;
+  status: string;
+  tanggal: string;
+}
 
-  const COLORS = ["#22C55E", "#FACC15", "#EF4444"];
+interface Aktivitas {
+  id: number;
+  aksi: string;
+  waktu: string;
+  type: string;
+}
 
-  return (
-    <div className="flex h-screen bg-gray-50">
-      <SidebarPenyedia activeMenu={activeMenu} setActiveMenu={setActiveMenu} />
+const DashboardPenyedia = () => {
+  // State untuk data dari API
+  const [statistik, setStatistik] = useState<Statistik>({
+    totalProduk: 0,
+    diverifikasi: 0,
+    menunggu: 0,
+    ditolak: 0,
+  });
+  const [dataProduk, setDataProduk] = useState<ProdukBulanan[]>([]);
+  const [dataStatus, setDataStatus] = useState<StatusData[]>([]);
+  const [produkTerbaru, setProdukTerbaru] = useState<Produk[]>([]);
+  const [aktivitas, setAktivitas] = useState<Aktivitas[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-      {/* MAIN CONTENT */}
-      <div className="flex-1 overflow-y-auto p-8">
-        <div className="max-w-7xl mx-auto space-y-6">
-          <h1 className="text-3xl font-bold text-gray-800">Dashboard Penyedia</h1>
-          <p className="text-sm text-gray-500">Selamat datang kembali, Ir. Budi Santoso</p>
+  const COLORS = ["#22C55E", "#FACC15", "#EF4444"]; // Hijau, Kuning, Merah (Diverifikasi, Menunggu, Ditolak)
 
-          {/* STATISTIK */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Total Produk */}
-            <div className="bg-[#2D6A9E] text-white p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:-translate-y-2 transition">
-              <div className="flex justify-between items-center mb-6">
-                <div className="bg-white/20 p-6 rounded-full">
-                  <List size={32} className="text-white" />
-                </div>
-                <p className="text-5xl font-bold">{statistik.totalProduk}</p>
-              </div>
-              <h3 className="text-xl font-bold">Total Produk</h3>
-              <p className="text-white/90 text-sm">Total inovasi yang Anda buat</p>
-            </div>
+  // Fetch semua data dashboard
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
 
-            {/* Diverifikasi */}
-            <div className="bg-[#2D6A9E] text-white p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:-translate-y-2 transition">
-              <div className="flex justify-between items-center mb-6">
-                <div className="bg-white/20 p-6 rounded-full">
-                  <CheckCircle size={32} className="text-white" />
-                </div>
-                <p className="text-5xl font-bold">{statistik.diverifikasi}</p>
-              </div>
-              <h3 className="text-xl font-bold">Diverifikasi</h3>
-              <p className="text-white/90 text-sm">Produk yang sudah valid</p>
-            </div>
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    setError(null);
 
-            {/* Menunggu */}
-            <div className="bg-[#2D6A9E] text-white p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:-translate-y-2 transition">
-              <div className="flex justify-between items-center mb-6">
-                <div className="bg-white/20 p-6 rounded-full">
-                  <Clock size={32} className="text-white" />
-                </div>
-                <p className="text-5xl font-bold">{statistik.menunggu}</p>
-              </div>
-              <h3 className="text-xl font-bold">Menunggu Verifikasi</h3>
-              <p className="text-white/90 text-sm">Sedang diperiksa oleh admin</p>
-            </div>
-          </div>
+    try {
+      // Fetch statistik
+      const statsResponse = await fetch(`${API_BASE_URL}/api/penyedia/statistics/${PENYEDIA_ID}`);
+      if (!statsResponse.ok) throw new Error('Gagal memuat statistik');
+      const statsData = await statsResponse.json();
+      setStatistik(statsData);
 
-          {/* GRAFIK */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Bar Chart */}
-            <div className="bg-white p-6 rounded-xl shadow">
-              <h3 className="text-lg font-semibold mb-4">Jumlah Produk per Bulan</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={dataProduk}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="bulan" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="jumlah" fill="#2D6A9E" radius={[6, 6, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+      // Fetch produk bulanan
+      const produkBulananResponse = await fetch(`${API_BASE_URL}/api/penyedia/produk-bulanan/${PENYEDIA_ID}?tahun=2024`);
+      if (!produkBulananResponse.ok) throw new Error('Gagal memuat data produk bulanan');
+      const produkBulananData = await produkBulananResponse.json();
+      setDataProduk(produkBulananData);
 
-            {/* Pie Chart */}
-            <div className="bg-white p-6 rounded-xl shadow">
-              <h3 className="text-lg font-semibold mb-4">Status Produk</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie data={dataStatus} cx="50%" cy="50%" outerRadius={100} label dataKey="value">
-                    {dataStatus.map((entry, index) => (
-                      <Cell key={index} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+      // Fetch status produk (DITAMBAH TRANSFORMASI DATA)
+      const statusResponse = await fetch(`${API_BASE_URL}/api/penyedia/status-produk/${PENYEDIA_ID}`);
+      if (!statusResponse.ok) throw new Error('Gagal memuat data status');
+      
+      const statusDataRaw = await statusResponse.json();
+      
+      // Transformasi data: Mengubah objek statistik menjadi array yang dibutuhkan PieChart
+      // Ini mencegah error jika API mengembalikan data dalam format objek {diverifikasi: N, menunggu: M, ditolak: K}
+      const transformedStatusData: StatusData[] = [
+        // Diasumsikan key di statusDataRaw sesuai dengan interface Statistik (diverifikasi, menunggu, ditolak)
+        { name: "Diverifikasi", value: statusDataRaw.diverifikasi || 0 },
+        { name: "Menunggu", value: statusDataRaw.menunggu || 0 },
+        { name: "Ditolak", value: statusDataRaw.ditolak || 0 },
+      ].filter(item => item.value > 0); // Filter untuk data yang memiliki nilai > 0
+      
+      setDataStatus(transformedStatusData);
+      // AKHIR TRANSFORMASI DATA
 
-          {/* LIST PRODUK & AKTIVITAS */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Produk Terbaru */}
-            <div className="bg-white p-6 rounded-xl shadow border border-gray-200">
-              <h2 className="text-lg font-bold mb-4">Produk Terbaru</h2>
-              <div className="space-y-3">
-                {produkTerbaru.map((p) => (
-                  <div key={p.id} className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 flex justify-between">
-                    <div>
-                      <p className="font-semibold">{p.nama}</p>
-                      <p className="text-xs text-gray-500">{p.kategori} • {p.tanggal}</p>
-                    </div>
-                    <span className={`px-3 py-1 text-xs rounded-full ${
-                      p.status === "Diverifikasi"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-yellow-100 text-yellow-700"
-                    }`}>
-                      {p.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
+      // Fetch produk terbaru
+      const produkResponse = await fetch(`${API_BASE_URL}/api/penyedia/produk-terbaru/${PENYEDIA_ID}?limit=3`);
+      if (!produkResponse.ok) throw new Error('Gagal memuat produk terbaru');
+      const produkData = await produkResponse.json();
+      setProdukTerbaru(produkData);
 
-            {/* Aktivitas Terbaru */}
-            <div className="bg-white p-6 rounded-xl shadow border border-gray-200">
-              <h2 className="text-lg font-bold mb-4">Aktivitas Terbaru</h2>
-              <div className="space-y-4">
-                {aktivitas.map((a) => (
-                  <div key={a.id} className="flex items-start gap-3">
-                    <div className={`p-2 rounded-full ${
-                      a.type === "success"
-                        ? "bg-green-100 text-green-700"
-                        : a.type === "warning"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : "bg-blue-100 text-blue-700"
-                    }`}>
-                      {a.type === "success" ? <CheckCircle size={16} /> :
-                       a.type === "warning" ? <AlertCircle size={16} /> :
-                       <PlusCircle size={16} />}
-                    </div>
-                    <div>
-                      <p className="text-sm">{a.aksi}</p>
-                      <p className="text-xs text-gray-500">{a.waktu}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+      // Fetch aktivitas
+      const aktivitasResponse = await fetch(`${API_BASE_URL}/api/penyedia/aktivitas/${PENYEDIA_ID}?limit=5`);
+      if (!aktivitasResponse.ok) throw new Error('Gagal memuat aktivitas');
+      const aktivitasData = await aktivitasResponse.json();
+      setAktivitas(aktivitasData);
 
-          <footer className="text-center text-xs text-gray-400 mt-10">
-            © 2025 SINOVA — Dashboard Penyedia Inovasi
-          </footer>
-        </div>
-      </div>
-    </div>
-  );
+    } catch (err) {
+      console.error('Error fetching dashboard data:', err);
+      setError((err as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[#2D6A9E] mx-auto"></div>
+          <p className="text-gray-600 mt-4 font-medium text-lg">Memuat data dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
+        <div className="bg-red-50 border-2 border-red-200 rounded-xl p-8 max-w-md w-full">
+          <div className="flex items-center gap-3 mb-4">
+            <AlertCircle className="w-8 h-8 text-red-600" />
+            <h3 className="text-red-600 font-bold text-xl">Terjadi Kesalahan</h3>
+          </div>
+          <p className="text-red-700 mb-6">{error}</p>
+          <button 
+            onClick={fetchDashboardData}
+            className="w-full px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+          >
+            Coba Lagi
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto p-6 lg:p-8">
+        {/* HEADER */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl lg:text-4xl font-bold text-gray-800">Dashboard Penyedia</h1>
+            <p className="text-sm text-gray-500 mt-1">Selamat datang kembali, Ir. Budi Santoso</p>
+          </div>
+          <button 
+            onClick={fetchDashboardData}
+            className="px-4 py-2 bg-[#2D6A9E] text-white rounded-lg hover:bg-[#245782] transition-colors flex items-center gap-2 font-medium shadow-md"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Refresh
+          </button>
+        </div>
+
+        {/* STATISTIK */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          {/* Total Produk */}
+          <div className="bg-gradient-to-br from-[#2D6A9E] to-[#245782] text-white p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all">
+            <div className="flex justify-between items-center mb-6">
+              <div className="bg-white/20 p-6 rounded-full backdrop-blur-sm">
+                <List size={32} className="text-white" />
+              </div>
+              <p className="text-5xl font-bold">{statistik.totalProduk}</p>
+            </div>
+            <h3 className="text-xl font-bold">Total Produk</h3>
+            <p className="text-white/90 text-sm mt-1">Total inovasi yang Anda buat</p>
+          </div>
+
+          {/* Diverifikasi */}
+          <div className="bg-gradient-to-br from-green-600 to-green-700 text-white p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all">
+            <div className="flex justify-between items-center mb-6">
+              <div className="bg-white/20 p-6 rounded-full backdrop-blur-sm">
+                <CheckCircle size={32} className="text-white" />
+              </div>
+              <p className="text-5xl font-bold">{statistik.diverifikasi}</p>
+            </div>
+            <h3 className="text-xl font-bold">Diverifikasi</h3>
+            <p className="text-white/90 text-sm mt-1">Produk yang sudah valid</p>
+          </div>
+
+          {/* Menunggu */}
+          <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all">
+            <div className="flex justify-between items-center mb-6">
+              <div className="bg-white/20 p-6 rounded-full backdrop-blur-sm">
+                <Clock size={32} className="text-white" />
+              </div>
+              <p className="text-5xl font-bold">{statistik.menunggu}</p>
+            </div>
+            <h3 className="text-xl font-bold">Menunggu Verifikasi</h3>
+            <p className="text-white/90 text-sm mt-1">Sedang diperiksa oleh admin</p>
+          </div>
+        </div>
+
+        {/* GRAFIK */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+          {/* Bar Chart */}
+          <div className="bg-white p-6 rounded-xl shadow-lg">
+            <h3 className="text-lg font-semibold mb-4 text-gray-800">Jumlah Produk per Bulan</h3>
+            {dataProduk.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={dataProduk}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="bulan" tick={{ fill: '#6b7280' }} />
+                  <YAxis tick={{ fill: '#6b7280' }} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: '#1f2937', 
+                      border: 'none', 
+                      borderRadius: '8px',
+                      color: 'white'
+                    }}
+                  />
+                  <Bar dataKey="jumlah" fill="#2D6A9E" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="text-center py-10 text-gray-500">Tidak ada data</div>
+            )}
+          </div>
+
+          {/* Pie Chart */}
+          <div className="bg-white p-6 rounded-xl shadow-lg">
+            <h3 className="text-lg font-semibold mb-4 text-gray-800">Status Produk</h3>
+            {dataStatus.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="text-center py-10 text-gray-500">Tidak ada data</div>
+            )}
+          </div>
+        </div>
+
+        {/* LIST PRODUK & AKTIVITAS */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+          {/* Produk Terbaru */}
+          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+            <h2 className="text-lg font-bold mb-4 text-gray-800">Produk Terbaru</h2>
+            {produkTerbaru.length > 0 ? (
+              <div className="space-y-3">
+                {produkTerbaru.map((p) => (
+                  <div key={p.id} className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors flex justify-between items-center">
+                    <div>
+                      <p className="font-semibold text-gray-800">{p.nama}</p>
+                      <p className="text-xs text-gray-500">{p.kategori} • {p.tanggal}</p>
+                    </div>
+                    <span className={`px-3 py-1 text-xs font-medium rounded-full ${
+                      p.status === "Diverifikasi"
+                        ? "bg-green-100 text-green-700"
+                        : p.status === "Menunggu"
+                        ? "bg-yellow-100 text-yellow-700"
+                        : "bg-red-100 text-red-700"
+                    }`}>
+                      {p.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-10 text-gray-500">Tidak ada produk</div>
+            )}
+          </div>
+
+          {/* Aktivitas Terbaru */}
+          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+            <h2 className="text-lg font-bold mb-4 text-gray-800">Aktivitas Terbaru</h2>
+            {aktivitas.length > 0 ? (
+              <div className="space-y-4">
+                {aktivitas.map((a) => (
+                  <div key={a.id} className="flex items-start gap-3">
+                    <div className={`p-2 rounded-full flex-shrink-0 ${
+                      a.type === "success"
+                        ? "bg-green-100 text-green-700"
+                        : a.type === "warning"
+                        ? "bg-yellow-100 text-yellow-700"
+                        : "bg-blue-100 text-blue-700"
+                    }`}>
+                      {a.type === "success" ? <CheckCircle size={16} /> :
+                       a.type === "warning" ? <AlertCircle size={16} /> :
+                       <PlusCircle size={16} />}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-800">{a.aksi}</p>
+                      <p className="text-xs text-gray-500 mt-1">{a.waktu}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-10 text-gray-500">Tidak ada aktivitas</div>
+            )}
+          </div>
+        </div>
+
+        <footer className="text-center text-xs text-gray-400 mt-10">
+          © 2025 SINOVA — Dashboard Penyedia Inovasi
+        </footer>
+      </div>
+    </div>
+  );
 };
 
-export default Dashboard_penyedia;
+export default DashboardPenyedia;
