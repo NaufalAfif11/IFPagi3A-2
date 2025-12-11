@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
-  "type": "module",
+"type": "module",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js"
@@ -20,5 +20,8 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
     "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@types/jwt-decode": "^2.2.1"
   }
 }

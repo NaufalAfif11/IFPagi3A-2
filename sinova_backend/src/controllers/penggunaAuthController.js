@@ -9,7 +9,11 @@ export const registerPengguna = async (req, res) => {
         const hashed = await bcrypt.hash(password, 10);
         const result = await createPengguna(name, email, hashed);
 
-        res.json({ message: "Register pengguna berhasil", user: result.rows[0] });
+        res.json({
+            message: "Register pengguna berhasil",
+            user: result.rows[0]
+        });
+
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Server error" });
@@ -21,11 +25,17 @@ export const loginPengguna = async (req, res) => {
         const { email, password } = req.body;
 
         const result = await findPenggunaByEmail(email);
-        if (!result.rows.length) return res.status(400).json({ error: "User tidak ditemukan" });
+
+        if (!result.rows.length) {
+            return res.status(400).json({ error: "User tidak ditemukan" });
+        }
 
         const user = result.rows[0];
+
         const match = await bcrypt.compare(password, user.password);
-        if (!match) return res.status(400).json({ error: "Password salah" });
+        if (!match) {
+            return res.status(400).json({ error: "Password salah" });
+        }
 
         const token = jwt.sign(
             { id: user.id, name: user.name, role: user.role },
@@ -33,8 +43,21 @@ export const loginPengguna = async (req, res) => {
             { expiresIn: "1h" }
         );
 
-        res.json({ message: "Login berhasil", user: { id: user.id, name: user.name, role: user.role }, token });
+        res.json({
+            message: "Login berhasil",
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                phone: user.phone,
+                foto_profil: user.foto_profil
+            },
+            token
+        });
+
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: "Server error" });
     }
 };

@@ -20,7 +20,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const BASE_URL = "http://localhost:5000"; // sesuaikan
+  const BASE_URL = "http://localhost:4000"; // sesuaikan
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setForm({ ...form, [e.target.name]: e.target.value } as RegisterForm);
@@ -85,8 +85,9 @@ export default function RegisterPage() {
         <div className="flex flex-col justify-center items-center w-1/2 bg-[#1F4E73] text-white p-10 rounded-r-[80px]">
           <h2 className="text-2xl font-bold mb-2">Pendaftaran Akun</h2>
           <p className="text-sm text-center">Isi data untuk membuat akun pengguna atau penyedia.</p>
+          
         </div>
-
+   
         {/* Right: Register form */}
         <div className="flex flex-col justify-center items-center w-1/2 p-10">
           <h2 className="text-2xl font-bold mb-6 text-[#1F4E73]">Daftar</h2>
