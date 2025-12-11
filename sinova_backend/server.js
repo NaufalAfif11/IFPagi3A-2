@@ -7,6 +7,8 @@ import pool, { connectDB } from "./src/config/db.js";
 import superAdminRoutes from "./src/routes/superAdminRoutes.js";
 import adminRoutes from "./src/routes/adminRoutes.js";
 import authRoutes from "./src/routes/authRoutes.js";
+import kebutuhanRoutes from "./src/routes/kebutuhanRoutes.js";
+import bidangRoutes from "./src/routes/bidangRoutes.js";
 
 dotenv.config();
 console.log("JWT_SECRET:", process.env.JWT_SECRET);
@@ -24,6 +26,12 @@ app.use("/auth/penyedia", penyediaRoutes);
 app.use("/auth/superadmin", superAdminRoutes);
 app.use("/auth/admin", adminRoutes);
 app.use("/auth", authRoutes);
+
+app.use("/api/kebutuhan", kebutuhanRoutes);
+
+app.use("/api/bidang", bidangRoutes);
+
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
