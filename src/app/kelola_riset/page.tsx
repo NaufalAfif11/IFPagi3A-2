@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import SidebarPenyedia from '@/components/ui/sidebar_admin';
+import { useState, useEffect } from 'react';
+import SidebarPenyedia from '@/components/ui/sidebar_penyedia';
 
 const API_URL = "http://localhost:5000/api/riset";
 

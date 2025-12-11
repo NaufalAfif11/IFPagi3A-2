@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+
 import SidebarPenyedia from "@/components/ui/sidebar_penyedia";
 import { List, CheckCircle, Clock, AlertCircle, PlusCircle } from "lucide-react";
 
@@ -19,6 +21,16 @@ import {
 
 const Dashboard_penyedia = () => {
   const [activeMenu, setActiveMenu] = useState("Dashboard");
+  const router = useRouter();
+
+  // 🔒 CEK LOGIN — jika tidak login, lempar ke halaman beranda
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+
+    if (!isLoggedIn) {
+      router.replace("/");
+    }
+  }, [router]);
 
   // Statistik Produk
   const statistik = {
@@ -58,7 +70,7 @@ const Dashboard_penyedia = () => {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <SidebarPenyedia activeMenu={activeMenu} setActiveMenu={setActiveMenu} />
+      <SidebarPenyedia />
 
       {/* MAIN CONTENT */}
       <div className="flex-1 overflow-y-auto p-8">

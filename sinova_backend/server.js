@@ -11,6 +11,8 @@ import pool, { connectDB } from "./src/config/db.js";
 import adminRoutes from "./src/routes/adminRoutes.js";
 import authRoutes from "./src/routes/authRoutes.js";
 import risetRoutes from "./src/routes/RisetRoutes.js";
+import beritaRoutes from "./src/routes/beritaRoutes.js";
+import lupaKataSandiRoutes from "./src/routes/lupaKataSandiRoutes.js";
 
 dotenv.config();
 
@@ -19,14 +21,16 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// Middleware - URUTAN PENTING!
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cors()); // CORS harus sebelum routes
 
-// Static files - serve uploads folder
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// ✔ FIX CORS
+app.use(cors({
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
 // Connect to database
 connectDB();
@@ -38,25 +42,11 @@ app.use("/auth/admin", adminRoutes);
 app.use("/auth", authRoutes);
 app.use("/api/riset", risetRoutes);
 
-// Health check endpoint
-app.get("/", (req, res) => {
-  res.json({ 
-    message: "Sinova API is running", 
-    status: "OK",
-    timestamp: new Date().toISOString()
-  });
-});
+// ✔ Route berita yang benar
+app.use("/api/berita", beritaRoutes);
+app.use("/uploads", express.static("uploads"));
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error("❌ Error:", err.stack);
-  res.status(500).json({
-    success: false,
-    message: "Something went wrong!",
-    error: err.message,
-  });
-});
-
+app.use("/api/reset", lupaKataSandiRoutes);
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);

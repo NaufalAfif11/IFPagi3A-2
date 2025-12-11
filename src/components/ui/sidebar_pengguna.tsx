@@ -43,14 +43,19 @@ const SidebarPengguna = () => {
         </button>
 
         {/* HEADER */}
-        {isOpen && (
-          <div className="p-4 border-b border-blue-800">
-            <h1 className="text-xl font-bold text-white">SINOVA</h1>
-            <p className="text-xs text-blue-200 mt-1">
-              Sistem Informasi dan Inovasi Riset Daerah
-            </p>
-          </div>
-        )}
+{isOpen && (
+  <div className="p-4 border-b border-blue-800">
+    <Link href="/" className="block w-fit">
+      <h1 className="text-xl font-bold text-white cursor-pointer">
+        SINOVA
+      </h1>
+    </Link>
+
+    <p className="text-xs text-blue-200 mt-1">
+      Sistem Informasi & Inovasi Riset Daerah
+    </p>
+  </div>
+)}
 
         {/* MENU */}
         <nav className="flex-1 p-4 overflow-y-auto">

@@ -9,23 +9,54 @@ export default function ForgotPasswordPage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleSendOTP = () => {
+  // ================================
+  // 1. KIRIM OTP KE BACKEND
+  // ================================
+  const handleSendOTP = async () => {
     if (!email) return alert("Email wajib diisi!");
-    alert("Kode OTP dikirim (Simulasi)");
+
+    const res = await fetch("http://localhost:5000/api/reset/kirim-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return alert(data.message || "Gagal mengirim OTP.");
+    }
+
+    alert("Kode OTP berhasil dikirim ke email!");
     setStep(2);
   };
 
-  const handleVerifyOTP = () => {
+  // ================================
+  // 2. VERIFIKASI OTP
+  // ================================
+  const handleVerifyOTP = async () => {
     if (!otp) return alert("OTP wajib diisi!");
-    if (otp === "123456") {
-      alert("OTP benar! (Simulasi)");
-      setStep(3);
-    } else {
-      alert("OTP salah! Gunakan: 123456");
+
+   const res = await fetch("http://localhost:5000/api/reset/verifikasi-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, otp }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return alert(data.message || "OTP salah!");
     }
+
+    alert("OTP benar!");
+    setStep(3);
   };
 
-  const handleResetPassword = () => {
+  // ================================
+  // 3. RESET PASSWORD
+  // ================================
+  const handleResetPassword = async () => {
     if (!newPassword || !confirmPassword)
       return alert("Semua field wajib diisi!");
     if (newPassword !== confirmPassword)
@@ -33,7 +64,23 @@ export default function ForgotPasswordPage() {
     if (newPassword.length < 6)
       return alert("Password minimal 6 karakter!");
 
-    alert("Password berhasil direset (Simulasi)");
+    const res = await fetch("http://localhost:5000/api/reset/reset-kata-sandi", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    email,
+    kataSandiBaru: newPassword,
+  }),
+});
+
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return alert(data.message || "Gagal reset password.");
+    }
+
+    alert("Password berhasil direset!");
     window.location.href = "/login";
   };
 
@@ -146,7 +193,7 @@ export default function ForgotPasswordPage() {
           </div>
         )}
 
-        {/* Progress */}
+        {/* PROGRESS */}
         <div className="flex justify-center items-center gap-3 mt-8">
           {[1, 2, 3].map((num) => (
             <div
@@ -161,6 +208,7 @@ export default function ForgotPasswordPage() {
             </div>
           ))}
         </div>
+
       </div>
     </div>
   );
