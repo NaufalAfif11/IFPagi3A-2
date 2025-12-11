@@ -23,7 +23,7 @@ import penyediaRoutes from "./src/routes/penyediaRoutes.js";
 import adminRoutes from "./src/routes/adminRoutes.js";
 import authRoutes from "./src/routes/authRoutes.js";
 import beritaRoutes from "./src/routes/beritaRoutes.js";
-import layananRoutes from './src/routes/layananRoutes.js';
+import lupaKataSandiRoutes from "./src/routes/lupaKataSandiRoutes.js";
 
 // Verifikasi JWT_SECRET
 console.log("JWT_SECRET:", process.env.JWT_SECRET ? 'Ditemukan' : 'TIDAK DITEMUKAN - Cek .env');

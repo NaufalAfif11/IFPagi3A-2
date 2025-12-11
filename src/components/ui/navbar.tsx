@@ -40,17 +40,27 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.clear();
-    setIsLoggedIn(false);
-    router.push("/");
-  };
+  // Hapus SEMUA session
+  localStorage.clear();  
+
+  setIsLoggedIn(false);
+
+  router.replace("/");
+
+  // Cegah kembali ke halaman sebelumnya
+  if (typeof window !== "undefined") {
+    window.history.pushState(null, "", "/");
+  }
+};
+
+
 
   const dashboardLink =
     role === "pengguna"
       ? "/dashboard_pengguna"
       : role === "penyedia"
       ? "/dashboard_penyedia"
-      : role === "admin" || role === "super_admin"
+      : role === "admin" 
       ? "/dashboard_admin"
       : "/dashboard";
 
