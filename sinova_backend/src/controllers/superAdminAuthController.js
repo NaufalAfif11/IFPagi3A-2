@@ -7,7 +7,7 @@ export const loginSuperadmin = async (req, res) => {
     const { email, password } = req.body;
 
     const result = await pool.query(
-        "SELECT * FROM users WHERE email=$1 AND role='super_admin'",
+        "SELECT * FROM users WHERE email=$1 AND role='superadmin'",
         [email]
     );
     if (!result.rows.length) {
