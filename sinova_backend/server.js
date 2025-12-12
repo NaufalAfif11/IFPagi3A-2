@@ -23,29 +23,22 @@ app.use(cors());
 // Connect DB
 connectDB();
 
-// ===================================
+// ==============================
 // API ROUTES
-// ===================================
-
+// ==============================
 app.use("/api/kebutuhan", kebutuhanRoutes);
-
 app.use("/api/bidang", bidangRoutes);
 
-
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`Server berjalan di port ${PORT} 🚀`);
-// Health check endpoint
+// Health check
 app.get("/", (req, res) => {
-    res.json({ 
-        message: "Sinova Backend API is running",
-        status: "healthy",
-        timestamp: new Date().toISOString()
-    });
+  res.json({
+    message: "Sinova Backend API is running",
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+  });
 });
 
-// Authentication routes
+// Auth routes
 app.use("/auth/pengguna", penggunaRoutes);
 app.use("/auth/penyedia", penyediaRoutes);
 app.use("/auth/admin", adminRoutes);
@@ -54,9 +47,16 @@ app.use("/auth", authRoutes);
 // Feature routes
 app.use("/api/berita", beritaRoutes);
 app.use("/api/lupasandi", lupaKataSandiRoutes);
+app.use("/api/riset", risetRoutes);
+
+// Static uploads
 const __dirname = path.resolve();
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// ==============================
+// START SERVER (HANYA SEKALI)
+// ==============================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log(`Server berjalan di port ${PORT} 🚀`);
+  console.log(`Server berjalan di port ${PORT} 🚀`);
 });

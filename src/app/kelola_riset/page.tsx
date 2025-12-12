@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import SidebarPenyedia from '@/components/ui/sidebar_penyedia';
 
 const API_URL = "http://localhost:5000/api/riset";
@@ -40,7 +40,8 @@ export default function ResearchManagement() {
   });
 
   // Filtered data based on search
-  const filteredData = React.useMemo(() => {
+ const filteredData = useMemo(() => {
+
     if (!searchTerm) return data;
 
     return data.filter(item => {
