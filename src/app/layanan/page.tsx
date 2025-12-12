@@ -4,11 +4,8 @@ import { useEffect, useState } from "react";
 import Navbar from "@/components/ui/navbar";
 import Footer from "@/components/ui/footer";
 
-const BASE_URL = "http://localhost:5000"; // ubah kalau backend port beda
+const BASE_URL = "http://localhost:5000";
 
-/* -------------------------
-   Reusable Input component
-   ------------------------- */
 interface InputFieldProps {
   label: string;
   name: string;
@@ -18,195 +15,118 @@ interface InputFieldProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
 }
 
-const InputField = ({ label, name, type = "text", placeholder = "", value, onChange }: InputFieldProps) => {
-  return (
-    <div className="mb-3">
-      <label htmlFor={name} className="block text-sm font-medium mb-1 text-white/90">
-        {label}
-      </label>
-      <input
-        id={name}
-        name={name}
-        type={type}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        className="w-full p-2 rounded bg-white text-[#1F4E73] border border-transparent focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none transition-all"
-      />
-    </div>
-  );
-};
+const InputField = ({ label, name, type = "text", placeholder = "", value, onChange }: InputFieldProps) => (
+  <div className="mb-3">
+    <label htmlFor={name} className="block text-sm font-medium mb-1 text-white/90">{label}</label>
+    <input
+      id={name}
+      name={name}
+      type={type}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      className="w-full p-2 rounded bg-white text-[#1F4E73] border border-transparent focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none transition-all"
+    />
+  </div>
+);
 
-/* -------------------------
-   Bidang type
-   ------------------------- */
-interface Bidang {
-  bidang_id: number | string;
-  nama_bidang: string;
+interface Kategori {
+  kategori_id: number | string;
+  nama_kategori: string;
 }
 
-/* -------------------------
-   Main page
-   ------------------------- */
 export default function LayananPage() {
-  const [bidangList, setBidangList] = useState<Bidang[]>([]);
-  const [loadingBidang, setLoadingBidang] = useState(true);
+  const [kategoriList, setKategoriList] = useState<Kategori[]>([]);
+  const [loadingKategori, setLoadingKategori] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  // state harus sesuai nama kolom DB / model
   const [formData, setFormData] = useState({
     nama: "",
     alamat: "",
     email: "",
     telp: "",
     jabatan: "",
-
     nama_perusahaan: "",
     email_perusahaan: "",
     alamat_perusahaan: "",
     telp_perusahaan: "",
-
     jenis_produk: "",
     tanggal_kebutuhan: "",
     estimasi_budget: "",
     deskripsi: "",
-
-    bidang_id: "",
+    kategori_id: "",
     dokumen: null as File | null,
   });
 
-  /* ================= FETCH BIDANG ================= */
   useEffect(() => {
-    const fetchBidang = async () => {
+    const fetchKategori = async () => {
       try {
-        const res = await fetch(`${BASE_URL}/api/bidang`);
-        if (!res.ok) throw new Error("Gagal fetch bidang");
+        const res = await fetch(`${BASE_URL}/api/kategori`);
+        if (!res.ok) throw new Error("Gagal fetch kategori");
         const data = await res.json();
-        setBidangList(data);
+        setKategoriList(data);
       } catch (err) {
-        console.error("fetch bidang error:", err);
-        setBidangList([]);
+        console.error("fetch kategori error:", err);
       } finally {
-        setLoadingBidang(false);
+        setLoadingKategori(false);
       }
     };
-
-    fetchBidang();
+    fetchKategori();
   }, []);
 
-  /* ================= HANDLERS ================= */
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
-    setFormData((prev) => ({ ...prev, dokumen: file }));
+    setFormData(prev => ({ ...prev, dokumen: file }));
   };
 
-  /* ================= VALIDATION ================= */
   const validate = () => {
-    // bidang wajib
-    if (!formData.bidang_id) {
-      alert("Pilih bidang terlebih dahulu.");
-      return false;
-    }
-    // minimal: jenis produk & deskripsi
-    if (!formData.jenis_produk.trim()) {
-      alert("Isi jenis produk.");
-      return false;
-    }
-    if (!formData.deskripsi.trim()) {
-      alert("Isi deskripsi kebutuhan.");
-      return false;
-    }
+    if (!formData.kategori_id) { alert("Pilih kategori terlebih dahulu."); return false; }
+    if (!formData.jenis_produk.trim()) { alert("Isi jenis produk."); return false; }
+    if (!formData.deskripsi.trim()) { alert("Isi deskripsi kebutuhan."); return false; }
     return true;
   };
 
-  /* ================== SUBMIT ================== */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submitting) return;
-    if (!validate()) return;
 
+    // Ambil token
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("❌ Anda belum login.");
+      window.location.href = "/login";
+      return;
+    }
+
+    if (!validate()) return;
     setSubmitting(true);
 
     try {
       const fd = new FormData();
-
-      // append only fields backend expects (names match DB fields)
-      fd.append("nama", formData.nama);
-      fd.append("alamat", formData.alamat);
-      fd.append("email", formData.email);
-      fd.append("telp", formData.telp);
-      fd.append("jabatan", formData.jabatan);
-
-      fd.append("nama_perusahaan", formData.nama_perusahaan);
-      fd.append("email_perusahaan", formData.email_perusahaan);
-      fd.append("alamat_perusahaan", formData.alamat_perusahaan);
-      fd.append("telp_perusahaan", formData.telp_perusahaan);
-
-      fd.append("jenis_produk", formData.jenis_produk);
-      fd.append("tanggal_kebutuhan", formData.tanggal_kebutuhan);
-      fd.append("estimasi_budget", formData.estimasi_budget);
-      fd.append("deskripsi", formData.deskripsi);
-
-      fd.append("bidang_id", String(formData.bidang_id));
-
-      if (formData.dokumen) {
-        fd.append("dokumen", formData.dokumen);
-      }
-
-      // debug: inspect payload before sending
-      console.log("=== FormData payload ===");
-      for (const pair of fd.entries()) {
-        console.log(pair[0], pair[1]);
-      }
-
-      // Optional: get token from localStorage (if you use JWT auth)
-      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      const headers: Record<string, string> = {};
-      if (token) headers["Authorization"] = `Bearer ${token}`;
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== null) fd.append(key, value as any);
+      });
 
       const res = await fetch(`${BASE_URL}/api/kebutuhan`, {
         method: "POST",
         body: fd,
-        headers, // don't set Content-Type: browser will set multipart boundary
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       const data = await res.json().catch(() => ({}));
-      console.log("SERVER RESPONSE", res.status, data);
-
-      if (!res.ok) {
-        // show message from server if ada
-        const msg = (data && (data.message || data.error)) || `Server returned ${res.status}`;
-        throw new Error(msg);
-      }
+      if (!res.ok) throw new Error(data.message || data.error || `Server returned ${res.status}`);
 
       alert("✅ Usulan berhasil diajukan!");
-      // reset form
       setFormData({
-        nama: "",
-        alamat: "",
-        email: "",
-        telp: "",
-        jabatan: "",
-
-        nama_perusahaan: "",
-        email_perusahaan: "",
-        alamat_perusahaan: "",
-        telp_perusahaan: "",
-
-        jenis_produk: "",
-        tanggal_kebutuhan: "",
-        estimasi_budget: "",
-        deskripsi: "",
-
-        bidang_id: "",
-        dokumen: null,
+        nama: "", alamat: "", email: "", telp: "", jabatan: "",
+        nama_perusahaan: "", email_perusahaan: "", alamat_perusahaan: "", telp_perusahaan: "",
+        jenis_produk: "", tanggal_kebutuhan: "", estimasi_budget: "", deskripsi: "",
+        kategori_id: "", dokumen: null
       });
     } catch (err: any) {
       console.error("submit error:", err);
@@ -224,55 +144,43 @@ export default function LayananPage() {
           <h1 className="text-2xl font-bold mb-6 text-center">Layanan Usulan Produk</h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* DATA PRIBADI */}
             <section>
               <p className="text-lg font-semibold border-b border-white pb-2">Data Pribadi</p>
-
-              <InputField label="Nama Lengkap" name="nama" value={formData.nama} onChange={handleChange} placeholder="Masukkan nama Anda" />
-              <InputField label="Alamat Lengkap" name="alamat" value={formData.alamat} onChange={handleChange} placeholder="Jalan, kota, provinsi" />
-              <InputField label="Email Pribadi" name="email" type="email" value={formData.email} onChange={handleChange} placeholder="contoh@domain.com" />
-              <InputField label="Nomor Telepon" name="telp" value={formData.telp} onChange={handleChange} placeholder="Contoh: 0812xxxx" />
-              <InputField label="Jabatan" name="jabatan" value={formData.jabatan} onChange={handleChange} placeholder="Contoh: Manajer Pemasaran" />
+              <InputField label="Nama Lengkap" name="nama" value={formData.nama} onChange={handleChange} />
+              <InputField label="Alamat Lengkap" name="alamat" value={formData.alamat} onChange={handleChange} />
+              <InputField label="Email Pribadi" name="email" type="email" value={formData.email} onChange={handleChange} />
+              <InputField label="Nomor Telepon" name="telp" value={formData.telp} onChange={handleChange} />
+              <InputField label="Jabatan" name="jabatan" value={formData.jabatan} onChange={handleChange} />
             </section>
 
-            {/* DATA PERUSAHAAN */}
             <section>
               <p className="text-lg font-semibold border-b border-white/50 pb-2 pt-4">Data Perusahaan</p>
-
-              <InputField label="Nama Perusahaan" name="nama_perusahaan" value={formData.nama_perusahaan} onChange={handleChange} placeholder="PT Jaya Abadi" />
-              <InputField label="Email Perusahaan" name="email_perusahaan" type="email" value={formData.email_perusahaan} onChange={handleChange} placeholder="hrd@perusahaan.com" />
-              <InputField label="Alamat Perusahaan" name="alamat_perusahaan" value={formData.alamat_perusahaan} onChange={handleChange} placeholder="Alamat kantor pusat" />
-              <InputField label="Nomor Telepon Perusahaan" name="telp_perusahaan" value={formData.telp_perusahaan} onChange={handleChange} placeholder="Nomor kontak perusahaan" />
+              <InputField label="Nama Perusahaan" name="nama_perusahaan" value={formData.nama_perusahaan} onChange={handleChange} />
+              <InputField label="Email Perusahaan" name="email_perusahaan" type="email" value={formData.email_perusahaan} onChange={handleChange} />
+              <InputField label="Alamat Perusahaan" name="alamat_perusahaan" value={formData.alamat_perusahaan} onChange={handleChange} />
+              <InputField label="Nomor Telepon Perusahaan" name="telp_perusahaan" value={formData.telp_perusahaan} onChange={handleChange} />
             </section>
 
-            {/* DETAIL USAHA */}
             <section>
               <p className="text-lg font-semibold border-b border-white/50 pb-2 pt-4">Detail Usulan Produk</p>
+              <InputField label="Jenis Produk" name="jenis_produk" value={formData.jenis_produk} onChange={handleChange} />
 
-              <InputField label="Jenis Produk" name="jenis_produk" value={formData.jenis_produk} onChange={handleChange} placeholder="Contoh: Aplikasi Mobile" />
-
-              {/* BIDANG */}
+              {/* Dropdown Kategori */}
               <div className="mb-3">
-                <label className="block text-sm font-medium mb-1 text-white/90">Bidang</label>
-                <select name="bidang_id" value={formData.bidang_id} onChange={handleChange} className="w-full p-2 rounded bg-white text-[#1F4E73] outline-none">
-                  <option value="">-- Pilih bidang --</option>
-                  {loadingBidang ? <option disabled>Loading...</option> : bidangList.map((b) => (
-                    <option key={b.bidang_id} value={b.bidang_id}>{b.nama_bidang}</option>
-                  ))}
+                <label className="block text-sm font-medium mb-1 text-white/90">Kategori</label>
+                <select name="kategori_id" value={formData.kategori_id} onChange={handleChange} className="w-full p-2 rounded bg-white text-[#1F4E73]">
+                  <option value="">-- Pilih kategori --</option>
+                  {loadingKategori ? <option disabled>Loading...</option> :
+                    kategoriList.map(k => <option key={k.kategori_id} value={k.kategori_id}>{k.nama_kategori}</option>)}
                 </select>
               </div>
 
-              {/* TANGGAL */}
-              <div className="mb-3">
-                <label className="block text-sm font-medium mb-1 text-white/90">Tanggal Pelaksanaan</label>
-                <input type="date" name="tanggal_kebutuhan" value={formData.tanggal_kebutuhan} onChange={handleChange} className="w-full p-2 rounded bg-white text-[#1F4E73]" />
-              </div>
-
-              <InputField label="Estimasi Budget" name="estimasi_budget" value={formData.estimasi_budget} onChange={handleChange} placeholder="Contoh: 50-100 juta" />
+              <InputField label="Tanggal Pelaksanaan" name="tanggal_kebutuhan" type="date" value={formData.tanggal_kebutuhan} onChange={handleChange} />
+              <InputField label="Estimasi Budget" name="estimasi_budget" value={formData.estimasi_budget} onChange={handleChange} />
 
               <div>
                 <label className="block text-sm font-medium mb-1 text-white/90">Deskripsi Kebutuhan</label>
-                <textarea name="deskripsi" value={formData.deskripsi} onChange={handleChange} rows={4} placeholder="Jelaskan detail kebutuhan..." className="w-full p-2 rounded bg-white text-[#1F4E73]"></textarea>
+                <textarea name="deskripsi" value={formData.deskripsi} onChange={handleChange} rows={4} className="w-full p-2 rounded bg-white text-[#1F4E73]"></textarea>
               </div>
 
               <div>
@@ -287,7 +195,6 @@ export default function LayananPage() {
           </form>
         </div>
       </main>
-
       <Footer />
     </>
   );

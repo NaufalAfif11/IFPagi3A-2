@@ -7,11 +7,12 @@ import pool, { connectDB } from "./src/config/db.js";
 import adminRoutes from "./src/routes/adminRoutes.js";
 import authRoutes from "./src/routes/authRoutes.js";
 import kebutuhanRoutes from "./src/routes/kebutuhanRoutes.js";
-import bidangRoutes from "./src/routes/bidangRoutes.js";
+import kategoriRoutes from "./src/routes/kategoriRoutes.js";
 import risetRoutes from "./src/routes/RisetRoutes.js";
 import beritaRoutes from "./src/routes/beritaRoutes.js";
 import lupaKataSandiRoutes from "./src/routes/lupaKataSandiRoutes.js";
 import path from "path";
+import profileRoutes from "./src/routes/profileRoutes.js";
 
 dotenv.config();
 console.log("JWT_SECRET:", process.env.JWT_SECRET);
@@ -27,7 +28,7 @@ connectDB();
 // API ROUTES
 // ==============================
 app.use("/api/kebutuhan", kebutuhanRoutes);
-app.use("/api/bidang", bidangRoutes);
+app.use("/api/kategori", kategoriRoutes);
 
 // Health check
 app.get("/", (req, res) => {
@@ -48,6 +49,7 @@ app.use("/auth", authRoutes);
 app.use("/api/berita", beritaRoutes);
 app.use("/api/lupasandi", lupaKataSandiRoutes);
 app.use("/api/riset", risetRoutes);
+app.use("/api/profile", profileRoutes);
 
 // Static uploads
 const __dirname = path.resolve();
