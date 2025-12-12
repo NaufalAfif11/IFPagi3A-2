@@ -3,8 +3,8 @@ const { Pool } = require("pg");
 const pool = new Pool({
   user: "postgres",
   host: "localhost",
-  database: "sinova_db",
-  password: "nopal123",   // ganti dengan password PostgreSQL kamu
+  database: "db_sinova",
+  password: "210406",   // ganti dengan password PostgreSQL kamu
   port: 5432,
 });
 
