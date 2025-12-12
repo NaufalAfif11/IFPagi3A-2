@@ -1,12 +1,18 @@
 import pool from "../config/db.js";
 
 // Cari user by email
-export const findPenggunaByEmail = async (email) => {
-    // 🔥 PASTIKAN PASSWORD DIAMBIL DI QUERY
-    return pool.query(
-        "SELECT id, name, email, password, role, phone, foto_profil FROM users WHERE email = $1", 
-        [email]
-    );
+export const findPenggunaByEmail = (email) => {
+    return pool.query(`
+        SELECT 
+            u.id,
+            u.name,
+            u.email,
+            u.password,
+            r.role_name AS role
+        FROM users u
+        JOIN role r ON r.id = u.role_id
+        WHERE u.email = $1 AND r.role_name = 'pengguna'
+    `, [email]);
 };
 
 

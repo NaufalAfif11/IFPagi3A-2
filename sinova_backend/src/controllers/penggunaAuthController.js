@@ -44,17 +44,16 @@ export const loginPengguna = async (req, res) => {
         );
 
         res.json({
-            message: "Login berhasil",
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                phone: user.phone,
-                foto_profil: user.foto_profil
-            },
-            token
-        });
+    message: "Login berhasil",
+    user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+    },
+    token
+});
+
 
     } catch (err) {
         console.error(err);

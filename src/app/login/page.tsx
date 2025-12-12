@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FaGoogle, FaGithub } from "react-icons/fa";
 
-const BASE_URL = "http://localhost:4000";
+const BASE_URL = "http://localhost:5000";
 
 const LOGIN_ENDPOINTS = [
   { role: "pengguna", url: "/auth/pengguna/login" },

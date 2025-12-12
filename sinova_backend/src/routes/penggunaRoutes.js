@@ -1,12 +1,12 @@
-// penggunaRoutes.js (Contoh)
-
-import express from 'express';
-// Pastikan path-nya benar
-import { createPengguna } from '../controllers/authController.js'; 
+import express from "express";
+import { registerPengguna, loginPengguna } from "../controllers/penggunaAuthController.js";
 
 const router = express.Router();
 
-// Contoh rute POST untuk pendaftaran
-router.post('/register', createPengguna);
+// REGISTER
+router.post("/register", registerPengguna);
+
+// LOGIN
+router.post("/login", loginPengguna);
 
 export default router;
