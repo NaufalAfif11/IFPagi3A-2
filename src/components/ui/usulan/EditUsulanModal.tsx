@@ -71,7 +71,7 @@ export default function EditUsulanModal({
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setForm((prev: any) => ({ ...prev, [name]: value }));
+    setForm((prev: Usulan) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -104,17 +104,26 @@ export default function EditUsulanModal({
     };
 
     try {
+      const token = localStorage.getItem("token");
+
       const res = await fetch(
         `http://localhost:5000/api/kebutuhan/${form.id}`,
         {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
           body: JSON.stringify(payload),
         }
       );
 
-      if (!res.ok) throw new Error("Gagal update");
+      const data = await res.json().catch(() => ({}));
 
+      if (!res.ok) {
+        console.error("Backend error:", data);
+        throw new Error(data.message || "Gagal update");
+      }
       alert("Usulan berhasil diperbarui!");
       onSuccess();
       onClose();
@@ -132,102 +141,201 @@ export default function EditUsulanModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
-        
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-sm w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
         {/* HEADER */}
-        <div className="bg-[#1F4E73] text-white p-4 flex justify-between">
-          <h2 className="text-lg font-bold">Edit Usulan</h2>
-          <button onClick={onClose}><X /></button>
+        <div className="flex justify-between items-center p-4 bg-[#1F4E73] text-white sticky top-0 z-10">
+          <h2 className="font-bold text-lg">Edit Usulan</h2>
+          <button
+            onClick={onClose}
+            className="hover:bg-white/20 p-1 rounded transition-colors">
+            <X size={20} />
+          </button>
         </div>
 
-        <div className="p-6 overflow-y-auto flex-1">
-          <form onSubmit={handleSubmit} className="space-y-6">
-
-            {/* ===== DATA PRIBADI ===== */}
+        {/* FORM - Scrollable Area */}
+        <div className="overflow-y-auto flex-1">
+          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            {/* DATA PRIBADI */}
             <section>
-              <p className="font-semibold text-lg border-b pb-2 mb-3">Data Pribadi</p>
+              <p className="text-lg font-semibold border-b border-gray-300 pb-2 mb-4 text-gray-800">
+                Data Pribadi
+              </p>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label>Nama Lengkap</label>
-                  <input name="nama" value={form.nama} onChange={handleChange} className="input" />
+                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                    Nama Lengkap <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    name="nama"
+                    value={form.nama || ""}
+                    onChange={handleChange}
+                    placeholder="Masukkan nama Anda"
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all"
+                    required
+                  />
                 </div>
 
                 <div>
-                  <label>Email Pribadi</label>
-                  <input name="email" value={form.email} onChange={handleChange} className="input" />
+                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                    Email Pribadi <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    name="email"
+                    type="email"
+                    value={form.email || ""}
+                    onChange={handleChange}
+                    placeholder="contoh@domain.com"
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all"
+                    required
+                  />
                 </div>
 
                 <div>
-                  <label>Telepon</label>
-                  <input name="telp" value={form.telp || ""} onChange={handleChange} className="input" />
+                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                    Nomor Telepon
+                  </label>
+                  <input
+                    name="telp"
+                    value={form.telp || ""}
+                    onChange={handleChange}
+                    placeholder="Contoh: 0812xxxx"
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all"
+                  />
                 </div>
 
                 <div>
-                  <label>Jabatan</label>
-                  <input name="jabatan" value={form.jabatan || ""} onChange={handleChange} className="input" />
+                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                    Jabatan
+                  </label>
+                  <input
+                    name="jabatan"
+                    value={form.jabatan || ""}
+                    onChange={handleChange}
+                    placeholder="Contoh: Manajer Pemasaran"
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all"
+                  />
                 </div>
 
-                <div className="col-span-2">
-                  <label>Alamat</label>
-                  <textarea name="alamat" value={form.alamat || ""} onChange={handleChange} className="input" />
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                    Alamat Lengkap
+                  </label>
+                  <textarea
+                    name="alamat"
+                    value={form.alamat || ""}
+                    onChange={handleChange}
+                    placeholder="Jalan, kota, provinsi"
+                    rows={2}
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all resize-none"
+                  />
                 </div>
               </div>
             </section>
 
-            {/* ===== DATA PERUSAHAAN ===== */}
+            {/* DATA PERUSAHAAN */}
             <section>
-              <p className="font-semibold text-lg border-b pb-2 mb-3">Data Perusahaan</p>
+              <p className="text-lg font-semibold border-b border-gray-300 pb-2 mb-4 text-gray-800">
+                Data Perusahaan
+              </p>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label>Nama Perusahaan</label>
-                  <input name="nama_perusahaan" value={form.nama_perusahaan || ""} onChange={handleChange} className="input" />
+                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                    Nama Perusahaan
+                  </label>
+                  <input
+                    name="nama_perusahaan"
+                    value={form.nama_perusahaan || ""}
+                    onChange={handleChange}
+                    placeholder="PT Jaya Abadi"
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all"
+                  />
                 </div>
 
                 <div>
-                  <label>Email Perusahaan</label>
-                  <input name="email_perusahaan" value={form.email_perusahaan || ""} onChange={handleChange} className="input" />
+                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                    Email Perusahaan
+                  </label>
+                  <input
+                    name="email_perusahaan"
+                    type="email"
+                    value={form.email_perusahaan || ""}
+                    onChange={handleChange}
+                    placeholder="hrd@perusahaan.com"
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all"
+                  />
                 </div>
 
                 <div>
-                  <label>Telepon Perusahaan</label>
-                  <input name="telp_perusahaan" value={form.telp_perusahaan || ""} onChange={handleChange} className="input" />
+                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                    Nomor Telepon Perusahaan
+                  </label>
+                  <input
+                    name="telp_perusahaan"
+                    value={form.telp_perusahaan || ""}
+                    onChange={handleChange}
+                    placeholder="Nomor kontak perusahaan"
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all"
+                  />
                 </div>
 
-                <div className="col-span-2">
-                  <label>Alamat Perusahaan</label>
-                  <textarea name="alamat_perusahaan" value={form.alamat_perusahaan || ""} onChange={handleChange} className="input" />
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                    Alamat Perusahaan
+                  </label>
+                  <textarea
+                    name="alamat_perusahaan"
+                    value={form.alamat_perusahaan || ""}
+                    onChange={handleChange}
+                    placeholder="Alamat kantor pusat"
+                    rows={2}
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all resize-none"
+                  />
                 </div>
               </div>
             </section>
 
-            {/* ===== DETAIL PRODUK ===== */}
+            {/* DETAIL USAHA */}
             <section>
-              <p className="font-semibold text-lg border-b pb-2 mb-3">Detail Produk</p>
+              <p className="text-lg font-semibold border-b border-gray-300 pb-2 mb-4 text-gray-800">
+                Detail Usulan Produk
+              </p>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label>Jenis Produk</label>
-                  <input name="jenis_produk" value={form.jenis_produk} onChange={handleChange} className="input" />
+                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                    Jenis Produk <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    name="jenis_produk"
+                    value={form.jenis_produk || ""}
+                    onChange={handleChange}
+                    placeholder="Contoh: Aplikasi Mobile"
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all"
+                    required
+                  />
                 </div>
 
                 <div>
-                  <label>Kategori</label>
+                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                    Kategori <span className="text-red-500">*</span>
+                  </label>
                   <select
                     name="kategori_id"
-                    value={form.kategori_id}
+                    value={form.kategori_id || ""}
                     onChange={handleChange}
-                    className="input"
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none"
+                    required
                   >
-                    <option value="">-- pilih kategori --</option>
+                    <option value="">-- Pilih Kategori --</option>
                     {loadingKategori ? (
-                      <option>Loading...</option>
+                      <option disabled>Loading...</option>
                     ) : (
-                      kategoriList.map((k) => (
-                        <option key={k.kategori_id} value={k.kategori_id}>
-                          {k.nama_kategori}
+                      kategoriList.map((b) => (
+                        <option key={b.kategori_id} value={b.kategori_id}>
+                          {b.nama_kategori}
                         </option>
                       ))
                     )}
@@ -235,37 +343,66 @@ export default function EditUsulanModal({
                 </div>
 
                 <div>
-                  <label>Tanggal Kebutuhan</label>
+                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                    Tanggal Pelaksanaan
+                  </label>
                   <input
                     type="date"
                     name="tanggal_kebutuhan"
                     value={formatDateForInput(form.tanggal_kebutuhan)}
                     onChange={handleChange}
-                    className="input"
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none"
                   />
                 </div>
 
                 <div>
-                  <label>Estimasi Budget</label>
-                  <input name="estimasi_budget" value={form.estimasi_budget || ""} onChange={handleChange} className="input" />
+                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                    Estimasi Budget
+                  </label>
+                  <input
+                    name="estimasi_budget"
+                    value={form.estimasi_budget || ""}
+                    onChange={handleChange}
+                    placeholder="Contoh: 50-100 juta"
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all"
+                  />
                 </div>
 
-                <div className="col-span-2">
-                  <label>Deskripsi</label>
-                  <textarea name="deskripsi" value={form.deskripsi} onChange={handleChange} className="input" />
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                    Deskripsi Kebutuhan <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    name="deskripsi"
+                    value={form.deskripsi || ""}
+                    onChange={handleChange}
+                    placeholder="Jelaskan detail kebutuhan..."
+                    rows={4}
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all resize-none"
+                    required
+                  />
                 </div>
               </div>
             </section>
 
-            <div className="flex justify-end gap-3 pt-4 border-t">
-              <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-300 rounded">
-                Batal
-              </button>
-              <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">
-                <Save size={16} /> Simpan
-              </button>
+            {/* FOOTER BUTTONS */}
+            <div className="border-t border-gray-300 pt-4">
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors">
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-4 py-2 bg-blue-600 text-white rounded flex gap-2 items-center hover:bg-blue-700 transition-colors disabled:opacity-50">
+                  <Save size={16} />
+                  {loading ? "Menyimpan..." : "Simpan Perubahan"}
+                </button>
+              </div>
             </div>
-
           </form>
         </div>
       </div>

@@ -7,6 +7,7 @@ import {
   editKebutuhan,
   removeKebutuhan,
   fetchPenyediaByKebutuhan,
+  fetchAllKebutuhanForPenyedia,
 } from '../controllers/kebutuhanController.js';
 import { authMiddleware, checkRole } from '../middleware/authMiddleware.js';
 
@@ -14,11 +15,12 @@ const upload = multer({ dest: "uploads/" });
 const router = express.Router();
 
 // Semua route harus login pengguna
-router.get("/", authMiddleware, fetchKebutuhan);
+router.get("/penyedia", authMiddleware, checkRole("penyedia"), fetchAllKebutuhanForPenyedia);
 
 // 🔥 pindahkan ke atas
 router.get("/:id/penyedia", authMiddleware, fetchPenyediaByKebutuhan);
 
+router.get("/saya", authMiddleware, checkRole("pengguna"), fetchKebutuhan);
 router.get("/:id", authMiddleware, fetchKebutuhanById);
 router.post("/", authMiddleware, checkRole("pengguna"), upload.single("dokumen"), addKebutuhan);
 router.put("/:id", authMiddleware, checkRole("pengguna"), upload.single("dokumen"), editKebutuhan);

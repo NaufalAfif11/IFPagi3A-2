@@ -1,7 +1,7 @@
 import {
     createKebutuhan,
     getAllKebutuhanByUser,
-    getKebutuhanByIdAndUser,
+    getAllKebutuhanForPenyedia,
     updateKebutuhanByUser,
     deleteKebutuhanByUser,
     searchKebutuhanModel,
@@ -26,7 +26,7 @@ export const addKebutuhan = async (req, res) => {
         if (req.file) data.dokumen = req.file.filename;
 
         // Set pengguna_id dari akun login
-        data.pengguna_id = req.user.id;
+        data.user_id = req.user.id;
 
         const result = await createKebutuhan(data);
         res.status(201).json({ message: "Usulan berhasil dibuat", data: result });
@@ -35,6 +35,39 @@ export const addKebutuhan = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+//read all penyedia
+// READ ALL USULAN (UNTUK PENYEDIA) - SIMPLE VERSION
+export const fetchAllKebutuhanForPenyedia = async (req, res) => {
+  try {
+    // Cek autentikasi dan role
+    if (req.user?.role !== "penyedia") {
+      return res.status(403).json({ 
+        success: false, 
+        message: "Akses hanya untuk penyedia" 
+      });
+    }
+
+    // Ambil data
+    const data = await getAllKebutuhanForPenyedia();
+    
+    // Return response
+    return res.json({
+      success: true,
+      data: data,
+      count: data.length,
+      message: "Berhasil mengambil data kebutuhan"
+    });
+
+  } catch (err) {
+    console.error("Error:", err.message);
+    res.status(500).json({ 
+      success: false, 
+      message: "Gagal mengambil data kebutuhan" 
+    });
+  }
+};
+
 
 // READ ALL USULAN PEMILIK (RIWAYAT)
 export const fetchKebutuhan = async (req, res) => {
@@ -46,10 +79,10 @@ export const fetchKebutuhan = async (req, res) => {
     }
 };
 
-// READ USULAN BY ID PEMILIK
+// READ USULAN BY ID, PEMILIK
 export const fetchKebutuhanById = async (req, res) => {
     try {
-        const kebutuhan = await getKebutuhanByIdAndUser(req.params.id, req.user.id);
+        const kebutuhan = await getAllKebutuhanByUser(req.params.id, req.user.id);
         if (!kebutuhan) return res.status(404).json({ message: "Usulan tidak ditemukan" });
         res.json(kebutuhan);
     } catch (err) {

@@ -19,7 +19,7 @@ export const createKebutuhan = async (data) => {
     deskripsi,
     dokumen,
     kategori_id,
-    pengguna_id,
+    user_id,
     status,
     status_detail
   )
@@ -28,8 +28,8 @@ export const createKebutuhan = async (data) => {
     $6,$7,$8,$9,
     $10,$11,$12,$13,$14,
     $15,$16,
-    'Menunggu',
-    'Menunggu Persetujuan'
+    'Tersedia',
+    'Tersedia untuk diambil'
   )
   RETURNING *;
 `;
@@ -50,7 +50,7 @@ export const createKebutuhan = async (data) => {
   data.deskripsi,
   data.dokumen || null,
   data.kategori_id,
-  data.pengguna_id
+  data.user_id
 ];
 
 
@@ -70,23 +70,31 @@ export const getAllKebutuhanByUser = async (userId) => {
       FROM minat_penyedia
       GROUP BY kebutuhan_id
     ) mp ON mp.kebutuhan_id = k.id
-    WHERE k.pengguna_id = $1
+    WHERE k.user_id = $1
     ORDER BY k.created_at DESC;
   `, [userId]);
   return result.rows;
 };
 
-// GET BY ID MILIK USER
-export const getKebutuhanByIdAndUser = async (id, userId) => {
-  const result = await pool.query(
-    `SELECT k.*, c.nama_kategori
-     FROM kebutuhan k
-     LEFT JOIN kategori c ON k.kategori_id = c.kategori_id
-     WHERE k.id = $1 AND k.pengguna_id = $2`,
-    [id, userId]
-  );
-  return result.rows[0];
+// GET all kebutuhan (for penyedia)
+export const getAllKebutuhanForPenyedia = async () => {
+  const query = `
+    SELECT 
+      k.*,
+      c.nama_kategori,
+      COUNT(mp.id) AS peminat
+    FROM kebutuhan k
+    LEFT JOIN kategori c ON k.kategori_id = c.kategori_id
+    LEFT JOIN minat_penyedia mp ON mp.kebutuhan_id = k.id
+    WHERE k.status IN ('Tersedia', 'Sedang Dikerjakan')
+    GROUP BY k.id, c.nama_kategori
+    ORDER BY k.created_at DESC
+  `;
+
+  const result = await pool.query(query);
+  return result.rows;
 };
+
 
 // UPDATE MILIK USER
 export const updateKebutuhanByUser = async (id, userId, data) => {
@@ -96,7 +104,7 @@ export const updateKebutuhanByUser = async (id, userId, data) => {
       nama_perusahaan=$6, email_perusahaan=$7, alamat_perusahaan=$8, telp_perusahaan=$9,
       jenis_produk=$10, tanggal_kebutuhan=$11, deskripsi=$12, dokumen=$13,
       kategori_id=$14, estimasi_budget=$15
-    WHERE id=$16 AND pengguna_id=$17
+    WHERE id=$16 AND user_id=$17
     RETURNING *;
   `;
 
@@ -115,7 +123,7 @@ export const updateKebutuhanByUser = async (id, userId, data) => {
 // DELETE MILIK USER
 export const deleteKebutuhanByUser = async (id, userId) => {
   const result = await pool.query(
-    `DELETE FROM kebutuhan WHERE id=$1 AND pengguna_id=$2 RETURNING *`,
+    `DELETE FROM kebutuhan WHERE id=$1 AND user_id=$2 RETURNING *`,
     [id, userId]
   );
   return result.rows[0];
@@ -151,7 +159,7 @@ export const getPenyediaByKebutuhan = async (kebutuhanId) => {
       mp.estimasi_waktu,
       mp.tanggal_minat
     FROM minat_penyedia mp
-    JOIN penyedia p ON p.penyedia_id = mp.penyedia_id
+    JOIN users u ON u.id = mp.user_id
     WHERE mp.kebutuhan_id = $1
     ORDER BY mp.tanggal_minat DESC;
   `;

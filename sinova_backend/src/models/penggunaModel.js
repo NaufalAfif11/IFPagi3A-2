@@ -16,7 +16,7 @@ export const findPenggunaByEmail = (email) => {
 };
 
 
-// Membuat user baru + detail default
+// Membuat user baru
 export const createPengguna = async (name, email, hashedPassword) => {
 
     const roleRes = await pool.query(
@@ -31,18 +31,10 @@ export const createPengguna = async (name, email, hashedPassword) => {
     const roleId = roleRes.rows[0].id;
 
     const userRes = await pool.query(
-        `INSERT INTO users (name, email, password, role_id)
-         VALUES ($1, $2, $3, $4)
+        `INSERT INTO users (name, email, password, role_id, no_handphone, foto_profil)
+         VALUES ($1, $2, $3, $4, NULL, NULL)
          RETURNING id, name, email, role_id`,
         [name, email, hashedPassword, roleId]
-    );
-
-    const userId = userRes.rows[0].id;
-
-    await pool.query(
-        `INSERT INTO detail_users (user_id, phone, foto_profil)
-         VALUES ($1, null, null)`,
-        [userId]
     );
 
     return userRes;

@@ -7,7 +7,8 @@ import FilterUsulan from "@/components/ui/usulan/FilterUsulan";
 import PeminatModal from "@/components/ui/usulan/PeminatModal";
 import DetailUsulanModal from "@/components/ui/usulan/DetailUsulanModal";
 import EditUsulanModal from "@/components/ui/usulan/EditUsulanModal";
-import type { Usulan, Penyedia } from "@/types/usulan";
+import type { PenyediaItem } from "@/types/minat";
+import type { Usulan, Peminat } from "@/types/usulan";
 
 export default function RiwayatUsulanPage() {
   const [usulan, setUsulan] = useState<Usulan[]>([]);
@@ -17,66 +18,69 @@ export default function RiwayatUsulanPage() {
   const [editData, setEditData] = useState<Usulan | null>(null);
   const [showDetailUsulanModal, setShowDetailUsulanModal] = useState(false);
   const [showPeminatModal, setShowPeminatModal] = useState(false);
-  const [penyediaList, setPenyediaList] = useState<Penyedia[]>([]);
+  const [listPeminat, setListPeminat] = useState<PenyediaItem[]>([]);
   const [search, setSearch] = useState("");
 
   const BASE_URL = "http://localhost:5000";
 
   // ============================================
-  // FETCH USULAN (Ditaruh di luar useEffect!)
+  // FETCH USULAN
   // ============================================
   const fetchUsulan = useCallback(async () => {
     try {
+
       const token = localStorage.getItem("token");
       if (!token) return;
 
-      const res = await fetch(`${BASE_URL}/api/kebutuhan`, {
+      const res = await fetch(`${BASE_URL}/api/kebutuhan/saya`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       const data = await res.json();
       console.log("📥 DATA USULAN:", data);
-      setUsulan(data);
+        setUsulan(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Gagal memuat usulan:", err);
     }
   }, []);
 
-  // Load pertama
   useEffect(() => {
     fetchUsulan();
   }, [fetchUsulan]);
 
   // ============================================
-  // Normalisasi data
+  // Normalisasi data - GUNAKAN usulan yang sudah dijamin array
   // ============================================
-  const normalizedUsulan = usulan.map((u) => ({
+  const normalizedUsulan = Array.isArray(usulan)
+  ? usulan.map((u) => ({
     id: u.id,
-    nama: u.nama,
-    alamat: u.alamat,
-    email: u.email,
-    noTelp: u.telp,
-    jabatan: u.jabatan,
-    namaPerusahaan: u.nama_perusahaan,
-    emailPerusahaan: u.email_perusahaan,
-    alamatPerusahaan: u.alamat_perusahaan,
-    noTelpPerusahaan: u.telp_perusahaan,
+    nama: u.nama || "",
+    alamat: u.alamat || "",
+    email: u.email || "",
+    noTelp: u.telp || "",
+    jabatan: u.jabatan || "",
+    namaPerusahaan: u.nama_perusahaan || "",
+    emailPerusahaan: u.email_perusahaan || "",
+    alamatPerusahaan: u.alamat_perusahaan || "",
+    noTelpPerusahaan: u.telp_perusahaan || "",
     jenisProdukanDiusulkan: u.jenis_produk || "",
     deskripsiKebutuhan: u.deskripsi || "",
-    kapanDigunakan: u.tanggal_kebutuhan,
-    estimasiBudget: u.estimasi_budget,
-    dokumen: u.dokumen,
-    tanggal: u.created_at,
-    status: u.status || "Menunggu",
-    statusDetail: u.status_detail || "Menunggu Persetujuan",
-    kategori_id: u.kategori_id,
-    nama_kategori: u.nama_kategori ?? "Tidak ada kategori",
+    kapanDigunakan: u.tanggal_kebutuhan || "",
+    estimasiBudget: u.estimasi_budget || 0,
+    dokumen: u.dokumen || "",
+    tanggal: u.created_at || "",
+    status: u.status,
+    statusDetail: u.status_detail,
+    kategori_id: u.kategori_id || null,
+    nama_kategori: u.nama_kategori || "Tidak ada kategori",
     peminat: u.peminat || 0,
-  }));
+    penyediaDikerjakan: u.penyedia_dikerjakan || null
+  }))
+  : [];
 
   const counts = {
     total: normalizedUsulan.length,
-    menunggu: normalizedUsulan.filter((u) => u.status === "Menunggu").length,
+    tersedia: normalizedUsulan.filter((u) => u.status === "Tersedia").length,
     dikerjakan: normalizedUsulan.filter((u) => u.status === "Sedang Dikerjakan").length,
   };
 
@@ -86,7 +90,10 @@ export default function RiwayatUsulanPage() {
       (u.nama?.toLowerCase().includes(s) ||
         u.jenisProdukanDiusulkan?.toLowerCase().includes(s) ||
         u.deskripsiKebutuhan?.toLowerCase().includes(s)) &&
-      (selectedFilter === "semua" ? true : u.status === selectedFilter)
+      (selectedFilter === "semua"
+        ? true
+        : u.status.toLowerCase() === selectedFilter.toLowerCase()
+      )
     );
   });
 
@@ -112,29 +119,81 @@ export default function RiwayatUsulanPage() {
   };
 
   const handleEditUsulan = (u: Usulan) => {
-    setEditData(u);
+    setEditData({
+      ...u,
+      kategori_id: u.kategori_id ?? 0,
+    } as Usulan);
     setShowDetailUsulanModal(false);
   };
 
-  const handleOpenPeminat = async (id: number) => {
+  const handleOpenPeminat = async (kebutuhanId: number) => {
     try {
-      const res = await fetch(`${BASE_URL}/api/kebutuhan/${id}/penyedia`);
-      const result = await res.json();
-      setPenyediaList(result.data ?? []);
-    } catch {
-      setPenyediaList([]);
+      const token = localStorage.getItem("token");
+
+      const res = await fetch(
+        `${BASE_URL}/api/minat-penyedia/${kebutuhanId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      const data = await res.json();
+
+      setListPeminat(data.data);
+      setShowPeminatModal(true);
+    } catch (err) {
+      console.error(err);
     }
-    setShowPeminatModal(true);
   };
+
+  const handleApprovePenyedia = async (p: PenyediaItem) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    await fetch(`${BASE_URL}/api/minat-penyedia/${p.id}/approve`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        kebutuhanId: selectedUsulan?.id,
+        userId: p.id,
+      }),
+    });
+
+    alert("proposal berhasil disetujui");
+
+    setShowPeminatModal(false);
+    setShowDetailUsulanModal(false);
+    fetchUsulan(); // refresh data
+  } catch (err) {
+    console.error(err);
+    alert("Gagal menyetujui proposal");
+  }
+};
+
+
 
   // ============================================
   // RENDER
   // ============================================
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-100">
       <SidebarPengguna />
+      <div className="flex-1 overflow-y-auto">
+        <div className="bg-gradient-to-r from-[#3e81aa] to-[#1F4E73] text-white shadow-xl">
+          <div className="max-w-7xl mx-auto px-4 py-8">
+            <div className="flex items-center gap-4">
+              <div>
+                <h1 className="text-3xl font-bold text-white">Riwayat Usulan Kebutuhan</h1>
+                <p className="text-blue-100 text-sm">Selamat datang pengguna! Lihat Usulanmu</p>
+              </div>
+            </div>
+          </div>
+        </div>
 
-      <div className="flex-1 p-6">
+        <div className="px-4 pt-6 space-y-6">
         <FilterUsulan
           selectedFilter={selectedFilter}
           setSelectedFilter={setSelectedFilter}
@@ -142,23 +201,24 @@ export default function RiwayatUsulanPage() {
           setSearch={setSearch}
           counts={counts}
         />
+        </div>
 
         {/* LIST USULAN */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredUsulan.map((u) => (
-            <UsulanCard
-              key={u.id}
-              usulan={u}
-              kategoriName={u.nama_kategori}
-              onClick={() => {
-                const raw = usulan.find((x) => x.id === u.id);
-                setSelectedRawUsulan(raw!);
-                setSelectedUsulan(u);
-                setShowDetailUsulanModal(true);
-              }}
-            />
-          ))}
-        </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
+            {filteredUsulan.map((u) => (
+              <UsulanCard
+                key={u.id}
+                usulan={u}
+                kategoriName={u.nama_kategori}
+                onClick={() => {
+                  const raw = usulan.find((x) => x.id === u.id);
+                  setSelectedRawUsulan(raw!);
+                  setSelectedUsulan(u);
+                  setShowDetailUsulanModal(true);
+                }}
+              />
+            ))}
+          </div>
 
         {/* MODAL DETAIL */}
         {showDetailUsulanModal && selectedUsulan && (
@@ -168,11 +228,12 @@ export default function RiwayatUsulanPage() {
             onEdit={() => handleEditUsulan(selectedRawUsulan!)}
             onDelete={handleDeleteUsulan}
             onOpenPeminat={() => handleOpenPeminat(selectedUsulan.id)}
+            showAjukanProposal={false}
           />
         )}
 
         {/* MODAL EDIT */}
-        {editData && (
+        {editData && selectedUsulan && (
           <EditUsulanModal
             usulan={editData}
             onClose={() => setEditData(null)}
@@ -184,12 +245,12 @@ export default function RiwayatUsulanPage() {
         )}
 
         {/* MODAL PEMINAT */}
-        {showPeminatModal && (
+        {showPeminatModal && selectedUsulan && (
           <PeminatModal
             usulan={selectedUsulan}
-            penyedia={penyediaList}
+            penyedia={listPeminat}
             onClose={() => setShowPeminatModal(false)}
-            onApprove={(p) => alert(`Menyetujui ${p.nama_penyedia}`)}
+            onApprove={handleApprovePenyedia}
           />
         )}
       </div>

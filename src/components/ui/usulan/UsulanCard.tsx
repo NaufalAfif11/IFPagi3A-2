@@ -22,8 +22,8 @@ interface Usulan {
     status: string;
     statusDetail: string;
     peminat: number;
-    bidang_id: string;
-    nama_bidang: string;
+    kategori_id: string;
+    nama_kategori: string;
     estimasiBudget: string;
     penyediaDikerjakan: {
       id: string;
@@ -35,11 +35,11 @@ interface Usulan {
 
     interface UsulanCardProps {
         usulan: Usulan;
-        bidangName: string;
+        kategoriName: string;
         onClick: () => void;
     }
     
-export default function UsulanCard({ usulan, bidangName, onClick }: UsulanCardProps) {
+export default function UsulanCard({ usulan, kategoriName, onClick }: UsulanCardProps) {
   return (
     <div className="bg-white rounded-xl shadow-md transition-all border-2 border-transparent hover:border-blue-200">
       <div className={`p-4 border-b ${
@@ -48,7 +48,7 @@ export default function UsulanCard({ usulan, bidangName, onClick }: UsulanCardPr
         
         <div className="flex items-start justify-between mb-3">
           <span className="px-2 py-1 rounded-md text-xs font-semibold bg-blue-100 text-blue-700">
-            {bidangName}
+            {kategoriName}
           </span>
 
           <StatusBadge status={usulan.status} />
@@ -84,7 +84,29 @@ export default function UsulanCard({ usulan, bidangName, onClick }: UsulanCardPr
           </div>
         </div>
 
-        {usulan.status === "Menunggu Persetujuan" && (
+        {usulan.status === "Sedang Dikerjakan" && usulan.penyediaDikerjakan && (
+        <div className="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">
+              {usulan.penyediaDikerjakan?.nama
+              ? usulan.penyediaDikerjakan.nama.charAt(0)
+              : "?"}
+            </div>
+
+            <div>
+              <p className="text-xs text-blue-700 font-semibold">
+                Sedang Dikerjakan Oleh
+              </p>
+              <p className="text-sm font-bold text-blue-900">
+                {usulan.penyediaDikerjakan.nama || "Penyedia"}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+        {usulan.status === "Tersedia" && (
           <div className="flex items-center gap-1 text-xs text-orange-600 font-semibold mb-4">
             <Users className="w-4 h-4" />
             {usulan.peminat} Peminat
@@ -93,9 +115,13 @@ export default function UsulanCard({ usulan, bidangName, onClick }: UsulanCardPr
 
         <button
           onClick={onClick}
-          className="w-full py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-[#1F4E73] to-[#3e81aa] text-white">
+          className={`w-full py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-all ${
+                    usulan.status === 'Tersedia'
+                      ? 'bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-200'
+                      : 'bg-gradient-to-r from-[#3e81aa] to-[#1F4E73] text-white hover:bg-gradient-to-l'
+                  }`}>
           <Eye className="w-4 h-4" />
-          Lihat
+          {usulan.status === 'Tersedia' ? 'Lihat Info' : 'Lihat Detail & Ajukan'}
         </button>
       </div>
     </div>

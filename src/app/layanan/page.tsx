@@ -67,6 +67,7 @@ export default function LayananPage() {
         setKategoriList(data);
       } catch (err) {
         console.error("fetch kategori error:", err);
+        setKategoriList([]);
       } finally {
         setLoadingKategori(false);
       }
