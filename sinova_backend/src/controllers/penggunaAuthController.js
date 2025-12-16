@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import pool from "../config/db.js";
 import jwt from "jsonwebtoken";
 import { findPenggunaByEmail, createPengguna } from "../models/penggunaModel.js";
 
@@ -19,6 +20,24 @@ export const registerPengguna = async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 };
+export const getPenggunaProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const result = await pool.query(
+      "SELECT id, name, email, foto_profil FROM users WHERE id = $1",
+      [userId]
+    );
+
+    if (!result.rows.length)
+      return res.status(404).json({ message: "User tidak ditemukan" });
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 
 export const loginPengguna = async (req, res) => {
     try {
@@ -40,7 +59,7 @@ export const loginPengguna = async (req, res) => {
         const token = jwt.sign(
             { id: user.id, name: user.name, role: user.role },
             process.env.JWT_SECRET,
-            { expiresIn: "1h" }
+            { expiresIn: "7d" }
         );
 
         res.json({

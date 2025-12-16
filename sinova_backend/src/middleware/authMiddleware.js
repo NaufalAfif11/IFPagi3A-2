@@ -10,10 +10,9 @@ export const authMiddleware = (req, res, next) => {
     req.user = decoded; // {id, email, role}
     next();
   } catch (err) {
-    return res.status(403).json({ message: "Token tidak valid" });
+    return res.status(401).json({message: "Token expired atau tidak valid"});
   }
 };
-
 export const checkRole = (allowedRole) => (req, res, next) => {
   if (!req.user || req.user.role !== allowedRole) {
     return res.status(403).json({ message: "Akses ditolak" });

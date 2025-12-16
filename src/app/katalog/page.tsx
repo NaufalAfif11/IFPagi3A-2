@@ -1,341 +1,423 @@
 "use client";
 
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import React, { useState, useEffect, useCallback } from "react";
-import Navbar from "../../components/ui/navbar"; 
-import Footer from "../../components/ui/footer"; 
-import InovasiCard from "../../components/ui/InovasiCard";
-import StatsSection from "../../components/ui/StatsSection";
+import Navbar from "@/components/ui/navbar";
+import Footer from "@/components/ui/footer";
+import {
+  Search,
+  X,
+  Phone,
+  MessageCircle,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
-// Definisi Tipe Data (Interface) untuk objek Inovasi
+/* ================== TYPES ================== */
 interface Inovasi {
-    id: number;
-    title: string;
-    desc: string;
-    images: string[];
-    harga: string;
-    kategori: string;
-    penyedia: string;
-    telp: string;
+  id: number;
+  title: string;
+  desc: string;
+  images: string[];
+  harga: string;
+  kategori: string;
+  penyedia: string;
+  telp: string;
+  status?: string;
 }
 
-const ALL_CATEGORIES = [
-    "Transportasi Pintar", "Otomotif", "Teknologi Udara", 
-    "Teknologi Rumah", "Kesehatan", "Robotika"
-];
+interface Kategori {
+  kategori_id: number;
+  nama_kategori: string;
+}
 
-// URL Backend API - Ubah sesuai dengan konfigurasi Anda
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+/* ================== CONSTANTS ================== */
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
+/* ================== PAGE ================== */
 export default function KatalogPage() {
-    const [inovasiList, setInovasiList] = useState<Inovasi[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [selected, setSelected] = useState<Inovasi | null>(null);
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [inovasiList, setInovasiList] = useState<Inovasi[]>([]);
+  const [categories, setCategories] = useState<Kategori[]>([]);
 
-    // State untuk Search dan Filter
-    const [searchTerm, setSearchTerm] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    // Fetch Data dari Express Backend
-    const fetchInovasi = useCallback(async () => {
-        setLoading(true);
-        setError(null);
+  const [selected, setSelected] = useState<Inovasi | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-        // Buat URL dengan query parameter
-        const queryParams = new URLSearchParams();
-        if (searchTerm) {
-            queryParams.append('search', searchTerm);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+
+  /* ================== FETCH CATEGORIES ================== */
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/kategori`);
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      const data = await res.json();
+      console.log("KATEGORI DARI API:", data);
+      setCategories(data);
+    } catch (err) {
+      console.error("Gagal fetch kategori:", err);
+    }
+  };
+
+  /* ================== FETCH PRODUK ================== */
+  const fetchInovasi = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    const params = new URLSearchParams();
+    if (searchTerm) params.append("search", searchTerm);
+    if (selectedCategory) params.append("kategori", selectedCategory);
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/public/produk/katalog?${params}`);
+      
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      const data = await res.json();
+      console.log("DATA PRODUK:", data);
+
+      const mapped: Inovasi[] = data.map((item: any) => {
+        // Ambil foto utama atau foto pertama dari foto_list
+        let mainImage = '';
+        if (item.foto_produk) {
+          mainImage = `${API_BASE_URL}/${item.foto_produk.replace(/\\/g, "/")}`;
+        } else if (item.foto_list && item.foto_list.length > 0) {
+          mainImage = `${API_BASE_URL}/${item.foto_list[0].path.replace(/\\/g, "/")}`;
         }
-        if (selectedCategory) {
-            queryParams.append('kategori', selectedCategory);
-        }
 
-        const url = `${API_BASE_URL}/api/katalog?${queryParams.toString()}`;
-        
-        try {
-            const response = await fetch(url);
-            
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Gagal memuat data inovasi dari server.');
-            }
+        // Ambil semua foto dari foto_list
+        const allImages = item.foto_list && item.foto_list.length > 0
+          ? item.foto_list.map((f: any) => `${API_BASE_URL}/${f.path.replace(/\\/g, "/")}`)
+          : [mainImage];
 
-            const data: Inovasi[] = await response.json();
-            setInovasiList(data);
-        } catch (err) {
-            console.error('Error fetching inovasi:', err);
-            setError((err as Error).message);
-            setInovasiList([]);
-        } finally {
-            setLoading(false);
-        }
-    }, [searchTerm, selectedCategory]);
+        return {
+          id: item.id,
+          title: item.nama_produk,
+          desc: item.deskripsi,
+          images: allImages.filter(Boolean), // filter out empty strings
+          harga: `Rp ${Number(item.harga).toLocaleString("id-ID")}`,
+          kategori: item.nama_kategori || 'Tanpa Kategori',
+          penyedia: item.penyedia_name || `User #${item.user_id}`,
+          telp: item.kontak,
+        };
+      });
 
-    useEffect(() => {
-        fetchInovasi();
-    }, [fetchInovasi]);
+      setInovasiList(mapped);
+    } catch (err: any) {
+      console.error("Error fetching produk:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [searchTerm, selectedCategory]);
 
-    // Fungsi handler untuk navigasi gambar modal
-    const handlePrev = () => setCurrentImageIndex(prev => Math.max(0, prev - 1));
-    const handleNext = () => selected && setCurrentImageIndex(prev => Math.min(selected.images.length - 1, prev + 1));
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
-    return (
-        <main className="min-h-screen flex flex-col bg-white overflow-hidden">
-            <Navbar />
+  useEffect(() => {
+    const t = setTimeout(fetchInovasi, 500);
+    return () => clearTimeout(t);
+  }, [fetchInovasi]);
 
-            {/* Judul & Search/Filter */}
-            <motion.section
-                initial={{ opacity: 0, y: -40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                className="text-center py-12 px-8"
+  /* ================== RENDER ================== */
+  return (
+    <main className="min-h-screen bg-[#F3F7FB] flex flex-col pt-2">
+      {/* NAVBAR */}
+      <Navbar />
+
+      {/* ================== HEADER ================== */}
+      <header className="bg-[#F3F7FB] border-b-4 border-[#1F4E73]">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <h1 className="text-3xl font-bold text-center text-[#1F4E73]">
+            Katalog Inovasi Terverifikasi
+          </h1>
+          <p className="text-center text-gray-600 mt-2 mb-6">
+            Temukan inovasi terbaik dengan tampilan marketplace
+          </p>
+
+          <div className="max-w-5xl mx-auto flex flex-col sm:flex-row gap-3">
+            {/* SEARCH */}
+            <div className="flex-1 flex items-center bg-white border rounded-lg px-4 py-3">
+              <Search className="w-5 h-5 text-gray-400 mr-2" />
+              <input
+                className="flex-1 outline-none"
+                placeholder="Cari produk..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              {searchTerm && (
+                <button onClick={() => setSearchTerm("")}>
+                  <X className="w-4 h-4 text-gray-400" />
+                </button>
+              )}
+            </div>
+
+            {/* FILTER */}
+            <select
+              className="bg-white border rounded-lg px-4 py-3"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
             >
-                <h1 className="text-4xl font-bold text-[#1F4E73] mb-2">Katalog Inovasi Terbaru</h1>
-                <p className="text-gray-600 mb-6">Jelajahi beragam hasil inovasi kreatif dan inspiratif!</p>
+              <option value="">Semua Kategori</option>
+              {categories.map((cat) => (
+                <option key={cat.kategori_id} value={cat.nama_kategori}>
+                  {cat.nama_kategori}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </header>
 
-                {/* Search and Filter Inputs */}
-                <div className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto">
-                    {/* Search Input */}
-                    <input
-                        type="text"
-                        placeholder="Cari berdasarkan judul atau deskripsi..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="flex-1 p-3 border border-gray-300 rounded-lg focus:border-[#1F4E73] outline-none transition-all"
-                    />
-                    
-                    {/* Category Filter Dropdown */}
-                    <select
-                        value={selectedCategory}
-                        onChange={(e) => setSelectedCategory(e.target.value)}
-                        className="p-3 border border-gray-300 rounded-lg bg-white focus:border-[#1F4E73] outline-none transition-all sm:w-1/3"
-                    >
-                        <option value="">Semua Kategori</option>
-                        {ALL_CATEGORIES.map((cat) => (
-                            <option key={cat} value={cat}>{cat}</option>
-                        ))}
-                    </select>
+      {/* ================== CONTENT ================== */}
+      <section className="flex-1 px-6 py-8">
+        <div className="max-w-7xl mx-auto">
+          {loading && (
+            <p className="text-center text-[#1F4E73]">Memuat produk...</p>
+          )}
+
+          {error && (
+            <p className="text-center text-red-500">Error: {error}</p>
+          )}
+
+          {!loading && inovasiList.length === 0 && (
+            <div className="text-center py-16">
+              <div className="text-6xl mb-4">📦</div>
+              <p className="text-gray-500 text-lg">Produk tidak ditemukan</p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {inovasiList.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => {
+                  setSelected(item);
+                  setCurrentImageIndex(0);
+                }}
+                className="bg-white rounded-lg shadow hover:shadow-lg cursor-pointer transition-all"
+              >
+                {item.images.length > 0 && item.images[0] ? (
+                  <img
+                    src={item.images[0]}
+                    alt={item.title}
+                    className="aspect-square object-cover rounded-t-lg"
+                  />
+                ) : (
+                  <div className="aspect-square bg-gray-100 rounded-t-lg flex items-center justify-center">
+                    <span className="text-5xl">📦</span>
+                  </div>
+                )}
+                <div className="p-3">
+                  <h3 className="text-sm font-medium line-clamp-2">
+                    {item.title}
+                  </h3>
+                  <p className="text-[#1F4E73] font-bold mt-1">{item.harga}</p>
                 </div>
-            </motion.section>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-            {/* Daftar Katalog */}
-            <section className="px-8 py-10 flex-1">
-                {loading && (
-                    <div className="flex flex-col items-center justify-center py-20">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1F4E73]"></div>
-                        <p className="text-[#1F4E73] font-medium mt-4">Memuat data inovasi...</p>
-                    </div>
-                )}
-                
-                {error && !loading && (
-                    <div className="text-center text-red-500 font-medium p-4 bg-red-50 rounded-lg max-w-md mx-auto">
-                        ⚠️ Error: {error}
-                        <button 
-                            onClick={fetchInovasi}
-                            className="block mx-auto mt-3 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-                        >
-                            Coba Lagi
-                        </button>
-                    </div>
-                )}
-                
-                {!loading && !error && inovasiList.length === 0 && (
-                    <div className="text-center text-gray-500 font-medium py-20">
-                        <svg className="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <p>Tidak ada inovasi yang ditemukan untuk kriteria pencarian ini.</p>
-                    </div>
-                )}
-                
-                {!loading && inovasiList.length > 0 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {inovasiList.map((item, i) => (
-                            <motion.div
-                                key={item.id}
-                                initial={{ opacity: 0, y: 40 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.6, delay: i * 0.15 }}
-                            >
-                                <div
-                                    onClick={() => {
-                                        setSelected(item);
-                                        setCurrentImageIndex(0);
-                                    }}
-                                    className="cursor-pointer hover:scale-[1.03] transition-transform"
-                                >
-                                    <div className="border border-[#1F4E73]/20 rounded-xl shadow-md hover:shadow-lg transition-all duration-300">
-                                        <InovasiCard title={item.title} desc={item.desc} image={item.images[0]} />
-                                    </div>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
-                )}
-            </section>
+      <Footer />
 
-            {/* Stats & Footer */}
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8 }} viewport={{ once: true }}>
-                <StatsSection />
-            </motion.div>
-            <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} transition={{ duration: 0.8 }}>
-                <Footer />
-            </motion.div>
-
-            {/* Modal Detail Inovasi */}
-            <AnimatePresence>
-            {selected && (
-                <motion.div
-                    className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-md z-50 p-4 overflow-y-auto"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    onClick={() => setSelected(null)}
+      {/* ================== MODAL DETAIL ================== */}
+      <AnimatePresence>
+        {selected && (
+          <motion.div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 overflow-y-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelected(null)}
+          >
+            <div className="min-h-screen flex items-start sm:items-center justify-center p-2 sm:p-4">
+              <motion.div
+                className="bg-white rounded-xl sm:rounded-2xl w-full max-w-5xl my-4 sm:my-8 shadow-2xl overflow-hidden"
+                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                transition={{ duration: 0.3 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Close Button */}
+                <button
+                  onClick={() => setSelected(null)}
+                  className="absolute right-2 top-2 sm:right-4 sm:top-4 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg z-10 transition-all"
                 >
-                    <motion.div
-                        className="bg-white w-full md:w-[85%] lg:w-[70%] rounded-2xl shadow-2xl overflow-hidden relative"
-                        initial={{ scale: 0.85, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0.85, opacity: 0 }}
-                        transition={{ duration: 0.25 }}
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        {/* Header */}
-                        <div className="relative p-6 bg-[#1F4E73] text-white">
-                            <button
-                                onClick={() => setSelected(null)}
-                                className="absolute right-4 top-4 bg-white/20 hover:bg-white/40 w-10 h-10 rounded-lg flex items-center justify-center transition-colors"
-                            >
-                                ✕
-                            </button>
+                  <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
+                </button>
 
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                                <div>
-                                    <span className="bg-white/20 px-3 py-1 text-xs rounded-full">
-                                        {selected.kategori}
-                                    </span>
-                                    <h2 className="text-3xl font-bold mt-2">{selected.title}</h2>
-                                </div>
+                <div className="grid md:grid-cols-2 gap-4 sm:gap-6 p-4 sm:p-6">
+                  {/* Image Section */}
+                  <div className="space-y-3">
+                    {/* Main Image */}
+                    <div className="bg-gray-50 rounded-xl overflow-hidden aspect-square flex items-center justify-center relative group">
+                      {selected.images.length > 0 && selected.images[currentImageIndex] ? (
+                        <img
+                          src={selected.images[currentImageIndex]}
+                          alt={selected.title}
+                          className="w-full h-full object-contain"
+                        />
+                      ) : (
+                        <div className="text-8xl">📦</div>
+                      )}
 
-                                <div className="bg-white/20 px-4 py-2 rounded-xl text-sm backdrop-blur-md">
-                                    <p className="opacity-80">Penyedia:</p>
-                                    <p className="font-semibold">{selected.penyedia}</p>
-                                </div>
-                            </div>
+                      {/* Navigation Arrows */}
+                      {selected.images.length > 1 && (
+                        <>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCurrentImageIndex((prev) =>
+                                prev === 0 ? selected.images.length - 1 : prev - 1
+                              );
+                            }}
+                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all"
+                          >
+                            <ChevronLeft className="w-5 h-5 text-gray-700" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCurrentImageIndex((prev) =>
+                                prev === selected.images.length - 1 ? 0 : prev + 1
+                              );
+                            }}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all"
+                          >
+                            <ChevronRight className="w-5 h-5 text-gray-700" />
+                          </button>
+                        </>
+                      )}
+
+                      {/* Image Counter */}
+                      {selected.images.length > 1 && (
+                        <div className="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
+                          {currentImageIndex + 1}/{selected.images.length}
                         </div>
+                      )}
+                    </div>
 
-                        {/* Carousel */}
-                        <div className="bg-gray-50 p-6">
-                            <div className="w-full flex items-center justify-center bg-white rounded-xl p-4 relative group">
-                                <img
-                                    src={selected.images[currentImageIndex]}
-                                    alt={selected.title}
-                                    className="max-h-[75vh] w-auto object-contain"
-                                />
+                    {/* Thumbnails */}
+                    {selected.images.length > 1 && (
+                      <div className="flex gap-2 overflow-x-auto pb-2">
+                        {selected.images.map((img, i) => (
+                          <button
+                            key={i}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCurrentImageIndex(i);
+                            }}
+                            className={`flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                              currentImageIndex === i
+                                ? "border-[#1F4E73] ring-2 ring-[#1F4E73]/30"
+                                : "border-gray-200 hover:border-gray-300"
+                            }`}
+                          >
+                            <img
+                              src={img}
+                              alt=""
+                              className="w-full h-full object-cover"
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
-                                {/* Prev Button */}
-                                <button
-                                    disabled={currentImageIndex === 0}
-                                    onClick={handlePrev}
-                                    className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 w-11 h-11 rounded-full shadow hover:bg-white flex items-center justify-center text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                                >
-                                    ←
-                                </button>
+                  {/* Details Section */}
+                  <div className="space-y-4 overflow-y-auto max-h-[70vh]">
+                    {/* Category Badge */}
+                    <div>
+                      <span className="inline-block bg-[#1F4E73]/10 text-[#1F4E73] text-xs px-3 py-1 rounded-full font-medium">
+                        {selected.kategori}
+                      </span>
+                    </div>
 
-                                {/* Next Button */}
-                                <button
-                                    disabled={currentImageIndex === selected.images.length - 1}
-                                    onClick={handleNext}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 w-11 h-11 rounded-full shadow hover:bg-white flex items-center justify-center text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                                >
-                                    →
-                                </button>
-                            </div>
+                    {/* Title */}
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-800 leading-tight">
+                      {selected.title}
+                    </h2>
 
-                            {/* Dot Indicator */}
-                            <div className="flex justify-center mt-3 gap-2">
-                                {selected.images.map((_, i) => (
-                                    <div
-                                        key={i}
-                                        className={`w-3 h-3 rounded-full cursor-pointer transition-all ${
-                                            currentImageIndex === i ? "bg-[#1F4E73]" : "bg-gray-300 hover:bg-gray-400"
-                                        }`}
-                                        onClick={() => setCurrentImageIndex(i)}
-                                    />
-                                ))}
-                            </div>
+                    {/* Price */}
+                    <div className="bg-[#1F4E73]/5 border-l-4 border-[#1F4E73] rounded-lg p-4">
+                      <p className="text-sm text-gray-600 mb-1">Harga Produk</p>
+                      <p className="text-2xl sm:text-3xl font-bold text-[#1F4E73]">
+                        {selected.harga}
+                      </p>
+                    </div>
 
-                            {/* Thumbnails */}
-                            <div className="flex gap-3 mt-5 overflow-x-auto pb-2">
-                                {selected.images.map((img, index) => (
-                                    <button
-                                        key={index}
-                                        onClick={() => setCurrentImageIndex(index)}
-                                        className={`min-w-[80px] h-[80px] rounded-lg overflow-hidden border transition-all ${
-                                            currentImageIndex === index ? "border-4 border-[#1F4E73]" : "border-transparent opacity-80 hover:opacity-100"
-                                        }`}
-                                    >
-                                        <img src={img} alt={`${selected.title} Thumbnail ${index + 1}`} className="w-full h-full object-cover" />
-                                    </button>
-                                ))}
-                            </div>
+                    {/* Description */}
+                    <div className="border-t pt-4">
+                      <h3 className="font-semibold text-gray-800 mb-2 text-sm sm:text-base">
+                        Detail Produk
+                      </h3>
+                      <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
+                        {selected.desc}
+                      </p>
+                    </div>
+
+                    {/* Seller Info */}
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <h3 className="font-semibold text-gray-800 mb-3 text-sm sm:text-base flex items-center gap-2">
+                        <span className="w-8 h-8 bg-[#1F4E73] rounded-full flex items-center justify-center text-white text-xs">
+                          {selected.penyedia.charAt(0)}
+                        </span>
+                        Informasi Penjual
+                      </h3>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">Nama pembuat</span>
+                          <span className="font-medium text-gray-800">
+                            {selected.penyedia}
+                          </span>
                         </div>
-
-                        {/* Detail */}
-                        <div className="p-6 space-y-6">
-                            {/* Deskripsi */}
-                            <div>
-                                <h3 className="font-bold text-xl text-[#1F4E73] mb-2">Deskripsi Produk</h3>
-                                <p className="text-gray-700 leading-relaxed">{selected.desc}</p>
-                            </div>
-
-                            {/* Harga */}
-                            <div className="bg-gradient-to-br from-[#1F4E73]/10 to-[#2c6a99]/20 border-l-4 border-[#1F4E73] p-4 rounded-xl">
-                                <p className="text-gray-600 text-sm">Harga</p>
-                                <p className="text-3xl font-bold text-[#1F4E73]">{selected.harga}</p>
-                            </div>
-
-                            {/* Penyedia */}
-                            <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-                                <h3 className="font-semibold text-lg mb-3 text-[#1F4E73]">Informasi Kontak</h3>
-
-                                <div className="grid sm:grid-cols-2 gap-3">
-                                    <div>
-                                        <p className="text-sm text-gray-500">Perusahaan</p>
-                                        <p className="font-medium text-gray-800">{selected.penyedia}</p>
-                                    </div>
-
-                                    <div>
-                                        <p className="text-sm text-gray-500">Nomor Telepon</p>
-                                        <p className="font-medium text-gray-800">{selected.telp}</p>
-                                    </div>
-                                </div>
-
-                                <div className="flex gap-3 mt-5">
-                                    <a
-                                        href={`https://wa.me/${selected.telp.replace(/^0/, "62")}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex-1 bg-[#25D366] hover:bg-[#1DA851] text-white py-3 rounded-lg text-center font-medium transition-colors"
-                                    >
-                                        Hubungi via WhatsApp
-                                    </a>
-                                    <a
-                                        href={`tel:${selected.telp}`}
-                                        className="flex-1 bg-[#1F4E73] hover:bg-[#183a54] text-white py-3 rounded-lg text-center font-medium transition-colors"
-                                    >
-                                        Telepon Langsung
-                                    </a>
-                                </div>
-                            </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">Kontak</span>
+                          <span className="font-medium text-gray-800">
+                            {selected.telp}
+                          </span>
                         </div>
-                    </motion.div>
-                </motion.div>
-            )}
-            </AnimatePresence>
-        </main>
-    );
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="sticky bottom-0 bg-white pt-4 pb-2 flex gap-3">
+                      <a
+                        href={`tel:${selected.telp}`}
+                        className="flex-1 bg-white border-2 border-[#1F4E73] text-[#1F4E73] py-3 rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-[#1F4E73]/5 transition-all text-sm sm:text-base"
+                      >
+                        <Phone className="w-4 h-4 sm:w-5 sm:h-5" />
+                        Telepon
+                      </a>
+                      <a
+                        href={`https://wa.me/${selected.telp.replace(/^0/, "62")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 bg-white border-2 border-[#1F4E73] text-[#1F4E73] py-3 rounded-lg font-medium flex items-center justify-center gap-2 hover:bg-[#1F4E73]/5 transition-all text-sm sm:text-base"
+                      >
+                        <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                        Chat WA
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </main>
+  );
 }

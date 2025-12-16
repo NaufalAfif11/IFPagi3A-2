@@ -217,7 +217,7 @@ export default function PengajuanUsulan() {
 
   return (
     <div className='flex min-h-screen'>
-      <SidebarPenyedia activeMenu={activeMenu} setActiveMenu={setActiveMenu} />
+      <SidebarPenyedia  />
       
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       <div className="bg-gradient-to-r from-[#3e81aa] to-[#1F4E73] text-white shadow-xl">

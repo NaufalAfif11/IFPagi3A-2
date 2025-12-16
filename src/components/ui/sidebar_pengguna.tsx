@@ -1,15 +1,62 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Home, FileText, User, LogOut, Menu, X } from "lucide-react";
 
 const SidebarPengguna = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState<{ name: string; foto?: string } | null>(null);
+  const router = useRouter();
+
+  // Ambil user langsung dari backend
+  useEffect(() => {
+  const fetchUser = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+const res = await fetch(`${API_URL}/auth/pengguna/me`, {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
+
+
+      if (!res.ok) throw new Error(`Gagal ambil data user, status: ${res.status}`);
+
+      const data = await res.json();
+      setUser({ name: data.name, foto: data.foto || "" });
+    } catch (err) {
+      console.error(err);
+      setUser({ name: "Pengguna" }); // fallback
+    }
+  };
+
+  fetchUser();
+}, []);
+
+
+  // Logout
+    const handleLogout = () => {
+  // Hapus semua session
+  localStorage.clear();
+
+  // Redirect ke beranda publik (belum login)
+  router.replace("/");
+
+  // Cegah back ke dashboard
+  if (typeof window !== "undefined") {
+    window.history.pushState(null, "", "/");
+  }
+};
 
   return (
     <div className="flex h-screen">
-      {/* TOGGLE BUTTON MOBILE (Auto Hide When Open) */}
+      {/* Tombol menu kecil di mobile */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
@@ -19,12 +66,12 @@ const SidebarPengguna = () => {
         </button>
       )}
 
-      {/* SIDEBAR */}
+      {/* Sidebar */}
       <div
         className={`bg-[#1F4E73] text-white h-screen overflow-y-auto flex flex-col fixed md:static top-0 left-0 transition-all duration-300 z-40
         ${isOpen ? "w-64 translate-x-0" : "w-0 md:w-20 -translate-x-full md:translate-x-0"}`}
       >
-        {/* CLOSE BUTTON MOBILE */}
+        {/* Tombol tutup di mobile */}
         {isOpen && (
           <button
             onClick={() => setIsOpen(false)}
@@ -34,7 +81,7 @@ const SidebarPengguna = () => {
           </button>
         )}
 
-        {/* Collapse Button Desktop */}
+        {/* Tombol toggle di desktop */}
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="hidden md:block absolute top-4 right-4 text-white"
@@ -42,22 +89,19 @@ const SidebarPengguna = () => {
           {isOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
 
-        {/* HEADER */}
-{isOpen && (
-  <div className="p-4 border-b border-blue-800">
-    <Link href="/" className="block w-fit">
-      <h1 className="text-xl font-bold text-white cursor-pointer">
-        SINOVA
-      </h1>
-    </Link>
+        {/* Logo */}
+        {isOpen && (
+          <div className="p-4 border-b border-blue-800">
+            <Link href="/" className="block w-fit">
+              <h1 className="text-xl font-bold text-white cursor-pointer">SINOVA</h1>
+            </Link>
+            <p className="text-xs text-blue-200 mt-1">
+              Sistem Informasi & Inovasi Riset Daerah
+            </p>
+          </div>
+        )}
 
-    <p className="text-xs text-blue-200 mt-1">
-      Sistem Informasi & Inovasi Riset Daerah
-    </p>
-  </div>
-)}
-
-        {/* MENU */}
+        {/* Navigation */}
         <nav className="flex-1 p-4 overflow-y-auto">
           <ul className="space-y-2">
             <li>
@@ -86,24 +130,25 @@ const SidebarPengguna = () => {
           </ul>
         </nav>
 
-        {/* USER FOOTER */}
-        <Link href="/edit-profil">
-          <div className="p-4 border-t border-blue-800 cursor-pointer">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
-                DY
-              </div>
-              {isOpen && (
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-white">Dr. Ahmad Yani</p>
-                  <p className="text-xs text-blue-200">Pengguna</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </Link>
-
-        <button className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-red-300 hover:bg-blue-800 rounded-lg">
+        {/* User Footer */}
+<Link href="/edit-profil" className="p-4 border-t border-blue-800 cursor-pointer block">
+  <div className="flex items-center gap-3 mb-3">
+    <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+      {user?.name?.slice(0, 2).toUpperCase() || "US"}
+    </div>
+    {isOpen && (
+      <div className="flex-1">
+        <p className="text-sm font-medium text-white">{user?.name || "Pengguna"}</p>
+        <p className="text-xs text-blue-200">Pengguna</p>
+      </div>
+    )}
+  </div>
+</Link>
+        {/* Logout */}
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-red-300 hover:bg-blue-800 rounded-lg"
+        >
           <LogOut size={18} /> {isOpen && "Keluar"}
         </button>
       </div>
