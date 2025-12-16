@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import path from "path";
 import penggunaRoutes from "./src/routes/penggunaRoutes.js";
 import penyediaRoutes from "./src/routes/penyediaRoutes.js";
 import pool, { connectDB } from "./src/config/db.js";
@@ -11,14 +12,8 @@ import kategoriRoutes from "./src/routes/kategoriRoutes.js";
 import risetRoutes from "./src/routes/RisetRoutes.js";
 import beritaRoutes from "./src/routes/beritaRoutes.js";
 import lupaKataSandiRoutes from "./src/routes/lupaKataSandiRoutes.js";
-import path from "path";
 import profileRoutes from "./src/routes/profileRoutes.js";
-import produkPenyediaRoutes from "./src/routes/produkpenyediaRoutes.js";
-import adminProdukRoutes from "./src/routes/adminProdukRoutes.js";
-import publicProdukRoutes from "./src/routes/publicprodukRoutes.js";
-import dashboardAdminRoutes from "./src/routes/dashboardAdminRoutes.js";
-import dashboardPenggunaRoutes from "./src/routes/dashboardPenggunaRoutes.js";
-import berandaRoutes from './src/routes/berandaRoutes.js';
+
 dotenv.config();
 console.log("JWT_SECRET:", process.env.JWT_SECRET);
 
@@ -34,9 +29,7 @@ connectDB();
 // ==============================
 app.use("/api/kebutuhan", kebutuhanRoutes);
 app.use("/api/kategori", kategoriRoutes);
-app.use("/api", dashboardAdminRoutes);
-app.use("/api", dashboardPenggunaRoutes);
-app.use('/api/beranda', berandaRoutes);
+
 // Health check
 app.get("/", (req, res) => {
   res.json({
@@ -53,6 +46,9 @@ app.use("/auth/admin", adminRoutes);
 app.use("/auth", authRoutes);
 
 // Feature routes
+app.use("/api/kebutuhan", kebutuhanRoutes);
+app.use("/api/kategori", kategoriRoutes);
+app.use("/api/minat-penyedia", minatPenyediaRoutes);
 app.use("/api/berita", beritaRoutes);
 app.use("/api/lupasandi", lupaKataSandiRoutes);
 app.use("/api/riset", risetRoutes);

@@ -9,7 +9,7 @@ interface FilterUsulanProps {
   setSearch: (v: string) => void;
   counts: {
     total: number;
-    menunggu: number;
+    tersedia: number;
     dikerjakan: number;
   };
 }
@@ -41,7 +41,7 @@ export default function FilterUsulan({
         <div className="flex flex-wrap gap-2">
           {[
             { key: "semua", label: "Semua", total: counts.total },
-            { key: "Menunggu Persetujuan", label: "Menunggu", total: counts.menunggu },
+            { key: "Tersedia", label: "Tersedia", total: counts.tersedia },
             { key: "Sedang Dikerjakan", label: "Dikerjakan", total: counts.dikerjakan }
           ].map(btn => (
             <button
