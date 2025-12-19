@@ -30,6 +30,12 @@ import { saveAs } from 'file-saver';
 // =====================
 // Custom Tooltip
 // =====================
+interface PengajuanItem {
+  bulan: string;
+  jumlah: number | string;
+  diterima: number | string;
+}
+
 interface TooltipPayloadItem {
   name?: string;
   value?: string | number;
@@ -131,12 +137,14 @@ const DashboardAdmin = () => {
         setKategoriData(kategoriWithColors);
 
         // Set data pengajuan
-        setDataPengajuan(data.pengajuan.map(item => ({
-          bulan: item.bulan,
-          jumlah: Number(item.jumlah),
-          diterima: Number(item.diterima),
-          ditolak: Number(item.ditolak),
-        })));
+        setDataPengajuan(
+          data.pengajuan.map((item: PengajuanItem) => ({
+            bulan: item.bulan,
+            jumlah: Number(item.jumlah),
+            diterima: Number(item.diterima),
+          }))
+        );
+        
 
         setError(null);
       } catch (err) {
