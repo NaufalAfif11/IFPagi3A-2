@@ -72,7 +72,7 @@ const SidebarPengguna = () => {
   };
 
   const menuItems = [
-    { href: "/dashboard_pengguba", icon: Home, label: "Dashboard" },
+    { href: "/dashboard_pengguna", icon: Home, label: "Dashboard" },
     { href: "/riwayat_usulan", icon: Lightbulb, label: "Riwayat Usulan" },
     { href: "/edit-profil", icon: User, label: "Profil" },
   ];
