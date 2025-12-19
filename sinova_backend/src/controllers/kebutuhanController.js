@@ -1,142 +1,169 @@
 import {
-    createKebutuhan,
-    getAllKebutuhanByUser,
-    getAllKebutuhanForPenyedia,
-    updateKebutuhanByUser,
-    deleteKebutuhanByUser,
-    searchKebutuhanModel,
-    getPenyediaByKebutuhan,
+  createKebutuhan,
+  getAllKebutuhanByUser,
+  getAllKebutuhanForPenyedia,
+  updateKebutuhanByUser,
+  deleteKebutuhanByUser,
+  getPenyediaByKebutuhan,
 } from "../models/kebutuhanModel.js";
 
-// CREATE USULAN
+/* ===============================
+   CREATE (PENGGUNA)
+================================ */
 export const addKebutuhan = async (req, res) => {
-    try {
-        const data = req.body;
-
-        // Validasi required fields
-        const requiredFields = ['nama', 'email', 'kategori_id'];
-        const missingFields = requiredFields.filter(field => !data[field]);
-        if (missingFields.length > 0) {
-            return res.status(400).json({ 
-                error: `Field wajib: ${missingFields.join(', ')}` 
-            });
-        }
-
-        // Upload dokumen
-        if (req.file) data.dokumen = req.file.filename;
-
-        // Set pengguna_id dari akun login
-        data.user_id = req.user.id;
-
-        const result = await createKebutuhan(data);
-        res.status(201).json({ message: "Usulan berhasil dibuat", data: result });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: err.message });
-    }
-};
-
-//read all penyedia
-// READ ALL USULAN (UNTUK PENYEDIA) - SIMPLE VERSION
-export const fetchAllKebutuhanForPenyedia = async (req, res) => {
   try {
-    // Cek autentikasi dan role
-    if (req.user?.role !== "penyedia") {
-      return res.status(403).json({ 
-        success: false, 
-        message: "Akses hanya untuk penyedia" 
+    const data = req.body;
+
+    if (!data.nama || !data.email || !data.kategori_id) {
+      return res.status(400).json({
+        message: "Nama, Email, dan Kategori wajib diisi",
       });
     }
 
-    // Ambil data
-    const data = await getAllKebutuhanForPenyedia();
-    
-    // Return response
-    return res.json({
-      success: true,
-      data: data,
-      count: data.length,
-      message: "Berhasil mengambil data kebutuhan"
-    });
+    if (req.file) {
+      data.dokumen = req.file.filename;
+    }
 
+    data.user_id = req.user.id;
+
+    const result = await createKebutuhan(data);
+
+    res.status(201).json({
+      message: "Kebutuhan berhasil dibuat",
+      data: result,
+    });
   } catch (err) {
-    console.error("Error:", err.message);
-    res.status(500).json({ 
-      success: false, 
-      message: "Gagal mengambil data kebutuhan" 
+    console.error(err);
+    res.status(500).json({
+      message: "Gagal membuat kebutuhan",
     });
   }
 };
 
-
-// READ ALL USULAN PEMILIK (RIWAYAT)
+/* ===============================
+   READ RIWAYAT (PENGGUNA)
+================================ */
 export const fetchKebutuhan = async (req, res) => {
-    try {
-        const list = await getAllKebutuhanByUser(req.user.id);
-        res.json(list);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+  try {
+    const data = await getAllKebutuhanByUser(req.user.id);
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
-// READ USULAN BY ID, PEMILIK
+/* ===============================
+   READ BY ID
+================================ */
 export const fetchKebutuhanById = async (req, res) => {
-    try {
-        const kebutuhan = await getAllKebutuhanByUser(req.params.id, req.user.id);
-        if (!kebutuhan) return res.status(404).json({ message: "Usulan tidak ditemukan" });
-        res.json(kebutuhan);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+  try {
+    const list = await getAllKebutuhanByUser(req.user.id);
+    const kebutuhan = list.find(
+      (k) => k.id === Number(req.params.id)
+    );
+
+    if (!kebutuhan) {
+      return res.status(404).json({
+        message: "Kebutuhan tidak ditemukan",
+      });
     }
+
+    res.json(kebutuhan);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
-// UPDATE USULAN PEMILIK
+/* ===============================
+   UPDATE (PENGGUNA)
+================================ */
 export const editKebutuhan = async (req, res) => {
-    try {
-        const id = parseInt(req.params.id);
-        const data = req.body;
-        if (req.file) data.dokumen = req.file.filename;
+  try {
+    const id = Number(req.params.id);
+    const data = req.body;
 
-        const result = await updateKebutuhanByUser(id, req.user.id, data);
-        if (!result) return res.status(404).json({ message: "Usulan tidak ditemukan atau bukan milik Anda" });
-
-        res.json({ message: "Update sukses", data: result });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+    if (req.file) {
+      data.dokumen = req.file.filename;
     }
+
+    const result = await updateKebutuhanByUser(
+      id,
+      req.user.id,
+      data
+    );
+
+    if (!result) {
+      return res.status(404).json({
+        message: "Data tidak ditemukan atau bukan milik Anda",
+      });
+    }
+
+    res.json({
+      message: "Kebutuhan berhasil diupdate",
+      data: result,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
-// DELETE USULAN PEMILIK
+/* ===============================
+   DELETE (PENGGUNA)
+================================ */
 export const removeKebutuhan = async (req, res) => {
-    try {
-        const result = await deleteKebutuhanByUser(req.params.id, req.user.id);
-        if (!result) return res.status(404).json({ message: "Usulan tidak ditemukan atau bukan milik Anda" });
-        res.json({ message: "Usulan berhasil dihapus", data: result });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+  try {
+    const result = await deleteKebutuhanByUser(
+      req.params.id,
+      req.user.id
+    );
+
+    if (!result) {
+      return res.status(404).json({
+        message: "Data tidak ditemukan",
+      });
     }
+
+    res.json({
+      message: "Kebutuhan berhasil dihapus",
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
-// SEARCH (optional)
-export const searchKebutuhan = async (req, res) => {
-    try {
-        const keyword = req.query.keyword;
-        if (!keyword) return res.status(400).json({ success: false, message: "Keyword wajib diisi" });
-
-        const data = await searchKebutuhanModel(keyword);
-        return res.json({ success: true, message: "Pencarian berhasil", total: data.length, data });
-    } catch (err) {
-        res.status(500).json({ success: false, message: "Terjadi kesalahan server", error: err.message });
+/* ===============================
+   READ ALL (PENYEDIA)
+================================ */
+export const fetchAllKebutuhanForPenyedia = async (req, res) => {
+  try {
+    if (req.user.role !== "penyedia") {
+      return res.status(403).json({ message: "Akses hanya untuk penyedia" });
     }
+
+    const data = await getAllKebutuhanForPenyedia(req.user.id);
+
+    res.json({
+      success: true,
+      data,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
-// FETCH PENYEDIA BERMINAT
+
+/* ===============================
+   FETCH PENYEDIA BERMINTA
+================================ */
 export const fetchPenyediaByKebutuhan = async (req, res) => {
   try {
-    const kebutuhanId = req.params.id;
-    const data = await getPenyediaByKebutuhan(kebutuhanId);
-    return res.json({ success: true, total: data.length, data });
+    const data = await getPenyediaByKebutuhan(req.params.id);
+
+    res.json({
+      total: data.length,
+      data,
+    });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ message: err.message });
   }
 };

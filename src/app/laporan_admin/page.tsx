@@ -22,7 +22,7 @@ export default function LaporanAdmin() {
       if (bulan) params.append('bulan', bulan);
       if (tahun) params.append('tahun', tahun.toString());
 
-      const res = await fetch(`${API_URL}/api/laporan/dashboard?${params}`, {
+      const res = await fetch(`${API_URL}/api/dashboard/laporan/dashboard?${params}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },

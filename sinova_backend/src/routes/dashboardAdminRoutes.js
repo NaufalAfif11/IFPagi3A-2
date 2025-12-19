@@ -2,7 +2,7 @@ import express from "express";
 import { authMiddleware, checkRole } from "../middleware/authMiddleware.js";
 import {
   getDashboardAdmin,
-  getLaporanDashboard, 
+  getLaporanDashboard,
 } from "../controllers/dashboardadminController.js";
 
 const router = express.Router();

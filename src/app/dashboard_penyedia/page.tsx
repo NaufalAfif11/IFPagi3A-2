@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SidebarPenyedia from "@/components/ui/sidebar_penyedia";
 import { List, CheckCircle, Clock, AlertCircle, PlusCircle } from "lucide-react";
 
@@ -18,53 +18,143 @@ import {
 } from "recharts";
 
 const Dashboard_penyedia = () => {
-  const [activeMenu, setActiveMenu] = useState("Dashboard");
+  const [statistik, setStatistik] = useState({
+    total: 0,
+    diterima: 0,
+    menunggu: 0,
+    ditolak: 0,
+  });
+  const [produkList, setProdukList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Statistik Produk
-  const statistik = {
-    totalProduk: 32,
-    diverifikasi: 18,
-    menunggu: 9,
+  // Fetch data dari backend
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const token = localStorage.getItem("token");
+        
+        if (!token) {
+          throw new Error("Token tidak ditemukan. Silakan login kembali.");
+        }
+
+        // GANTI URL INI SESUAI BACKEND ANDA
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+        
+        console.log("Fetching from:", `${API_URL}/api/dashboardpenyedia`);
+        
+        const response = await fetch(`${API_URL}/api/dashboardpenyedia`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        console.log("Response status:", response.status);
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error("Error response:", errorData);
+          throw new Error(errorData.message || `HTTP Error: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log("API Response:", result);
+        
+        if (result.success) {
+          setStatistik(result.data.statistik);
+          setProdukList(result.data.produk);
+        } else {
+          throw new Error(result.message || "Gagal mengambil data");
+        }
+      } catch (err) {
+        console.error("Error fetching dashboard:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  // Hitung data untuk chart berdasarkan produk real
+  const getMonthlyData = () => {
+    const monthCounts = {};
+    produkList.forEach(produk => {
+      const month = new Date(produk.created_at || Date.now()).toLocaleString('id-ID', { month: 'short' });
+      monthCounts[month] = (monthCounts[month] || 0) + 1;
+    });
+    
+    return Object.entries(monthCounts).map(([bulan, jumlah]) => ({
+      bulan,
+      jumlah,
+    }));
   };
 
-  // Chart Data
-  const dataProduk = [
-    { bulan: "Jun", jumlah: 5 },
-    { bulan: "Jul", jumlah: 8 },
-    { bulan: "Agu", jumlah: 12 },
-    { bulan: "Sep", jumlah: 15 },
-    { bulan: "Okt", jumlah: 20 },
-  ];
-
   const dataStatus = [
-    { name: "Diverifikasi", value: 18 },
-    { name: "Menunggu", value: 9 },
-    { name: "Ditolak", value: 5 },
-  ];
-
-  const produkTerbaru = [
-    { id: 1, nama: "Aplikasi Cuaca Laut", kategori: "Maritim", status: "Diverifikasi", tanggal: "24 Okt 2025" },
-    { id: 2, nama: "Sensor Suhu Pintar", kategori: "IoT", status: "Menunggu", tanggal: "23 Okt 2025" },
-    { id: 3, nama: "Mesin Pakan Ikan", kategori: "Perikanan", status: "Diverifikasi", tanggal: "20 Okt 2025" },
-  ];
-
-  const aktivitas = [
-    { id: 1, aksi: "Produk Anda diverifikasi: Mesin Pakan Ikan", waktu: "3 jam lalu", type: "success" },
-    { id: 2, aksi: "Anda mengajukan produk baru: Sensor Suhu Pintar", waktu: "1 hari lalu", type: "info" },
-    { id: 3, aksi: "Produk Anda memerlukan revisi: Alat Ukur Arus Laut", waktu: "2 hari lalu", type: "warning" },
+    { name: "Diterima", value: parseInt(statistik.diterima) || 0 },
+    { name: "Menunggu", value: parseInt(statistik.menunggu) || 0 },
+    { name: "Ditolak", value: parseInt(statistik.ditolak) || 0 },
   ];
 
   const COLORS = ["#22C55E", "#FACC15", "#EF4444"];
 
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Memuat data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-50">
+        <div className="bg-white border border-red-200 rounded-lg p-8 max-w-md shadow-lg">
+          <div className="flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mx-auto mb-4">
+            <AlertCircle className="text-red-600" size={32} />
+          </div>
+          <h2 className="text-xl font-bold text-gray-800 text-center mb-2">Terjadi Kesalahan</h2>
+          <p className="text-red-600 text-center mb-6">{error}</p>
+          <div className="space-y-2">
+            <button 
+              onClick={() => window.location.reload()} 
+              className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition font-semibold"
+            >
+              Coba Lagi
+            </button>
+            <button 
+              onClick={() => {
+                localStorage.removeItem("token");
+                window.location.href = "/login";
+              }}
+              className="w-full bg-gray-200 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-300 transition"
+            >
+              Kembali ke Login
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen bg-gray-50">
-      <SidebarPenyedia  />
+      <SidebarPenyedia />
 
       {/* MAIN CONTENT */}
       <div className="flex-1 overflow-y-auto p-8">
         <div className="max-w-7xl mx-auto space-y-6">
           <h1 className="text-3xl font-bold text-gray-800">Dashboard Penyedia</h1>
-          <p className="text-sm text-gray-500">Selamat datang kembali, Ir. Budi Santoso</p>
+          <p className="text-sm text-gray-500">Selamat datang kembali!</p>
 
           {/* STATISTIK */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -74,22 +164,22 @@ const Dashboard_penyedia = () => {
                 <div className="bg-white/20 p-6 rounded-full">
                   <List size={32} className="text-white" />
                 </div>
-                <p className="text-5xl font-bold">{statistik.totalProduk}</p>
+                <p className="text-5xl font-bold">{statistik.total}</p>
               </div>
               <h3 className="text-xl font-bold">Total Produk</h3>
               <p className="text-white/90 text-sm">Total inovasi yang Anda buat</p>
             </div>
 
-            {/* Diverifikasi */}
+            {/* Diterima */}
             <div className="bg-[#2D6A9E] text-white p-8 rounded-3xl shadow-xl hover:shadow-2xl hover:-translate-y-2 transition">
               <div className="flex justify-between items-center mb-6">
                 <div className="bg-white/20 p-6 rounded-full">
                   <CheckCircle size={32} className="text-white" />
                 </div>
-                <p className="text-5xl font-bold">{statistik.diverifikasi}</p>
+                <p className="text-5xl font-bold">{statistik.diterima}</p>
               </div>
-              <h3 className="text-xl font-bold">Diverifikasi</h3>
-              <p className="text-white/90 text-sm">Produk yang sudah valid</p>
+              <h3 className="text-xl font-bold">Diterima</h3>
+              <p className="text-white/90 text-sm">Produk yang sudah diverifikasi</p>
             </div>
 
             {/* Menunggu */}
@@ -111,7 +201,7 @@ const Dashboard_penyedia = () => {
             <div className="bg-white p-6 rounded-xl shadow">
               <h3 className="text-lg font-semibold mb-4">Jumlah Produk per Bulan</h3>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={dataProduk}>
+                <BarChart data={getMonthlyData()}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="bulan" />
                   <YAxis />
@@ -128,7 +218,7 @@ const Dashboard_penyedia = () => {
                 <PieChart>
                   <Pie data={dataStatus} cx="50%" cy="50%" outerRadius={100} label dataKey="value">
                     {dataStatus.map((entry, index) => (
-                      <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip />
@@ -137,55 +227,33 @@ const Dashboard_penyedia = () => {
             </div>
           </div>
 
-          {/* LIST PRODUK & AKTIVITAS */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Produk Terbaru */}
-            <div className="bg-white p-6 rounded-xl shadow border border-gray-200">
-              <h2 className="text-lg font-bold mb-4">Produk Terbaru</h2>
+          {/* LIST PRODUK */}
+          <div className="bg-white p-6 rounded-xl shadow border border-gray-200">
+            <h2 className="text-lg font-bold mb-4">Daftar Produk Anda</h2>
+            {produkList.length === 0 ? (
+              <p className="text-gray-500 text-center py-8">Belum ada produk</p>
+            ) : (
               <div className="space-y-3">
-                {produkTerbaru.map((p) => (
+                {produkList.slice(0, 5).map((p) => (
                   <div key={p.id} className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 flex justify-between">
                     <div>
-                      <p className="font-semibold">{p.nama}</p>
-                      <p className="text-xs text-gray-500">{p.kategori} • {p.tanggal}</p>
+                      <p className="font-semibold">{p.nama_produk}</p>
+                      <p className="text-xs text-gray-500">{p.nama_kategori} • Rp {p.harga?.toLocaleString('id-ID')}</p>
                     </div>
-                    <span className={`px-3 py-1 text-xs rounded-full ${
-                      p.status === "Diverifikasi"
+                    <span className={`px-3 py-1 text-xs rounded-full h-fit ${
+                      p.status === "diterima"
                         ? "bg-green-100 text-green-700"
-                        : "bg-yellow-100 text-yellow-700"
+                        : p.status === "menunggu"
+                        ? "bg-yellow-100 text-yellow-700"
+                        : "bg-red-100 text-red-700"
                     }`}>
-                      {p.status}
+                      {p.status === "diterima" ? "Diterima" : 
+                       p.status === "menunggu" ? "Menunggu" : "Ditolak"}
                     </span>
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Aktivitas Terbaru */}
-            <div className="bg-white p-6 rounded-xl shadow border border-gray-200">
-              <h2 className="text-lg font-bold mb-4">Aktivitas Terbaru</h2>
-              <div className="space-y-4">
-                {aktivitas.map((a) => (
-                  <div key={a.id} className="flex items-start gap-3">
-                    <div className={`p-2 rounded-full ${
-                      a.type === "success"
-                        ? "bg-green-100 text-green-700"
-                        : a.type === "warning"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : "bg-blue-100 text-blue-700"
-                    }`}>
-                      {a.type === "success" ? <CheckCircle size={16} /> :
-                       a.type === "warning" ? <AlertCircle size={16} /> :
-                       <PlusCircle size={16} />}
-                    </div>
-                    <div>
-                      <p className="text-sm">{a.aksi}</p>
-                      <p className="text-xs text-gray-500">{a.waktu}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            )}
           </div>
 
           <footer className="text-center text-xs text-gray-400 mt-10">

@@ -1,44 +1,57 @@
 import pool from "../config/db.js";
 
+/* ===============================
+   CREATE MINAT
+================================ */
 export const createMinatPenyedia = async ({
   kebutuhan_id,
-  user_id,
-  deskripsi_proposal,
-  file_proposal
+  penyedia_id,
+  deskripsi,
+  proposal_file,
+  estimasi_biaya,
+  estimasi_waktu
 }) => {
-  const query = `
+  const result = await pool.query(
+    `
     INSERT INTO minat_penyedia
-    (kebutuhan_id, user_id, deskripsi_proposal, file_proposal, status)
-    VALUES ($1,$2,$3,$4,'menunggu')
+    (kebutuhan_id, penyedia_id, deskripsi, proposal_file, estimasi_biaya, estimasi_waktu, status)
+    VALUES ($1, $2, $3, $4, $5, $6, 'menunggu')
     RETURNING *
-  `;
+    `,
+    [
+      kebutuhan_id,
+      penyedia_id,
+      deskripsi,
+      proposal_file,
+      estimasi_biaya,
+      estimasi_waktu
+    ]
+  );
 
-  const values = [
-    kebutuhan_id,
-    user_id,
-    deskripsi_proposal,
-    file_proposal
-  ];
-
-  const result = await pool.query(query, values);
   return result.rows[0];
 };
 
 
+/* ===============================
+   GET PEMINAT BY KEBUTUHAN
+================================ */
 export const getMinatByKebutuhan = async (kebutuhanId) => {
   const result = await pool.query(
     `
-    SELECT 
-      mp.id,
-      mp.deskripsi_proposal,
-      mp.file_proposal,
+    SELECT
+      mp.minat_id,
+      mp.kebutuhan_id,
+      mp.penyedia_id,
+      mp.deskripsi,            
+      mp.proposal_file,
+      mp.tanggal_minat,
       mp.status,
-      mp.created_at,
+      u.name AS nama,
       u.email
     FROM minat_penyedia mp
-    JOIN users u ON mp.user_id = u.id
+    JOIN users u ON u.id = mp.penyedia_id
     WHERE mp.kebutuhan_id = $1
-    ORDER BY mp.created_at DESC
+    ORDER BY mp.tanggal_minat DESC
     `,
     [kebutuhanId]
   );
@@ -46,66 +59,63 @@ export const getMinatByKebutuhan = async (kebutuhanId) => {
   return result.rows;
 };
 
-
+/* ===============================
+   APPROVE MINAT (WAJIB ADA)
+================================ */
 export const approveMinat = async (minatId) => {
   const client = await pool.connect();
 
   try {
     await client.query("BEGIN");
 
-    // 1. Ambil data minat
-    const { rows, rowCount } = await client.query(
+    // Ambil data minat
+    const { rows } = await client.query(
       `
-      SELECT id, kebutuhan_id, user_id
+      SELECT kebutuhan_id, penyedia_id
       FROM minat_penyedia
-      WHERE id = $1
+      WHERE minat_id = $1
       `,
       [minatId]
     );
 
-    if (!rowCount) {
+    if (!rows.length) {
       throw new Error("Minat tidak ditemukan");
     }
 
-    const { kebutuhan_id, user_id } = rows[0];
+    const { kebutuhan_id, penyedia_id } = rows[0];
 
-    // 2. Set minat terpilih
+    // Terima penyedia terpilih
     await client.query(
       `
       UPDATE minat_penyedia
       SET status = 'diterima'
-      WHERE kebutuhan_id = $1 AND user_id = $2
+      WHERE minat_id = $1
       `,
-      [kebutuhan_id, user_id]
+      [minatId]
     );
 
-    // 3. Tolak minat lain
+    // Tolak penyedia lain
     await client.query(
       `
       UPDATE minat_penyedia
       SET status = 'ditolak'
-      WHERE kebutuhan_id = $1 AND user_id != $2
+      WHERE kebutuhan_id = $1 AND minat_id != $2
       `,
-      [kebutuhan_id, user_id]
+      [kebutuhan_id, minatId]
     );
 
-    // 4. Update kebutuhan
+    // Update kebutuhan
     await client.query(
       `
       UPDATE kebutuhan
       SET status = 'Sedang Dikerjakan',
           penyedia_dikerjakan = $1
       WHERE id = $2
-    `,
-      [user_id, kebutuhan_id]
+      `,
+      [penyedia_id, kebutuhan_id]
     );
 
     await client.query("COMMIT");
-
-    return {
-      kebutuhan_id,
-      user_id: user_id
-    };
   } catch (err) {
     await client.query("ROLLBACK");
     throw err;
@@ -113,5 +123,3 @@ export const approveMinat = async (minatId) => {
     client.release();
   }
 };
-
-

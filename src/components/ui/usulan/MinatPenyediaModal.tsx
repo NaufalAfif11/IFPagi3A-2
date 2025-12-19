@@ -13,19 +13,12 @@ interface Props {
   show: boolean;
   onClose: () => void;
   selectedUsulan: SelectedUsulan;
-  onSuccess?: () => void;
+  onSuccess?: (kebutuhan_id: string | number, file: File, deskripsi?: string) => void;
 }
 
-export default function MinatPenyediaModal({
-  show,
-  onClose,
-  selectedUsulan,
-  onSuccess,
-}: Props) {
+export default function MinatPenyediaModal({ show, onClose, selectedUsulan, onSuccess }: Props) {
   const [loading, setLoading] = useState(false);
   const [proposalData, setProposalData] = useState({
-    nama: "",
-    email: "",
     deskripsi: "",
     file: null as File | null,
   });
@@ -39,53 +32,15 @@ export default function MinatPenyediaModal({
   };
 
   const kirimProposal = async () => {
-    if (
-      !proposalData.nama ||
-      !proposalData.email ||
-      !proposalData.deskripsi ||
-      !proposalData.file
-    ) {
-      alert("Semua field wajib diisi!");
-      return;
-    }
-
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Silakan login terlebih dahulu");
+    if (!proposalData.file) {
+      alert("Silakan upload file proposal!");
       return;
     }
 
     try {
       setLoading(true);
-
-      const fd = new FormData();
-      fd.append("kebutuhan_id", String(selectedUsulan.id));
-      fd.append("nama", proposalData.nama);
-      fd.append("email", proposalData.email);
-      fd.append("deskripsi", proposalData.deskripsi);
-      fd.append("file", proposalData.file);
-
-      const res = await fetch(
-        "http://localhost:5000/api/minat-penyedia",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: fd,
-        }
-      );
-
-      const data = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
-        console.error(data);
-        throw new Error(data.message || "Gagal mengirim proposal");
-      }
-
-      alert("✅ Proposal berhasil dikirim!");
-      setProposalData({ nama: "", email: "", deskripsi: "", file: null });
-      onSuccess?.();
+      await onSuccess?.(selectedUsulan.id, proposalData.file, proposalData.deskripsi || "");
+      setProposalData({ file: null, deskripsi: "" });
       onClose();
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Terjadi kesalahan";
@@ -109,14 +64,9 @@ export default function MinatPenyediaModal({
           <div className="flex items-start justify-between">
             <div>
               <h2 className="text-2xl font-bold mb-2">Ajukan Proposal</h2>
-              <p className="text-green-100">
-                {selectedUsulan.jenisProdukanDiusulkan}
-              </p>
+              <p className="text-green-100">{selectedUsulan.jenisProdukanDiusulkan}</p>
             </div>
-            <button
-              onClick={onClose}
-              className="text-white hover:bg-white/20 rounded-lg p-2"
-            >
+            <button onClick={onClose} className="text-white hover:bg-white/20 rounded-lg p-2">
               <X className="w-6 h-6" />
             </button>
           </div>
@@ -131,52 +81,17 @@ export default function MinatPenyediaModal({
             </p>
           </div>
 
-          {/* Nama */}
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Nama Lengkap <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={proposalData.nama}
-              placeholder="Masukkan Nama Anda"
-              onChange={(e) =>
-                setProposalData({ ...proposalData, nama: e.target.value })
-              }
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#3e81aa]"
-            />
-          </div>
-
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Email <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="email"
-              value={proposalData.email}
-              placeholder="Masukkan Email Anda"
-              onChange={(e) =>
-                setProposalData({ ...proposalData, email: e.target.value })
-              }
-              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#3e81aa]"
-            />
-          </div>
-
           {/* Deskripsi */}
           <div>
             <label className="block text-sm font-medium mb-2">
-              Deskripsi Proposal <span className="text-red-500">*</span>
+              Deskripsi Proposal
             </label>
             <textarea
               rows={5}
               value={proposalData.deskripsi}
               placeholder="Jelaskan proposal Anda secara singkat"
               onChange={(e) =>
-                setProposalData({
-                  ...proposalData,
-                  deskripsi: e.target.value,
-                })
+                setProposalData({ ...proposalData, deskripsi: e.target.value })
               }
               className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#1F4E73]"
             />
@@ -198,13 +113,9 @@ export default function MinatPenyediaModal({
               <label htmlFor="file-upload" className="cursor-pointer">
                 <Upload className="w-10 h-10 mx-auto text-gray-400 mb-2" />
                 {proposalData.file ? (
-                  <p className="text-blue-600 font-medium">
-                    {proposalData.file.name}
-                  </p>
+                  <p className="text-blue-600 font-medium">{proposalData.file.name}</p>
                 ) : (
-                  <p className="text-gray-600">
-                    Klik untuk upload PDF / DOC / DOCX
-                  </p>
+                  <p className="text-gray-600">Klik untuk upload PDF / DOC / DOCX</p>
                 )}
               </label>
             </div>

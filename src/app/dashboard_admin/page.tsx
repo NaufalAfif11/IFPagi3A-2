@@ -104,13 +104,14 @@ const DashboardAdmin = () => {
           throw new Error("Token tidak ditemukan. Silakan login kembali.");
         }
 
-        const response = await fetch("http://localhost:5000/api/dashboard-admin", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-          },
-        });
+        const response = await fetch("http://localhost:5000/api/dashboard/dashboard-admin", {
+  method: "GET",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  },
+});
+
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

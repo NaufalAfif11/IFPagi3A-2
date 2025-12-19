@@ -113,16 +113,20 @@ export default function UsulanCard({ usulan, kategoriName, onClick }: UsulanCard
           </div>
         )}
 
-        <button
-          onClick={onClick}
-          className={`w-full py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-all ${
-                    usulan.status === 'Tersedia'
-                      ? 'bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-200'
-                      : 'bg-gradient-to-r from-[#3e81aa] to-[#1F4E73] text-white hover:bg-gradient-to-l'
-                  }`}>
-          <Eye className="w-4 h-4" />
-          {usulan.status === 'Tersedia' ? 'Lihat Info' : 'Lihat Detail & Ajukan'}
-        </button>
+<button
+  onClick={onClick}
+  className={`w-full py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-all ${
+    usulan.status === 'Tersedia'
+      ? 'bg-gradient-to-r from-[#3e81aa] to-[#1F4E73] text-white hover:bg-gradient-to-l'
+      : 'bg-gray-100 text-gray-600 border border-gray-300'
+  }`}
+>
+  <Eye className="w-4 h-4" />
+  {usulan.status === 'Tersedia'
+    ? 'Lihat Detail & Ajukan'
+    : 'Lihat Info'}
+</button>
+
       </div>
     </div>
   );

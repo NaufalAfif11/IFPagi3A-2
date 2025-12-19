@@ -1,24 +1,28 @@
-import { createMinatPenyedia, getMinatByKebutuhan, approveMinat } from "../models/minatPenyediaModel.js";
+import {
+  createMinatPenyedia,
+  getMinatByKebutuhan,
+  approveMinat
+} from "../models/minatPenyediaModel.js";
 
+/* ===============================
+   AJUKAN PROPOSAL (PENYEDIA)
+================================ */
 export const ajukanProposal = async (req, res) => {
   try {
-    console.log("BODY:", req.body);
-    console.log("FILE:", req.file);
-
-    const kebutuhan_id = req.body?.kebutuhan_id;
-    const deskripsi = req.body?.deskripsi;
-
-    if (!kebutuhan_id || !deskripsi || !req.file) {
+    if (!req.file) {
       return res.status(400).json({
-        message: "Data tidak lengkap",
+        success: false,
+        message: "File proposal wajib diupload (PDF / Word)"
       });
     }
 
     const data = {
-      kebutuhan_id: Number(kebutuhan_id),
-      user_id: req.user.id,
-      deskripsi_proposal: deskripsi,
-      file_proposal: req.file.filename,
+      kebutuhan_id: Number(req.body.kebutuhan_id),
+      penyedia_id: req.user.id,
+      proposal_file: req.file.filename,
+      deskripsi: req.body.deskripsi,
+      estimasi_biaya: req.body.estimasi_biaya || null,
+      estimasi_waktu: req.body.estimasi_waktu || null
     };
 
     const result = await createMinatPenyedia(data);
@@ -26,48 +30,56 @@ export const ajukanProposal = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Proposal berhasil diajukan",
-      data: result,
+      data: result
     });
   } catch (err) {
-    console.error("AJUKAN PROPOSAL ERROR:", err);
+    console.error("ERROR AJUKAN PROPOSAL:", err);
     res.status(500).json({
-      message: "Gagal mengajukan proposal",
+      success: false,
+      message: err.message
     });
   }
 };
 
-
+/* ===============================
+   GET PEMINAT BY KEBUTUHAN
+================================ */
 export const getPeminatByKebutuhan = async (req, res) => {
   try {
-    const { kebutuhanId } = req.params;
-
+    const kebutuhanId = Number(req.params.kebutuhanId);
     const data = await getMinatByKebutuhan(kebutuhanId);
 
     res.json({
-      message: "list peminat",
+      success: true,
+      total: data.length,
       data
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("ERROR GET PEMINAT:", err);
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
   }
 };
 
+/* ===============================
+   APPROVE PENYEDIA
+================================ */
 export const approvePenyedia = async (req, res) => {
   try {
-    const { id } = req.params; // ini minat_id
-
-    if (!id) {
-      return res.status(400).json({ message: "ID minat tidak ada" });
-    }
-
-    await approveMinat(id);
+    const minatId = Number(req.params.id);
+    await approveMinat(minatId);
 
     res.json({
       success: true,
-      message: "Proposal berhasil disetujui",
+      message: "Penyedia berhasil dipilih"
     });
   } catch (err) {
-    console.error("APPROVE ERROR:", err);
-    res.status(500).json({ message: "Gagal menyetujui proposal" });
+    console.error("ERROR APPROVE:", err);
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
   }
 };

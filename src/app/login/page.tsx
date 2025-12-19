@@ -60,6 +60,7 @@ export default function LoginPage() {
       localStorage.setItem("username", data.user?.name || "Pengguna");
       localStorage.setItem("role", data.user?.role);  // ← ambil role asli dari DB
       localStorage.setItem("isLoggedIn", "true");
+      window.dispatchEvent(new Event("auth-change"));
 
       return ep.role;
     } catch (err) {
@@ -84,7 +85,7 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/");
+    router.replace("/");
     setLoading(false);
   };
 

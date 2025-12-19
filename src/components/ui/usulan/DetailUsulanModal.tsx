@@ -49,6 +49,7 @@ export default function DetailUsulanModal({
   onOpenPeminat,
   onAjukanProposal,
 }: DetailUsulanModalProps) {
+  console.log("PEMINAT =", usulan.peminat);
   if (!usulan) return null;
 
   const formatCurrency = (value: string | number) => {
@@ -92,15 +93,17 @@ export default function DetailUsulanModal({
   };
 
   const handleLihatPeminat = () => {
-    if (usulan.id && onOpenPeminat) {
-      onOpenPeminat(usulan.id);
-    }
-  };
+  if (usulan.id && onOpenPeminat) {
+    onOpenPeminat(usulan.id);
+    onClose(); // 🔥 PENTING
+  }
+};
+
 
   const canSeePeminat = Boolean(onOpenPeminat);
 
   const hasPeminat = (usulan.peminat ?? 0) > 0;
-  const isTersedia = usulan.status !== 'approved' && usulan.status !== 'rejected';
+  const isTersedia = usulan.status === "Tersedia";
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -318,14 +321,14 @@ export default function DetailUsulanModal({
             {/* Right Side: Action Buttons */}
             <div className="flex flex-wrap gap-3 justify-end">
               {/* AJUKAN PROPOSAL Button */}
-              { onAjukanProposal && (
-                <button 
-                  onClick={handleAjukanProposal}
-                  className="px-4 py-2 bg-gradient-to-r from-[#3e81aa] to-[#1F4E73] text-white rounded font-bold hover:shadow-xl transition-all flex items-center gap-2">
-                  Ajukan Proposal
-                  <ArrowRight className="w-5 h-5" />
-                </button>
-              )}
+              {isTersedia && onAjukanProposal && (
+  <button 
+    onClick={handleAjukanProposal}
+    className="px-4 py-2 bg-gradient-to-r from-[#3e81aa] to-[#1F4E73] text-white rounded font-bold hover:shadow-xl transition-all flex items-center gap-2">
+    Ajukan Proposal
+    <ArrowRight className="w-5 h-5" />
+  </button>
+)}
 
 
               {/* EDIT Button */}

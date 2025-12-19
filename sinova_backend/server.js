@@ -13,7 +13,16 @@ import risetRoutes from "./src/routes/RisetRoutes.js";
 import beritaRoutes from "./src/routes/beritaRoutes.js";
 import lupaKataSandiRoutes from "./src/routes/lupaKataSandiRoutes.js";
 import profileRoutes from "./src/routes/profileRoutes.js";
+import minatPenyediaRoutes from "./src/routes/minatPenyediaRoutes.js";
+import produkPenyediaRoutes from './src/routes/produkpenyediaRoutes.js';
+import adminProdukRoutes from './src/routes/adminProdukRoutes.js';
+import publicProdukRoutes from './src/routes/publicProdukRoutes.js';
+import berandaRoutes from "./src/routes/berandaRoutes.js";
+import dashboardAdminRoutes from "./src/routes/dashboardAdminRoutes.js";
+import dashboardPenggunaRoutes from "./src/routes/dashboardPenggunaRoutes.js";
 
+import adminRiwayatUsulanRoutes from "./src/routes/adminRiwayatUsulanRoutes.js";
+import dashboardpenyediaRoutes from "./src/routes/dashboardpenyediaRoutes.js";
 dotenv.config();
 console.log("JWT_SECRET:", process.env.JWT_SECRET);
 
@@ -27,8 +36,6 @@ connectDB();
 // ==============================
 // API ROUTES
 // ==============================
-app.use("/api/kebutuhan", kebutuhanRoutes);
-app.use("/api/kategori", kategoriRoutes);
 
 // Health check
 app.get("/", (req, res) => {
@@ -53,6 +60,14 @@ app.use("/api/berita", beritaRoutes);
 app.use("/api/lupasandi", lupaKataSandiRoutes);
 app.use("/api/riset", risetRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/beranda", berandaRoutes);
+app.use("/api/dashboard", dashboardAdminRoutes);
+app.use("/api", dashboardPenggunaRoutes);
+
+app.use("/api", dashboardpenyediaRoutes);
+app.use("/api/admin", adminRiwayatUsulanRoutes);
+
+
 // Produk Routes
 app.use("/api/produk", produkPenyediaRoutes);         
 app.use("/api/admin/produk", adminProdukRoutes);      

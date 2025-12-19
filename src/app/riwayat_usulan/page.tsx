@@ -125,53 +125,56 @@ export default function RiwayatUsulanPage() {
     } as Usulan);
     setShowDetailUsulanModal(false);
   };
-
   const handleOpenPeminat = async (kebutuhanId: number) => {
     try {
       const token = localStorage.getItem("token");
-
+  
       const res = await fetch(
-        `${BASE_URL}/api/minat-penyedia/${kebutuhanId}`,
+        `${BASE_URL}/api/minat-penyedia/kebutuhan/${kebutuhanId}`,
         {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
-
+  
       const data = await res.json();
-
-      setListPeminat(data.data);
+  
+      console.log("🔥 RESPONSE PEMINAT:", data);
+      console.log("🔥 DATA PEMINAT:", data.data);
+  
+      setListPeminat(data.data ?? []);
       setShowPeminatModal(true);
     } catch (err) {
       console.error(err);
     }
   };
+  
 
   const handleApprovePenyedia = async (p: PenyediaItem) => {
   try {
     const token = localStorage.getItem("token");
+    if (!token) return;
 
-    await fetch(`${BASE_URL}/api/minat-penyedia/${p.id}/approve`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        kebutuhanId: selectedUsulan?.id,
-        userId: p.id,
-      }),
-    });
+    await fetch(
+      `${BASE_URL}/api/minat-penyedia/${p.minat_id}/approve`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-    alert("proposal berhasil disetujui");
+    alert("Proposal berhasil disetujui");
 
     setShowPeminatModal(false);
     setShowDetailUsulanModal(false);
-    fetchUsulan(); // refresh data
+    fetchUsulan();
   } catch (err) {
     console.error(err);
     alert("Gagal menyetujui proposal");
   }
 };
+
 
 
 
@@ -245,14 +248,15 @@ export default function RiwayatUsulanPage() {
         )}
 
         {/* MODAL PEMINAT */}
-        {showPeminatModal && selectedUsulan && (
-          <PeminatModal
-            usulan={selectedUsulan}
-            penyedia={listPeminat}
-            onClose={() => setShowPeminatModal(false)}
-            onApprove={handleApprovePenyedia}
-          />
-        )}
+        {showPeminatModal && (
+  <PeminatModal
+    show={showPeminatModal}
+    penyedia={listPeminat}
+    onClose={() => setShowPeminatModal(false)}
+    onApprove={handleApprovePenyedia}
+  />
+)}
+
       </div>
     </div>
   );
