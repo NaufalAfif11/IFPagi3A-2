@@ -1,44 +1,58 @@
 "use client";
 
 import Navbar from '../components/ui/navbar';
-import Footer from '../components/ui/footer'; 
+import Footer from '../components/ui/footer';
 import Image from 'next/image';
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { FaLightbulb, FaHandPointRight, FaMapMarkerAlt, FaEnvelope, FaPhoneAlt, FaArrowRight } from "react-icons/fa";
+import { FaLightbulb, FaHandPointRight, FaMapMarkerAlt, FaEnvelope, FaPhoneAlt } from "react-icons/fa";
+
+interface Berita {
+  id: number;
+  judul: string;
+  isi: string;
+  thumbnail: string;
+  link: string;
+  status: "draft" | "publik";
+  tanggal_dibuat: string;
+}
+
+interface Stats {
+  total: number;
+  diverifikasi: number;
+}
 
 export default function Beranda() {
-  const [berita, setBerita] = useState([]);
+  const [berita, setBerita] = useState<Berita[]>([]);
+  const [stats, setStats] = useState<Stats | null>(null);
 
-  const API_URL = "http://localhost:5000/api/berita"; // ✔ FIXED
-useEffect(() => {
-  const fetchBerita = async () => {
-    try {
-      const res = await fetch("http://localhost:5000/api/berita");
-      const json = await res.json();
-
-      // Pastikan json.data SELALU array
-      let list = [];
-
-      if (Array.isArray(json.data)) {
-        list = json.data;
-      } else if (json.data) {
-        list = [json.data]; // jika objek, jadikan array
+  useEffect(() => {
+    const fetchBerita = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/berita");
+        const json = await res.json();
+        let list = Array.isArray(json.data) ? json.data : json.data ? [json.data] : [];
+        setBerita(list.slice(0, 6));
+      } catch (error) {
+        console.error("Gagal load berita:", error);
+        setBerita([]);
       }
+    };
+    fetchBerita();
+  }, []);
 
-      // Anti error: slice hanya untuk array
-      setBerita(list.slice(0, 3));
-
-    } catch (error) {
-      console.error("Gagal load berita:", error);
-      setBerita([]); // fallback supaya tidak error
-    }
-  };
-
-  fetchBerita();
-}, []);
-
-
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/beranda/stats");
+        const data = await res.json();
+        setStats(data);
+      } catch (error) {
+        console.error("Gagal load stats:", error);
+      }
+    };
+    fetchStats();
+  }, []);
 
   return (
     <div className="bg-[#F3F7FB] min-h-screen text-[#1F4E73]">
@@ -65,7 +79,6 @@ useEffect(() => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Katalog Produk */}
           <Link href="/katalog">
             <div className="cursor-pointer bg-[#2D6A9E] text-white rounded-3xl p-8 flex flex-col items-center text-center shadow-xl hover:shadow-2xl transition-all hover:-translate-y-2">
               <div className="bg-white/20 rounded-full p-6 mb-6 transition-transform">
@@ -78,7 +91,6 @@ useEffect(() => {
             </div>
           </Link>
 
-          {/* Usulan Kebutuhan Produk Inovasi */}
           <Link href="/layanan">
             <div className="cursor-pointer bg-[#2D6A9E] text-white rounded-3xl p-8 flex flex-col items-center text-center shadow-xl hover:shadow-2xl transition-all hover:-translate-y-2">
               <div className="bg-white/20 rounded-full p-6 mb-6 transition-transform">
@@ -94,58 +106,63 @@ useEffect(() => {
       </section>
 
       {/* Berita */}
-<section className="container mx-auto py-20 px-8">
-  <div className="text-center mb-12">
-    <h2 className="text-4xl font-bold text-[#1F4E73] mb-3">Berita Terkini</h2>
-    <p className="text-gray-600">Update terbaru seputar inovasi dan riset daerah</p>
-  </div>
+      <section className="container mx-auto py-20 px-8">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold text-[#1F4E73] mb-3">
+            Berita Terkini
+          </h2>
+          <p className="text-gray-600">
+            Update terbaru seputar inovasi dan riset daerah
+          </p>
+        </div>
 
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-    {berita.length > 0 ? (
-      berita
-        .filter((item: any) => item.status === "publik")   // ⬅ FILTER DI SINI
-        .map((item: any, i: number) => (
-          <div
-            key={i}
-            className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:-translate-y-2 group"
-          >
-            <div className="relative h-56 overflow-hidden">
-              <img
-                src={item.thumbnail}
-                alt={item.judul}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-              />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {berita.length > 0 ? (
+            berita.filter(item => item.status === "publik").map((item, i) => (
+              <a key={i} href={item.link} target="_blank" rel="noopener noreferrer" className="block group">
+                <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:-translate-y-2">
+                  <div className="relative h-56 overflow-hidden">
+                    <img
+                      src={item.thumbnail}
+                      alt={item.judul}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                    <div className="absolute top-4 left-4 bg-[#2D6A9E] text-white px-4 py-1 rounded-full text-xs font-semibold">
+                      Berita
+                    </div>
+                  </div>
 
-              <div className="absolute top-4 left-4 bg-[#2D6A9E] text-white px-4 py-1 rounded-full text-xs font-semibold">
-                Berita
-              </div>
-            </div>
+                  <div className="p-6">
+                    <p className="text-sm text-gray-500 mb-2">
+                      {new Date(item.tanggal_dibuat).toLocaleDateString("id-ID", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </p>
 
-            <div className="p-6">
-              <p className="text-sm text-gray-500 mb-2">
-                {new Date(item.tanggal_dibuat).toLocaleDateString("id-ID", {
-                  day: "2-digit",
-                  month: "long",
-                  year: "numeric",
-                })}
-              </p>
+                    <h3 className="text-lg font-bold text-[#1F4E73] mb-3 group-hover:text-[#2D6A9E] transition-colors">
+                      {item.judul}
+                    </h3>
 
-              <h3 className="text-lg font-bold text-[#1F4E73] mb-3 group-hover:text-[#2D6A9E] transition-colors">
-                {item.judul}
-              </h3>
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                      {item.isi}
+                    </p>
 
-              <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                {item.isi}
-              </p>
-            </div>
-          </div>
-        ))
-    ) : (
-      <p className="text-center text-gray-600">Belum ada berita.</p>
-    )}
-  </div>
-</section>
- {/* Riset & Inovasi */}
+                    <span className="inline-flex items-center text-sm font-semibold text-[#2D6A9E] group-hover:underline">
+                      Baca selengkapnya →
+                    </span>
+                  </div>
+                </div>
+              </a>
+            ))
+          ) : (
+            <p className="text-center text-gray-600 col-span-3">Belum ada berita.</p>
+          )}
+        </div>
+      </section>
+
+      {/* Riset & Inovasi */}
       <section className="bg-[#F3F7FB] py-20 px-8 text-[#1F4E73]">
         <div className="container mx-auto">
           <h2 className="text-4xl font-bold text-center mb-4">RISET DAN INOVASI DAERAH</h2>
@@ -170,32 +187,34 @@ useEffect(() => {
               </p>
 
               <div className="flex flex-wrap gap-3 mb-10">
-                {['Pendidikan', 'Kesehatan', 'Lingkungan', 'Transportasi', 'Pariwisata', 'Perikanan', 'Industri Kreatif'].map((item, i) => (
+                {['Pendidikan','Kesehatan','Lingkungan','Transportasi','Pariwisata','Perikanan','Industri Kreatif'].map((item, i) => (
                   <div key={i} className="bg-[#2D6A9E] text-white px-6 py-2 rounded-full font-medium hover:shadow-lg transition-all cursor-pointer">
                     {item}
                   </div>
                 ))}
               </div>
 
+              {/* Stats */}
               <div className="grid grid-cols-3 gap-4">
                 <div className="bg-white rounded-2xl p-6 text-center border border-blue-100 shadow-sm">
-                  <p className="text-4xl font-bold mb-2">108</p>
-                  <p className="text-sm text-gray-600">Uji Coba</p>
+                  <p className="text-4xl font-bold mb-2">{stats ? stats.total : 0}</p>
+                  <p className="text-sm text-gray-600">total produk</p>
                 </div>
                 <div className="bg-white rounded-2xl p-6 text-center border border-blue-100 shadow-sm">
-                  <p className="text-4xl font-bold mb-2">138</p>
-                  <p className="text-sm text-gray-600">Sudah Diterapkan</p>
+                  <p className="text-4xl font-bold mb-2">{stats ? stats.diverifikasi : 0}</p>
+                  <p className="text-sm text-gray-600">diverifikasi</p>
                 </div>
                 <div className="bg-white rounded-2xl p-6 text-center border border-blue-100 shadow-sm">
-                  <p className="text-4xl font-bold mb-2">223</p>
-                  <p className="text-sm text-gray-600">Terimplementasi</p>
+                  <p className="text-4xl font-bold mb-2">—</p>
+                  <p className="text-sm text-gray-600">statistik lain</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </section>
-{/* Hubungi Kami */}
+
+      {/* Hubungi Kami */}
       <section className="container mx-auto py-20 px-8">
         <div className="text-center mb-12">
           <h3 className="text-4xl font-bold mb-3 text-[#1F4E73]">Hubungi Kami</h3>
@@ -232,7 +251,7 @@ useEffect(() => {
           </div>
         </div>
       </section>
-      {/* Komponen lain tetap sama */}
+
       <Footer />
     </div>
   );

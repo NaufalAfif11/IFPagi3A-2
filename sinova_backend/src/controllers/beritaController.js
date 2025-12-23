@@ -42,13 +42,27 @@ export const getBeritaById = async (req, res) => {
 // ===============================
 export const createBerita = async (req, res) => {
   try {
-    const { judul, isi, status } = req.body;
+    const { judul, isi, status, link } = req.body;
+
+    if (!link) {
+      return res.status(400).json({
+        success: false,
+        message: "Link berita wajib diisi",
+      });
+    }
 
     const thumbnail = req.file
       ? `http://localhost:5000/uploads/berita/${req.file.filename}`
       : null;
 
-    const berita = await createBeritaQuery(judul, isi, thumbnail, status);
+    // ✅ link ikut dikirim
+    const berita = await createBeritaQuery(
+      judul,
+      isi,
+      thumbnail,
+      status,
+      link
+    );
 
     res.json({
       success: true,
@@ -65,19 +79,22 @@ export const createBerita = async (req, res) => {
 // ===============================
 export const updateBerita = async (req, res) => {
   try {
-    const { judul, isi, status } = req.body;
+    const { judul, isi, status, link } = req.body;
+
 
     const thumbnail = req.file
       ? `http://localhost:5000/uploads/berita/${req.file.filename}`
       : null;
 
     const berita = await updateBeritaQuery(
-      req.params.id,
-      judul,
-      isi,
-      thumbnail,
-      status
-    );
+  req.params.id,
+  judul,
+  isi,
+  thumbnail,
+  status,
+  link
+);
+
 
     res.json({
       success: true,

@@ -1,45 +1,64 @@
 "use client";
 
-import { X, Edit, Trash2 } from "lucide-react";
+import { X, Edit, Trash2, Users, Package, Mail, Phone, MapPin, ArrowRight, FileText, Calendar, DollarSign, Building } from "lucide-react";
+import type { Usulan } from "@/types/usulan";
 
 interface DetailUsulanModalProps {
-  usulan: {
-    kebutuhan_id?: string;
+  usulan: Usulan &{
+    id: number;
     nama: string;
     alamat: string;
     email: string;
-    telp: string;
+    noTelp: string;
     jabatan: string;
-    nama_perusahaan: string;
-    email_perusahaan: string;
-    alamat_perusahaan: string;
-    telp_perusahaan: string;
-    jenis_produk: string;
-    tanggal_kebutuhan: string;
-    estimasi_budget: string;
-    deskripsi: string;
-    bidang_id: string;
-    nama_bidang?: string;
+    namaPerusahaan: string;
+    emailPerusahaan: string;
+    noTelpPerusahaan: string;
+    alamatPerusahaan: string;
+    kapanDigunakan: string;
+    jenisProdukanDiusulkan: string;
+    deskripsiKebutuhan: string;
     dokumen: string | null;
-    status?: string;
-    created_at?: string;
-    peminat_count?: number;
+    tanggal: string;
+    status: string;
+    statusDetail: string;
+    peminat: number;
+    kategori_id: string;
+    nama_kategori: string;
+    estimasiBudget: string;
+    penyediaDikerjakan: {
+      id: string;
+      nama: string;
+      tanggalAmbil: string;
+      estimasiSelesai: string;
   } | null;
+};
   onClose: () => void;
   onEdit?: (usulan: string) => void;
   onDelete?: (id: number) => void;
-  onOpenPeminat?: (kebutuhanId: string) => void;
+  onOpenPeminat?: (kebutuhanId: number) => void;
+  showAjukanProposal?: boolean;
+  onAjukanProposal?: (kebutuhanId: number) => void;
 }
 
-export default function DetailUsulanModal({ usulan, onClose, onEdit, onDelete, onOpenPeminat }: DetailUsulanModalProps) {
+export default function DetailUsulanModal({ 
+  usulan, 
+  onClose, 
+  onEdit, 
+  onDelete, 
+  onOpenPeminat,
+  onAjukanProposal,
+}: DetailUsulanModalProps) {
+  console.log("PEMINAT =", usulan.peminat);
   if (!usulan) return null;
 
   const formatCurrency = (value: string | number) => {
-    const num = typeof value === 'string' ? parseFloat(value) : value;
+    const num = typeof value === 'string' ? parseFloat(value.replace(/[^\d]/g, '')) : value;
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
       currency: 'IDR',
-      minimumFractionDigits: 0
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
     }).format(num);
   };
 
@@ -55,197 +74,297 @@ export default function DetailUsulanModal({ usulan, onClose, onEdit, onDelete, o
 
   const handleDelete = () => {
     if (window.confirm('Yakin ingin menghapus usulan ini?')) {
-      onDelete?.(usulan.kebutuhan_id || '');
+      onDelete?.(Number(usulan.id) || 0);
       onClose();
     }
   };
 
-  const hasPeminat = (usulan.peminat_count ?? 0) > 0;
+  const handleEdit = () => {
+    if (onEdit) {
+      onEdit(DetailUsulanModal.name);
+      onClose();
+    }
+  };
+
+  const handleAjukanProposal = () => {
+    if (usulan?.id) {
+      onAjukanProposal?.(usulan.id);
+    }
+  };
+
+  const handleLihatPeminat = () => {
+  if (usulan.id && onOpenPeminat) {
+    onOpenPeminat(usulan.id);
+    onClose(); // 🔥 PENTING
+  }
+};
+
+
+  const canSeePeminat = Boolean(onOpenPeminat);
+
+  const hasPeminat = (usulan.peminat ?? 0) > 0;
+  const isTersedia = usulan.status === "Tersedia";
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-hidden">
-        
-        {/* Header */}
-        <div className="bg-[#1F4E73] text-white p-4 flex justify-between items-center">
-          <h2 className="text-xl font-bold">Detail Usulan Produk</h2>
-          <button onClick={onClose} className="hover:bg-white/20 p-1 rounded">
-            <X className="w-5 h-5" />
+      <div className="bg-white rounded-sm w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+        {/* Header - Minimalis */}
+        <div className="bg-gradient-to-r from-[#1F4E73] to-[#2C6698] text-white p-5 flex justify-between items-center">
+          <div>
+            <h2 className="text-xl font-bold">Detail Usulan Kebutuhan</h2>
+            <p className="text-sm text-blue-100 opacity-90">{usulan.jenisProdukanDiusulkan}</p>
+          </div>
+          <button 
+            onClick={onClose} 
+            className="hover:bg-white/20 p-2 rounded-full transition-colors">
+            <X size={20} />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
-          
-          {/* Data Pribadi */}
-          <div className="mb-6">
-            <h3 className="font-bold text-gray-800 mb-3 pb-2 border-b">Data Pribadi</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm text-gray-600">Nama Lengkap</label>
-                <p className="font-medium">{usulan.nama}</p>
+        <div className="p-6 space-y-6 overflow-y-auto flex-1">
+          {/* Status & Peminat Card */}
+          {hasPeminat && onOpenPeminat && (
+            <button
+              onClick={handleLihatPeminat}
+              className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:shadow-lg transition-all flex items-center gap-2"
+            >
+              <Users className="w-4 h-4" />
+              <span>
+                <span className="font-bold">{usulan.peminat}</span> Peminat • Lihat Detail
+              </span>
+            </button>
+          )}
+
+
+          {/* Deskripsi Kebutuhan */}
+          <div>
+            <h4 className="font-bold text-gray-900 mb-4 flex items-center gap-3">
+              <Package className="w-6 h-6 text-blue-600" />
+              Deskripsi Kebutuhan
+            </h4>
+              <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                {usulan.deskripsiKebutuhan || 'Tidak ada deskripsi'}
+              </p>
+          </div>
+
+          {/* Grid Info Penting */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Timeline */}
+            <div className="bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-xl p-5 shadow-sm">
+              <div className="flex items-center gap-3 mb-2">
+                <div>
+                  <p className="text-xs text-gray-600">Timeline Penggunaan</p>
+                  <p className="font-bold text-gray-900 text-sm">
+                    {formatDate(usulan.tanggal)}
+                  </p>
+                </div>
               </div>
-              <div>
-                <label className="text-sm text-gray-600">Jabatan</label>
-                <p className="font-medium">{usulan.jabatan || '-'}</p>
+            </div>
+
+            {/* Budget */}
+            <div className="bg-gradient-to-br from-green-50 to-white border border-green-200 rounded-xl p-5 shadow-sm">
+              <div className="flex items-center gap-3 mb-2">
+                <div>
+                  <p className="text-xs text-gray-600">Estimasi Budget</p>
+                  <p className="font-bold text-gray-900 text-sm">
+                    {usulan.estimasiBudget ? formatCurrency(usulan.estimasiBudget) : 'Belum ditentukan'}
+                  </p>
+                </div>
               </div>
-              <div>
-                <label className="text-sm text-gray-600">Email</label>
-                <p className="font-medium">{usulan.email}</p>
+            </div>
+
+            {/* kategori */}
+            <div className="bg-gradient-to-br from-purple-50 to-white border border-purple-200 rounded-xl p-5 shadow-sm">
+              <div className="flex items-center gap-3 mb-2">
+                <div>
+                  <p className="text-xs text-gray-600">kategori</p>
+                  <p className="font-bold text-gray-900 text-sm">
+                    {usulan.nama_kategori || usulan.kategori_id || '-'}
+                  </p>
+                </div>
               </div>
-              <div>
-                <label className="text-sm text-gray-600">No. Telepon</label>
-                <p className="font-medium">{usulan.telp}</p>
+            </div>
+          </div>
+
+          {/* Kontak Person */}
+          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+            <h4 className="font-bold text-gray-900 mb-4 flex items-center gap-3 text-lg">
+              <Users className="w-6 h-6 text-blue-600" />
+              Kontak Person
+            </h4>
+            <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-5 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs text-gray-600 mb-1">Nama Lengkap</p>
+                  <p className="font-bold text-gray-900 text-lg">{usulan.nama}</p>
+                  <p className="text-sm text-gray-600">{usulan.jabatan || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-600 mb-1">Perusahaan</p>
+                  <p className="font-bold text-gray-900">{usulan.namaPerusahaan || '-'}</p>
+                </div>
               </div>
-              <div className="col-span-2">
-                <label className="text-sm text-gray-600">Alamat</label>
-                <p className="font-medium">{usulan.alamat}</p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-center gap-3 bg-white p-3 rounded-lg">
+                  <div className="bg-gray-100 p-2 rounded-lg">
+                    <Mail className="w-4 h-4 text-gray-600" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600">Email</p>
+                    <p className="font-medium text-gray-900">{usulan.email}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-3 bg-white p-3 rounded-lg">
+                  <div className="bg-gray-100 p-2 rounded-lg">
+                    <Phone className="w-4 h-4 text-gray-600" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600">Telepon</p>
+                    <p className="font-medium text-gray-900">{usulan.noTelp}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white p-3 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <div className="bg-gray-100 p-2 rounded-lg mt-1">
+                    <MapPin className="w-4 h-4 text-gray-600" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600 mb-1">Alamat Lengkap</p>
+                    <p className="text-gray-700">{usulan.alamat}</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Data Perusahaan */}
-          <div className="mb-6">
-            <h3 className="font-bold text-gray-800 mb-3 pb-2 border-b">Data Perusahaan</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm text-gray-600">Nama Perusahaan</label>
-                <p className="font-medium">{usulan.nama_perusahaan || '-'}</p>
-              </div>
-              <div>
-                <label className="text-sm text-gray-600">Email Perusahaan</label>
-                <p className="font-medium">{usulan.email_perusahaan || '-'}</p>
-              </div>
-              <div>
-                <label className="text-sm text-gray-600">Telepon Perusahaan</label>
-                <p className="font-medium">{usulan.telp_perusahaan || '-'}</p>
-              </div>
-              <div>
-                <label className="text-sm text-gray-600">Alamat Perusahaan</label>
-                <p className="font-medium">{usulan.alamat_perusahaan || '-'}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Detail Produk */}
-          <div className="mb-6">
-            <h3 className="font-bold text-gray-800 mb-3 pb-2 border-b">Detail Produk</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm text-gray-600">Jenis Produk</label>
-                <p className="font-medium">{usulan.jenis_produk}</p>
-              </div>
-              <div>
-                <label className="text-sm text-gray-600">Bidang</label>
-                <p className="font-medium">{usulan.nama_bidang || usulan.bidang_id}</p>
-              </div>
-              <div>
-                <label className="text-sm text-gray-600">Tanggal Kebutuhan</label>
-                <p className="font-medium">{formatDate(usulan.tanggal_kebutuhan)}</p>
-              </div>
-              <div>
-                <label className="text-sm text-gray-600">Estimasi Budget</label>
-                <p className="font-medium">
-                  {usulan.estimasi_budget ? formatCurrency(usulan.estimasi_budget) : '-'}
-                </p>
-              </div>
-              <div className="col-span-2">
-                <label className="text-sm text-gray-600">Deskripsi</label>
-                <p className="font-medium">{usulan.deskripsi || '-'}</p>
+          {(usulan.namaPerusahaan || usulan.alamatPerusahaan) && (
+            <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+              <h4 className="font-bold text-gray-900 mb-4 flex items-center gap-3 text-lg">
+                <Building className="w-6 h-6 text-blue-600" />
+                Detail Perusahaan
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-xs text-gray-600 mb-1">Nama Perusahaan</p>
+                  <p className="font-medium text-gray-900">{usulan.namaPerusahaan || '-'}</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-xs text-gray-600 mb-1">Email Perusahaan</p>
+                  <p className="font-medium text-gray-900">{usulan.emailPerusahaan || '-'}</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-xs text-gray-600 mb-1">Telepon Perusahaan</p>
+                  <p className="font-medium text-gray-900">{usulan.noTelpPerusahaan || '-'}</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-xs text-gray-600 mb-1">Alamat Perusahaan</p>
+                  <p className="font-medium text-gray-900">{usulan.alamatPerusahaan || '-'}</p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Dokumen */}
           {usulan.dokumen && (
-            <div className="mb-6">
-              <h3 className="font-bold text-gray-800 mb-3 pb-2 border-b">Dokumen Pendukung</h3>
-              <div className="flex items-center justify-between bg-gray-50 p-3 rounded">
-                <span className="text-sm font-medium">{usulan.dokumen}</span>
+            <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+              <h4 className="font-bold text-gray-900 mb-4 flex items-center gap-3 text-lg">
+                <FileText className="w-6 h-6 text-blue-600" />
+                Dokumen Pendukung
+              </h4>
+              <div className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-white border border-blue-200 p-4 rounded-xl">
+                <div className="flex items-center gap-3">
+                  <div className="bg-blue-100 p-2 rounded-lg">
+                    <FileText className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">{usulan.dokumen}</p>
+                    <p className="text-sm text-gray-600">Klik untuk mengunduh</p>
+                  </div>
+                </div>
                 <a
                   href={`http://localhost:5000/uploads/${usulan.dokumen}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-blue-600 hover:underline"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   Download
                 </a>
               </div>
             </div>
           )}
+        
 
-          {/* Status & Tanggal */}
-          {usulan.status && (
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="text-sm text-gray-600">Status</label>
-                <p className="font-medium">
-                  <span className={`inline-block px-3 py-1 rounded-full text-xs ${
-                    usulan.status === 'approved' ? 'bg-green-100 text-green-800' :
-                    usulan.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-gray-100 text-gray-800'
-                  }`}>
-                    {usulan.status}
+        {/* Footer Buttons - Semua Button Tetap Ada */}
+        <div className="border-t bg-gray-50 pt-4">
+          <div className="flex justify-end gap-2">
+            
+            {/* Left Side: Info & Peminat */}
+            <div className="flex flex-wrap gap-3">
+              {hasPeminat && canSeePeminat && (
+                <button
+                  onClick={handleLihatPeminat}
+                  className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:shadow-lg transition-all flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  <span>
+                    <span className="font-bold">{usulan.peminat}</span> Peminat • Lihat Detail
                   </span>
-                </p>
-              </div>
-              {usulan.created_at && (
-                <div>
-                  <label className="text-sm text-gray-600">Tanggal Diajukan</label>
-                  <p className="font-medium">{formatDate(usulan.created_at)}</p>
-                </div>
+                </button>
               )}
             </div>
-          )}
-        </div>
 
-        {/* Footer Actions */}
-        <div className="bg-gray-50 p-4 border-t flex items-center justify-between gap-4">
+            {/* Right Side: Action Buttons */}
+            <div className="flex flex-wrap gap-3 justify-end">
+              {/* AJUKAN PROPOSAL Button */}
+              {isTersedia && onAjukanProposal && (
+  <button 
+    onClick={handleAjukanProposal}
+    className="px-4 py-2 bg-gradient-to-r from-[#3e81aa] to-[#1F4E73] text-white rounded font-bold hover:shadow-xl transition-all flex items-center gap-2">
+    Ajukan Proposal
+    <ArrowRight className="w-5 h-5" />
+  </button>
+)}
 
-        {/* KIRI — info & peminat */}
-        <div>
-            {hasPeminat && (
-            <button
-                onClick={() => onOpenPeminat?.(usulan.kebutuhan_id!)}
-                className="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
-            >
-                ✅ {usulan.peminat_count} Peminat • Lihat Peminat
-            </button>
-            )}
-        </div>
 
-        {/* KANAN — aksi */}
-        <div className="flex gap-3">
-            {onEdit && (
-            <button
-                onClick={() => {
-                onEdit(usulan);
-                onClose();
-                }}
-                className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 flex items-center gap-2">
-                <Edit className="w-4 h-4" />
-                Edit
-            </button>
-            )}
+              {/* EDIT Button */}
+              {onEdit && (
+                <button
+                  onClick={handleEdit}
+                  className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded hover:shadow-lg transition-all flex items-center gap-2"
+                >
+                  <Edit className="w-4 h-4" />
+                  Edit
+                </button>
+              )}
 
-            {onDelete && (
-            <button
-                onClick={() => onDelete(usulan.id)}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 flex items-center gap-2">
-                <Trash2 className="w-4 h-4" />
-                Hapus
-            </button>
-            )}
+              {/* HAPUS Button */}
+              {onDelete && (
+                <button
+                  onClick={handleDelete}
+                  className="px-4 py-2 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded hover:shadow-lg transition-all flex items-center gap-2"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Hapus
+                </button>
+              )}
 
-            <button
-            onClick={onClose}
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-            >
-            Tutup
-            </button>
-        </div>
+              {/* BATAL/TUTUP Button */}
+              <button 
+                onClick={onClose}
+                className="px-4 py-2 bg-gradient-to-r from-gray-200 to-gray-300 text-gray-700 rounded hover:bg-gray-300 transition-all font-medium"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

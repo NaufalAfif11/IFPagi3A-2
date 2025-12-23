@@ -3,14 +3,13 @@
 import { X, Save } from "lucide-react";
 import { useState, useEffect } from "react";
 
-interface Bidang {
-  bidang_id: number | string;
-  nama_bidang: string;
+interface Kategori {
+  kategori_id: number | string;
+  nama_kategori: string;
 }
 
-// Tambahkan definisi tipe Usulan
 interface Usulan {
-  kebutuhan_id: number | string;
+  id: number | string;
   nama: string;
   email: string;
   telp?: string;
@@ -21,7 +20,7 @@ interface Usulan {
   telp_perusahaan?: string;
   alamat_perusahaan?: string;
   jenis_produk: string;
-  bidang_id: number | string;
+  kategori_id: number | string;
   tanggal_kebutuhan?: string;
   estimasi_budget?: string;
   deskripsi: string;
@@ -38,164 +37,118 @@ export default function EditUsulanModal({
 }) {
   const [form, setForm] = useState<Usulan>(usulan);
   const [loading, setLoading] = useState(false);
-  const [bidangList, setBidangList] = useState<Bidang[]>([]);
-  const [loadingBidang, setLoadingBidang] = useState(true);
+  const [kategoriList, setKategoriList] = useState<Kategori[]>([]);
+  const [loadingKategori, setLoadingKategori] = useState(true);
 
   useEffect(() => {
     if (usulan) {
-        setForm({
+      setForm({
         ...usulan,
-        bidang_id: usulan.bidang_id ?? "",
-        });
+        kategori_id: usulan.kategori_id ?? "",
+      });
     }
-    }, [usulan]);
+  }, [usulan]);
 
-  // Fetch bidang data
+  // Fetch kategori
   useEffect(() => {
-    const fetchBidang = async () => {
+    const fetchKategori = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/bidang");
-        if (!res.ok) throw new Error("Gagal fetch bidang");
+        const res = await fetch("http://localhost:5000/api/kategori");
         const data = await res.json();
-        setBidangList(data);
+        setKategoriList(data);
       } catch (err) {
-        console.error("fetch bidang error:", err);
-        setBidangList([]);
+        console.error("fetch kategori error:", err);
+        setKategoriList([]);
       } finally {
-        setLoadingBidang(false);
+        setLoadingKategori(false);
       }
     };
 
-    fetchBidang();
+    fetchKategori();
   }, []);
 
- const handleChange = (
+  const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-    ) => {
+  ) => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-    };
+    setForm((prev: Usulan) => ({ ...prev, [name]: value }));
+  };
 
-
-  const handleSubmit = async (
-    e: React.FormEvent<HTMLFormElement>
-    ) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
 
-    // Debug: lihat data yang akan dikirim
-    console.log("Form data sebelum submit:", form);
-    console.log("kebutuhan_id:", form.id);
+    const kategoriID = Number(form.kategori_id);
 
-    // Konversi bidang_id ke number jika backend memerlukan
-    const bidangId = Number(form.bidang_id);
-
-        if (!bidangId) {
-        alert("Bidang wajib dipilih");
-        setLoading(false);
-        return;
-        }
-
+    if (!kategoriID) {
+      alert("Kategori wajib dipilih!");
+      setLoading(false);
+      return;
+    }
 
     const payload = {
-      nama: form.nama || "",
-      email: form.email || "",
-      telp: form.telp || "",
-      jabatan: form.jabatan || "",
-      alamat: form.alamat || "",
-      nama_perusahaan: form.nama_perusahaan || "",
-      email_perusahaan: form.email_perusahaan || "",
-      telp_perusahaan: form.telp_perusahaan || "",
-      alamat_perusahaan: form.alamat_perusahaan || "",
-      jenis_produk: form.jenis_produk || "",
-      bidang_id: bidangId,
-      tanggal_kebutuhan: form.tanggal_kebutuhan || "",
-      estimasi_budget: form.estimasi_budget || "",
-      deskripsi: form.deskripsi || "",
+      nama: form.nama,
+      email: form.email,
+      telp: form.telp,
+      jabatan: form.jabatan,
+      alamat: form.alamat,
+      nama_perusahaan: form.nama_perusahaan,
+      email_perusahaan: form.email_perusahaan,
+      telp_perusahaan: form.telp_perusahaan,
+      alamat_perusahaan: form.alamat_perusahaan,
+      jenis_produk: form.jenis_produk,
+      kategori_id: kategoriID,
+      tanggal_kebutuhan: form.tanggal_kebutuhan,
+      estimasi_budget: form.estimasi_budget,
+      deskripsi: form.deskripsi,
     };
 
-    console.log("Payload yang dikirim:", payload);
-
     try {
+      const token = localStorage.getItem("token");
+
       const res = await fetch(
         `http://localhost:5000/api/kebutuhan/${form.id}`,
         {
           method: "PUT",
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
-            "Accept": "application/json"
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(payload),
         }
       );
 
-      console.log("Response status:", res.status);
-      
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error("Error response:", errorText);
-        
-        // Coba parse sebagai JSON jika bisa
-        try {
-          const errorJson = JSON.parse(errorText);
-          throw new Error(errorJson.message || errorJson.error || `Server error: ${res.status}`);
-        } catch {
-          throw new Error(`HTTP ${res.status}: ${errorText}`);
-        }
-      }
+      const data = await res.json().catch(() => ({}));
 
-      const data = await res.json();
-      console.log("Success response:", data);
-      
-      alert("✅ Usulan berhasil diperbarui");
+      if (!res.ok) {
+        console.error("Backend error:", data);
+        throw new Error(data.message || "Gagal update");
+      }
+      alert("Usulan berhasil diperbarui!");
       onSuccess();
       onClose();
-    } catch (err: unknown) {
-      console.error("Submit error details:", err);
-      let errorMessage = "Unknown error";
-      if (err instanceof Error) {
-        errorMessage = err.message;
-      } else if (typeof err === "string") {
-        errorMessage = err;
-      }
-      alert(`❌ Gagal update usulan: ${errorMessage}`);
+    } catch (err) {
+      console.error("Submit error:", err);
+      alert("Gagal update usulan");
     } finally {
       setLoading(false);
     }
   };
 
-  // Format tanggal untuk input date (YYYY-MM-DD)
   const formatDateForInput = (dateString: string | undefined) => {
     if (!dateString) return "";
-    
-    try {
-      // Jika tanggal sudah dalam format YYYY-MM-DD
-      if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
-        return dateString;
-      }
-      
-      // Jika tanggal dalam format lain (misalnya dari database)
-      const date = new Date(dateString);
-      if (!isNaN(date.getTime())) {
-        return date.toISOString().split('T')[0];
-      }
-    } catch (err) {
-      console.error("Error formatting date:", err);
-    }
-    
-    return "";
+    return new Date(dateString).toISOString().split("T")[0];
   };
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] flex flex-col">
+      <div className="bg-white rounded-sm w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
         {/* HEADER */}
         <div className="flex justify-between items-center p-4 bg-[#1F4E73] text-white sticky top-0 z-10">
           <h2 className="font-bold text-lg">Edit Usulan</h2>
           <button
             onClick={onClose}
-            className="hover:bg-white/20 p-1 rounded transition-colors"
-          >
+            className="hover:bg-white/20 p-1 rounded transition-colors">
             <X size={20} />
           </button>
         </div>
@@ -367,22 +320,22 @@ export default function EditUsulanModal({
 
                 <div>
                   <label className="block text-sm font-medium mb-1 text-gray-700">
-                    Bidang <span className="text-red-500">*</span>
+                    Kategori <span className="text-red-500">*</span>
                   </label>
                   <select
-                    name="bidang_id"
-                    value={form.bidang_id || ""}
+                    name="kategori_id"
+                    value={form.kategori_id || ""}
                     onChange={handleChange}
                     className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none"
                     required
                   >
-                    <option value="">-- Pilih bidang --</option>
-                    {loadingBidang ? (
+                    <option value="">-- Pilih Kategori --</option>
+                    {loadingKategori ? (
                       <option disabled>Loading...</option>
                     ) : (
-                      bidangList.map((b) => (
-                        <option key={b.bidang_id} value={b.bidang_id}>
-                          {b.nama_bidang}
+                      kategoriList.map((b) => (
+                        <option key={b.kategori_id} value={b.kategori_id}>
+                          {b.nama_kategori}
                         </option>
                       ))
                     )}
@@ -438,15 +391,13 @@ export default function EditUsulanModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors"
-                >
+                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors">
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-4 py-2 bg-blue-600 text-white rounded flex gap-2 items-center hover:bg-blue-700 transition-colors disabled:opacity-50"
-                >
+                  className="px-4 py-2 bg-blue-600 text-white rounded flex gap-2 items-center hover:bg-blue-700 transition-colors disabled:opacity-50">
                   <Save size={16} />
                   {loading ? "Menyimpan..." : "Simpan Perubahan"}
                 </button>
@@ -458,3 +409,6 @@ export default function EditUsulanModal({
     </div>
   );
 }
+
+/* Tailwind helper */
+const input = "w-full p-2 border rounded border-gray-300";

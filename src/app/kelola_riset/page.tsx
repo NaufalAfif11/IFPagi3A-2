@@ -302,7 +302,7 @@ export default function ResearchManagement() {
 
   return (
     <div className="flex min-h-screen">
-      <SidebarPenyedia activeMenu={activeMenu} setActiveMenu={setActiveMenu} />
+      <SidebarPenyedia />
 
       <div className="flex-1 min-h-screen bg-gray-50">
         {/* HEADER */}

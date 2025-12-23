@@ -135,7 +135,7 @@ export default function RegisterPage() {
                     checked={form.role === "pengguna"}
                     onChange={handleChange}
                   />
-                  <span className="ml-1">Pengguna</span>
+                  <span className="ml-1">Pengguna Inovasi</span>
                 </label>
 
                 <label className="flex items-center gap-2">
@@ -146,7 +146,7 @@ export default function RegisterPage() {
                     checked={form.role === "penyedia"}
                     onChange={handleChange}
                   />
-                  <span className="ml-1">Penyedia</span>
+                  <span className="ml-1">Penyedia Inovasi </span>
                 </label>
               </div>
             </div>

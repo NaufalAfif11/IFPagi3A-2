@@ -1,13 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SidebarPengguna from "@/components/ui/sidebar_pengguna";
 import {
   List,
   PlusCircle,
   Clock,
-  CheckCircle,
-  AlertCircle,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -22,33 +20,60 @@ import {
   Cell,
 } from "recharts";
 
+interface Statistik {
+  totalUsulan: number;
+  usulanBaru: number;
+  history: number;
+}
+
+interface DataStatus {
+  name: string;
+  value: number;
+}
+
+interface DataBulan {
+  bulan: string;
+  jumlah: number;
+}
+
+const COLORS = ["#FACC15", "#22C55E"]; // Menunggu, Dikerjakan
+
 const Dashboard_pengguna = () => {
-  const [activeMenu, setActiveMenu] = useState("Dashboard");
+  const [statistik, setStatistik] = useState<Statistik>({
+    totalUsulan: 0,
+    usulanBaru: 0,
+    history: 0,
+  });
 
-  const statistik = {
-    totalUsulan: 45,
-    usulanBaru: 12,
-    history: 33,
-    disetujui: 28,
-    diproses: 12,
-    ditolak: 5,
-  };
+  const [dataUsulan, setDataUsulan] = useState<DataBulan[]>([]);
+  const [dataStatus, setDataStatus] = useState<DataStatus[]>([
+    { name: "Menunggu", value: 0 },
+    { name: "Dikerjakan", value: 0 },
+  ]);
 
-  const dataUsulan = [
-    { bulan: "Jun", jumlah: 10 },
-    { bulan: "Jul", jumlah: 15 },
-    { bulan: "Agu", jumlah: 20 },
-    { bulan: "Sep", jumlah: 25 },
-    { bulan: "Okt", jumlah: 30 },
-  ];
+ useEffect(() => {
+  fetch("http://localhost:5000/api/dashboard-pengguna")
+    .then(res => res.json())
+    .then(data => {
+      console.log(data); // cek apakah data muncul di console
+      setStatistik(data.statistik);
+      setDataUsulan(data.dataBulan);
 
-  const dataStatus = [
-    { name: "Disetujui", value: 28 },
-    { name: "Diproses", value: 12 },
-    { name: "Ditolak", value: 5 },
-  ];
+      const statusTemplate = [
+        { name: "Menunggu", value: 0 },
+        { name: "Dikerjakan", value: 0 },
+      ];
 
-  const COLORS = ["#22C55E", "#FACC15", "#EF4444"];
+      data.statusData.forEach((item: any) => {
+        const index = statusTemplate.findIndex(s => s.name === item.name);
+        if (index >= 0) statusTemplate[index].value = item.value;
+      });
+
+      setDataStatus(statusTemplate);
+    })
+    .catch(err => console.log(err));
+}, []);
+
 
   return (
     <div className="flex h-screen">
@@ -60,9 +85,8 @@ const Dashboard_pengguna = () => {
           <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
           <p className="text-sm text-gray-500">Selamat datang kembali, Dr. Ahmad Yani</p>
 
-          {/* ========== KOTAK STATISTIK (Versi Warna Baru) ========== */}
+          {/* ========== KOTAK STATISTIK ========== */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
             {/* TOTAL USULAN */}
             <div className="cursor-pointer bg-[#2D6A9E] text-white rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all hover:-translate-y-2">
               <div className="flex items-center justify-between mb-6">

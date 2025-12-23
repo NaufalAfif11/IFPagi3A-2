@@ -19,31 +19,50 @@ export const getBeritaByIdQuery = async (id) => {
 // ===============================
 // CREATE BERITA
 // ===============================
-export const createBeritaQuery = async (judul, isi, thumbnail, status) => {
+export const createBeritaQuery = async (
+  judul,
+  isi,
+  thumbnail,
+  status,
+  link
+) => {
   const result = await pool.query(
-    `INSERT INTO berita (judul, isi, thumbnail, status)
-     VALUES ($1, $2, $3, $4)
+    `INSERT INTO berita (judul, isi, thumbnail, status, link)
+     VALUES ($1, $2, $3, $4, $5)
      RETURNING *`,
-    [judul, isi, thumbnail, status]
+    [judul, isi, thumbnail, status, link]
   );
 
   return result.rows[0];
 };
+
 
 // ===============================
 // UPDATE BERITA
 // ===============================
-export const updateBeritaQuery = async (id, judul, isi, thumbnail, status) => {
+export const updateBeritaQuery = async (
+  id,
+  judul,
+  isi,
+  thumbnail,
+  status,
+  link
+) => {
   const result = await pool.query(
     `UPDATE berita 
-     SET judul = $1, isi = $2, thumbnail = $3, status = $4
-     WHERE id = $5
+     SET judul = $1,
+         isi = $2,
+         thumbnail = COALESCE($3, thumbnail),
+         status = $4,
+         link = $5
+     WHERE id = $6
      RETURNING *`,
-    [judul, isi, thumbnail, status, id]
+    [judul, isi, thumbnail, status, link, id]
   );
 
   return result.rows[0];
 };
+
 
 // ===============================
 // DELETE BERITA
