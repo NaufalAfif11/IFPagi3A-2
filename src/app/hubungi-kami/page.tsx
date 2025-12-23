@@ -70,43 +70,44 @@ export default function HubungiKamiPage() {
 
       <div className="min-h-screen bg-white flex flex-col items-center px-4 sm:px-6 lg:px-10 py-8">
         
-        {/* MAP */}
-        <div
-          className="w-full max-w-7xl mb-10"
-          style={{ animation: "fadeIn 1s ease-in" }}
-        >
-          <div className="relative transition-all duration-300 hover:scale-[1.01] hover:shadow-xl cursor-pointer group rounded-lg">
-            
-            <div className="w-full h-64 sm:h-80 md:h-96 lg:h-[450px]">
-              <iframe
-                title="Dompak, Tanjung Pinang"
-                src="https://www.openstreetmap.org/export/embed.html?bbox=104.4350%2C0.8600%2C104.4550%2C0.8800&layer=mapnik&marker=0.8700625,104.4450625"
-                className="w-full h-full rounded-lg border-2 border-[#1F4E73] shadow-lg pointer-events-none"
-              />
-            </div>
+       {/* MAP */}
+<div
+  className="w-full max-w-7xl mb-10"
+  style={{ animation: "fadeIn 1s ease-in" }}
+>
+  <div className="relative transition-all duration-300 hover:scale-[1.01] hover:shadow-xl cursor-pointer group rounded-lg">
 
-            <div
-              onClick={handleMapClick}
-              className="absolute inset-0 rounded-lg flex items-center justify-center group-hover:bg-black group-hover:bg-opacity-10 transition-all duration-300"
-            >
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white bg-opacity-90 px-6 py-3 rounded-full shadow-lg">
-                <p className="text-[#1F4E73] font-semibold flex items-center gap-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                    <circle cx="12" cy="10" r="3" />
-                  </svg>
-                  Buka di Google Maps
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div className="w-full h-64 sm:h-80 md:h-96 lg:h-[450px]">
+      <iframe
+        title="Dompak, Tanjung Pinang"
+        src="https://www.openstreetmap.org/export/embed.html?bbox=104.4350%2C0.8600%2C104.4550%2C0.8800&layer=mapnik&marker=0.8700625,104.4450625"
+        className="w-full h-full rounded-lg border-2 border-[#1F4E73] shadow-lg pointer-events-none"
+      />
+    </div>
+
+    {/* Overlay yang tetap transparan (tidak gelap) saat hover */}
+    <div
+      onClick={handleMapClick}
+      className="absolute inset-0 rounded-lg flex items-center justify-center bg-transparent transition-all duration-300"
+    >
+      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white bg-opacity-90 px-6 py-3 rounded-full shadow-lg">
+        <p className="text-[#1F4E73] font-semibold flex items-center gap-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+          Buka di Google Maps
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
 
         {/* CARDS */}
         <div className="w-full max-w-7xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
