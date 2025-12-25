@@ -8,14 +8,17 @@ import {
   removeKebutuhan,
   fetchPenyediaByKebutuhan,
   fetchAllKebutuhanForPenyedia,
+  fetchAllKebutuhanForAdmin,
 } from '../controllers/kebutuhanController.js';
 import { authMiddleware, checkRole } from '../middleware/authMiddleware.js';
 
 const upload = multer({ dest: "uploads/" });
 const router = express.Router();
 
-// Semua route harus login pengguna
+// Semua route harus login penyedia
 router.get("/penyedia", authMiddleware, checkRole("penyedia"), fetchAllKebutuhanForPenyedia);
+router.get("/admin", authMiddleware, checkRole("admin"), fetchAllKebutuhanForAdmin);
+
 
 // 🔥 pindahkan ke atas
 router.get("/:id/penyedia", authMiddleware, fetchPenyediaByKebutuhan);

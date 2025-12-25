@@ -25,5 +25,5 @@ const connectDB = async () => {
     }
 };
 
-export default pool;     // ⬅️ ubah ini
-export { connectDB };    // ⬅️ opsional
+export default pool;  
+export { connectDB };

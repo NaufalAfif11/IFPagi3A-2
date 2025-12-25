@@ -2,6 +2,7 @@
 
 import { X, Save } from "lucide-react";
 import { useState, useEffect } from "react";
+import { toast } from "react-hot-toast";
 
 interface Kategori {
   kategori_id: number | string;
@@ -31,11 +32,11 @@ export default function EditUsulanModal({
   onClose,
   onSuccess,
 }: {
-  usulan: Usulan;
+  usulan: Usulan | null;
   onClose: () => void;
   onSuccess: () => void;
 }) {
-  const [form, setForm] = useState<Usulan>(usulan);
+  const [form, setForm] = useState<Usulan>([] as unknown as Usulan);
   const [loading, setLoading] = useState(false);
   const [kategoriList, setKategoriList] = useState<Kategori[]>([]);
   const [loadingKategori, setLoadingKategori] = useState(true);
@@ -81,7 +82,7 @@ export default function EditUsulanModal({
     const kategoriID = Number(form.kategori_id);
 
     if (!kategoriID) {
-      alert("Kategori wajib dipilih!");
+      toast("Kategori wajib dipilih!");
       setLoading(false);
       return;
     }
@@ -124,12 +125,12 @@ export default function EditUsulanModal({
         console.error("Backend error:", data);
         throw new Error(data.message || "Gagal update");
       }
-      alert("Usulan berhasil diperbarui!");
+      toast("Usulan berhasil diperbarui!");
       onSuccess();
       onClose();
     } catch (err) {
       console.error("Submit error:", err);
-      alert("Gagal update usulan");
+      toast("Gagal update usulan");
     } finally {
       setLoading(false);
     }
@@ -171,8 +172,8 @@ export default function EditUsulanModal({
                     name="nama"
                     value={form.nama || ""}
                     onChange={handleChange}
-                    placeholder="Masukkan nama Anda"
-                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all"
+                    placeholder="Masukkan Nama Anda"
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none transition-all"
                     required
                   />
                 </div>
@@ -186,8 +187,8 @@ export default function EditUsulanModal({
                     type="email"
                     value={form.email || ""}
                     onChange={handleChange}
-                    placeholder="contoh@domain.com"
-                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all"
+                    placeholder="contoh@gmail.com"
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none transition-all"
                     required
                   />
                 </div>
@@ -201,7 +202,7 @@ export default function EditUsulanModal({
                     value={form.telp || ""}
                     onChange={handleChange}
                     placeholder="Contoh: 0812xxxx"
-                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all"
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none transition-all"
                   />
                 </div>
 
@@ -214,7 +215,7 @@ export default function EditUsulanModal({
                     value={form.jabatan || ""}
                     onChange={handleChange}
                     placeholder="Contoh: Manajer Pemasaran"
-                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all"
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none transition-all"
                   />
                 </div>
 
@@ -228,7 +229,7 @@ export default function EditUsulanModal({
                     onChange={handleChange}
                     placeholder="Jalan, kota, provinsi"
                     rows={2}
-                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all resize-none"
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none transition-all resize-none"
                   />
                 </div>
               </div>
@@ -250,7 +251,7 @@ export default function EditUsulanModal({
                     value={form.nama_perusahaan || ""}
                     onChange={handleChange}
                     placeholder="PT Jaya Abadi"
-                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all"
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none transition-all"
                   />
                 </div>
 
@@ -264,7 +265,7 @@ export default function EditUsulanModal({
                     value={form.email_perusahaan || ""}
                     onChange={handleChange}
                     placeholder="hrd@perusahaan.com"
-                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all"
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none transition-all"
                   />
                 </div>
 
@@ -277,7 +278,7 @@ export default function EditUsulanModal({
                     value={form.telp_perusahaan || ""}
                     onChange={handleChange}
                     placeholder="Nomor kontak perusahaan"
-                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all"
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none transition-all"
                   />
                 </div>
 
@@ -291,7 +292,7 @@ export default function EditUsulanModal({
                     onChange={handleChange}
                     placeholder="Alamat kantor pusat"
                     rows={2}
-                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all resize-none"
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none transition-all resize-none"
                   />
                 </div>
               </div>
@@ -313,7 +314,7 @@ export default function EditUsulanModal({
                     value={form.jenis_produk || ""}
                     onChange={handleChange}
                     placeholder="Contoh: Aplikasi Mobile"
-                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all"
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none transition-all"
                     required
                   />
                 </div>
@@ -326,7 +327,7 @@ export default function EditUsulanModal({
                     name="kategori_id"
                     value={form.kategori_id || ""}
                     onChange={handleChange}
-                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none"
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none"
                     required
                   >
                     <option value="">-- Pilih Kategori --</option>
@@ -351,7 +352,7 @@ export default function EditUsulanModal({
                     name="tanggal_kebutuhan"
                     value={formatDateForInput(form.tanggal_kebutuhan)}
                     onChange={handleChange}
-                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none"
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none"
                   />
                 </div>
 
@@ -364,7 +365,7 @@ export default function EditUsulanModal({
                     value={form.estimasi_budget || ""}
                     onChange={handleChange}
                     placeholder="Contoh: 50-100 juta"
-                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all"
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none transition-all"
                   />
                 </div>
 
@@ -378,7 +379,7 @@ export default function EditUsulanModal({
                     onChange={handleChange}
                     placeholder="Jelaskan detail kebutuhan..."
                     rows={4}
-                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-green-400 focus:ring-2 focus:ring-green-300 outline-none transition-all resize-none"
+                    className="w-full p-2 rounded border border-gray-300 bg-white text-gray-800 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 outline-none transition-all resize-none"
                     required
                   />
                 </div>

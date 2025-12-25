@@ -65,7 +65,7 @@ export default function UsulanCard({ usulan, kategoriName, onClick }: UsulanCard
       </div>
 
       <div className="p-4">
-        <p className="text-sm text-gray-600 mb-4 line-clamp-3">
+        <p className="text-sm text-gray-600 mb-4 line-clamp-1">
           {usulan.deskripsiKebutuhan}
         </p>
 
@@ -84,48 +84,19 @@ export default function UsulanCard({ usulan, kategoriName, onClick }: UsulanCard
           </div>
         </div>
 
-        {usulan.status === "Sedang Dikerjakan" && usulan.penyediaDikerjakan && (
-        <div className="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">
-              {usulan.penyediaDikerjakan?.nama
-              ? usulan.penyediaDikerjakan.nama.charAt(0)
-              : "?"}
-            </div>
-
-            <div>
-              <p className="text-xs text-blue-700 font-semibold">
-                Sedang Dikerjakan Oleh
-              </p>
-              <p className="text-sm font-bold text-blue-900">
-                {usulan.penyediaDikerjakan.nama || "Penyedia"}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-
-        {usulan.status === "Tersedia" && (
-          <div className="flex items-center gap-1 text-xs text-orange-600 font-semibold mb-4">
-            <Users className="w-4 h-4" />
-            {usulan.peminat} Peminat
-          </div>
-        )}
-
-<button
-  onClick={onClick}
-  className={`w-full py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-all ${
-    usulan.status === 'Tersedia'
-      ? 'bg-gradient-to-r from-[#3e81aa] to-[#1F4E73] text-white hover:bg-gradient-to-l'
-      : 'bg-gray-100 text-gray-600 border border-gray-300'
-  }`}
->
-  <Eye className="w-4 h-4" />
-  {usulan.status === 'Tersedia'
-    ? 'Lihat Detail & Ajukan'
-    : 'Lihat Info'}
-</button>
+        <button
+          onClick={onClick}
+          className={`w-full py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-all ${
+            usulan.status === 'Tersedia'
+              ? 'bg-gradient-to-r from-[#3e81aa] to-[#1F4E73] text-white hover:bg-gradient-to-l'
+              : 'bg-gray-100 text-gray-600 border border-gray-300'
+          }`}
+        >
+          <Eye className="w-4 h-4" />
+          {usulan.status === 'Tersedia'
+            ? 'Lihat Detail'
+            : 'Lihat Info'}
+        </button>
 
       </div>
     </div>

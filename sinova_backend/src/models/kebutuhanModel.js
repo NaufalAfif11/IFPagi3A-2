@@ -92,6 +92,23 @@ export const getAllKebutuhanForPenyedia = async (penyediaId) => {
 };
 
 /* ===============================
+   READ SEMUA (UNTUK admin)
+================================ */
+export const getAllKebutuhanForAdmin = async () => {
+  const result = await pool.query(`
+    SELECT
+      k.*,
+      c.nama_kategori
+    FROM kebutuhan k
+    JOIN kategori c ON k.kategori_id = c.kategori_id
+    ORDER BY k.created_at DESC
+  `);
+
+  return result.rows;
+};
+
+
+/* ===============================
    UPDATE OLEH PEMILIK
 ================================ */
 export const updateKebutuhanByUser = async (id, userId, data) => {

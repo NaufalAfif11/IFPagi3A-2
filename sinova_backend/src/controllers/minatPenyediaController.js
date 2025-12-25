@@ -47,12 +47,17 @@ export const ajukanProposal = async (req, res) => {
 export const getPeminatByKebutuhan = async (req, res) => {
   try {
     const kebutuhanId = Number(req.params.kebutuhanId);
+    console.log(`🔍 Mencari peminat untuk kebutuhan ID: ${kebutuhanId}`);
+    
     const data = await getMinatByKebutuhan(kebutuhanId);
+    
+    console.log(`📊 Data ditemukan: ${data.length} peminat`);
+    console.log("📋 Data detail:", data);
 
     res.json({
       success: true,
       total: data.length,
-      data
+      data: data // Pastikan ini array
     });
   } catch (err) {
     console.error("ERROR GET PEMINAT:", err);
