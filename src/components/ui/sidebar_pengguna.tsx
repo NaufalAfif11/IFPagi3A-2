@@ -186,7 +186,7 @@ const SidebarPengguna = () => {
                     <p className="text-sm font-semibold text-white truncate">
                       {user?.name || "Admin Utama"}
                     </p>
-                    <p className="text-xs text-blue-200/70">Penyedia</p>
+                    <p className="text-xs text-blue-200/70">Pengguna</p>
                   </div>
                 )}
               </div>

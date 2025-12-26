@@ -22,7 +22,7 @@ interface Produk {
   kategori_id: number;
   nama_kategori?: string;
   deskripsi: string;
-  harga: string;
+  harga: number;
   kontak: string;
   foto_produk?: string;
   foto_list?: FotoList[];
@@ -162,7 +162,7 @@ function DetailProdukModal({ product, onClose, onEdit, onDelete }: any) {
               <div>
                 <span style={{ color: '#64748B', fontSize: '14px' }}>Harga: </span>
                 <span style={{ fontSize: '20px', fontWeight: 'bold', color: '#1F4E73' }}>
-                  Rp {parseFloat(product.harga).toLocaleString('id-ID')}
+                Rp {Number(product.harga).toLocaleString('id-ID')}
                 </span>
               </div>
               
@@ -504,7 +504,7 @@ export default function KatalogProdukPenyedia() {
       nama_produk: product.nama_produk,
       kategori_id: product.kategori_id.toString(),
       deskripsi: product.deskripsi,
-      harga: product.harga,
+      harga: String(product.harga),
       kontak: product.kontak,
       images: []
     });
@@ -729,7 +729,7 @@ export default function KatalogProdukPenyedia() {
                 </div>
                 
                 <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#1F4E73', marginBottom: '12px' }}>
-                  Rp {parseFloat(product.harga).toLocaleString('id-ID')}
+                Rp {Number(product.harga).toLocaleString('id-ID')}
                 </div>
 
                 <p style={{ fontSize: '14px', color: '#334155', marginBottom: '12px', lineHeight: '1.5' }}>
@@ -910,19 +910,29 @@ export default function KatalogProdukPenyedia() {
                   Harga
                 </label>
                 <input
-                  type="number"
-                  value={formData.harga}
-                  onChange={(e) => setFormData({...formData, harga: e.target.value})}
-                  placeholder="0"
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    borderRadius: '8px',
-                    border: '2px solid #E2E8F0',
-                    fontSize: '14px',
-                    boxSizing: 'border-box'
-                  }}
-                />
+  type="number"
+  step="1"
+  min="0"
+  inputMode="numeric"
+  value={formData.harga}
+  onChange={(e) =>
+    setFormData({
+      ...formData,
+      // hanya angka, buang titik & koma
+      harga: e.target.value.replace(/\D/g, '')
+    })
+  }
+  placeholder="0"
+  style={{
+    width: '100%',
+    padding: '12px',
+    borderRadius: '8px',
+    border: '2px solid #E2E8F0',
+    fontSize: '14px',
+    boxSizing: 'border-box'
+  }}
+/>
+
               </div>
 
               <div>

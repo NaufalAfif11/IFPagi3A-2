@@ -8,8 +8,55 @@ import DetailUsulanModal from "@/components/ui/usulan/DetailUsulanModal";
 import MinatPenyediaModal from "@/components/ui/usulan/MinatPenyediaModal";
 import type { Usulan } from "@/types/usulan";
 
+// =====================
+// TYPES
+// =====================
+interface RawUsulan {
+  id: number;
+  nama?: string;
+  alamat?: string;
+  email?: string;
+  telp?: string;
+  jabatan?: string;
+  nama_perusahaan?: string;
+  email_perusahaan?: string;
+  alamat_perusahaan?: string;
+  telp_perusahaan?: string;
+  jenis_produk?: string;
+  deskripsi?: string;
+  tanggal_kebutuhan?: string;
+  estimasi_budget?: number;
+  dokumen?: string;
+  created_at?: string;
+  status?: string;
+  kategori_id?: number | null;
+  nama_kategori?: string;
+  peminat?: number;
+  penyedia_dikerjakan?: string | null;
+}
+
+interface ApiResponse {
+  success?: boolean;
+  message?: string;
+  data?: RawUsulan[];
+}
+
+interface Peminat {
+  minat_id: number;
+  nama: string;
+  email: string;
+  estimasi_biaya: string | number;
+  estimasi_waktu: string | number;
+}
+
+interface FilterCounts {
+  total: number;
+  tersedia: number;
+  dikerjakan: number;
+}
+
 export default function UsulanPenyediaPage() {
-  const [usulan, setUsulan] = useState<Usulan[]>([]);
+  const [usulan, setUsulan] = useState<RawUsulan[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<string>("semua");
   const [selectedUsulan, setSelectedUsulan] = useState<Usulan | null>(null);
   const [showDetailUsulanModal, setShowDetailUsulanModal] = useState(false);
@@ -18,11 +65,11 @@ export default function UsulanPenyediaPage() {
 
   // tambahan state modal peminat
   const [showPeminatModal, setShowPeminatModal] = useState(false);
-  const [peminatList, setPeminatList] = useState<any[]>([]);
+  const [peminatList, setPeminatList] = useState<Peminat[]>([]);
 
   const BASE_URL = "http://localhost:5000";
 
-  const mapStatus = (status?: string) => {
+  const mapStatus = (status?: string): string => {
     if (status === "Menunggu") return "Tersedia";
     if (status === "Sedang Dikerjakan") return "Sedang Dikerjakan";
     if (status === "Selesai") return "Selesai";
@@ -38,8 +85,8 @@ export default function UsulanPenyediaPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const result = await res.json();
-      const list = Array.isArray(result) ? result : result.data;
+      const result: ApiResponse | RawUsulan[] = await res.json();
+      const list = Array.isArray(result) ? result : (result as ApiResponse).data;
       setUsulan(list ?? []);
     } catch (err) {
       console.error("Gagal memuat usulan:", err);
@@ -50,8 +97,8 @@ export default function UsulanPenyediaPage() {
     fetchUsulan();
   }, [fetchUsulan]);
 
-  const normalizedUsulan = Array.isArray(usulan)
-    ? usulan.map((u) => ({
+  const normalizedUsulan: Usulan[] = Array.isArray(usulan)
+    ? usulan.map((u: RawUsulan) => ({
         id: u.id,
         nama: u.nama || "",
         alamat: u.alamat || "",
@@ -76,7 +123,7 @@ export default function UsulanPenyediaPage() {
       }))
     : [];
 
-  const counts = {
+  const counts: FilterCounts = {
     total: normalizedUsulan.length,
     tersedia: normalizedUsulan.filter((u) => u.status === "Tersedia").length,
     dikerjakan: normalizedUsulan.filter((u) => u.status === "Sedang Dikerjakan").length,
@@ -120,7 +167,7 @@ export default function UsulanPenyediaPage() {
         body: formData,
       });
 
-      const result = await res.json();
+      const result: ApiResponse = await res.json();
       if (result.success) {
         alert("✅ Proposal berhasil diajukan!");
         setShowMinatPenyediaModal(false);
@@ -135,32 +182,31 @@ export default function UsulanPenyediaPage() {
   };
 
   const handleOpenPeminat = async (kebutuhanId: number) => {
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) return;
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
 
-    const res = await fetch(
-      `${BASE_URL}/api/minat/kebutuhan/${kebutuhanId}`, // ✅ FIX
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+      const res = await fetch(
+        `${BASE_URL}/api/minat/kebutuhan/${kebutuhanId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    if (!res.ok) throw new Error("Gagal fetch peminat");
+      if (!res.ok) throw new Error("Gagal fetch peminat");
 
-    const data = await res.json();
+      const data: Peminat[] = await res.json();
 
-    // ✅ backend kamu return ARRAY langsung
-    setPeminatList(data);
-    setShowPeminatModal(true);
-  } catch (err) {
-    console.error(err);
-    alert("❌ Gagal memuat peminat");
-  }
-};
-
+      // backend return ARRAY langsung
+      setPeminatList(data);
+      setShowPeminatModal(true);
+    } catch (err) {
+      console.error(err);
+      alert("❌ Gagal memuat peminat");
+    }
+  };
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -227,12 +273,16 @@ export default function UsulanPenyediaPage() {
             <div className="bg-white rounded-2xl max-w-lg w-full p-6 overflow-y-auto">
               <h2 className="text-xl font-bold mb-4">Daftar Peminat</h2>
               <ul className="space-y-2">
-                {peminatList.length > 0 ? peminatList.map((p: any) => (
-                  <li key={p.minat_id} className="border-b py-2">
-                    <span className="font-medium">{p.nama}</span> - {p.email} <br />
-                    Estimasi Biaya: {p.estimasi_biaya} | Estimasi Waktu: {p.estimasi_waktu} hari
-                  </li>
-                )) : <li>Tidak ada peminat</li>}
+                {peminatList.length > 0 ? (
+                  peminatList.map((p: Peminat) => (
+                    <li key={p.minat_id} className="border-b py-2">
+                      <span className="font-medium">{p.nama}</span> - {p.email} <br />
+                      Estimasi Biaya: {p.estimasi_biaya} | Estimasi Waktu: {p.estimasi_waktu} hari
+                    </li>
+                  ))
+                ) : (
+                  <li>Tidak ada peminat</li>
+                )}
               </ul>
               <button
                 onClick={() => setShowPeminatModal(false)}

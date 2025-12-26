@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import SidebarPenyedia from "@/components/ui/sidebar_penyedia";
-import { List, CheckCircle, Clock, AlertCircle, PlusCircle } from "lucide-react";
+import { List, CheckCircle, Clock, AlertCircle } from "lucide-react";
 
 import {
   ResponsiveContainer,
@@ -17,16 +17,58 @@ import {
   Cell,
 } from "recharts";
 
+// =====================
+// TYPES
+// =====================
+interface Statistik {
+  total: number;
+  diterima: number;
+  menunggu: number;
+  ditolak: number;
+}
+
+interface Produk {
+  id: number;
+  nama_produk: string;
+  nama_kategori: string;
+  harga: number;
+  status: string;
+  created_at: string;
+}
+
+interface DataStatus {
+  name: string;
+  value: number;
+  [key: string]: string | number;
+}
+
+
+interface DataBulan {
+  bulan: string;
+  jumlah: number;
+}
+
+interface ApiResponse {
+  success: boolean;
+  message?: string;
+  data: {
+    statistik: Statistik;
+    produk: Produk[];
+  };
+}
+
+const COLORS = ["#22C55E", "#FACC15", "#EF4444"];
+
 const Dashboard_penyedia = () => {
-  const [statistik, setStatistik] = useState({
+  const [statistik, setStatistik] = useState<Statistik>({
     total: 0,
     diterima: 0,
     menunggu: 0,
     ditolak: 0,
   });
-  const [produkList, setProdukList] = useState([]);
+  const [produkList, setProdukList] = useState<Produk[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Fetch data dari backend
   useEffect(() => {
@@ -57,12 +99,12 @@ const Dashboard_penyedia = () => {
         console.log("Response status:", response.status);
 
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
+          const errorData = await response.json().catch(() => ({})) as { message?: string };
           console.error("Error response:", errorData);
           throw new Error(errorData.message || `HTTP Error: ${response.status}`);
         }
 
-        const result = await response.json();
+        const result: ApiResponse = await response.json();
         console.log("API Response:", result);
         
         if (result.success) {
@@ -73,7 +115,7 @@ const Dashboard_penyedia = () => {
         }
       } catch (err) {
         console.error("Error fetching dashboard:", err);
-        setError(err.message);
+        setError((err as Error).message);
       } finally {
         setLoading(false);
       }
@@ -83,9 +125,9 @@ const Dashboard_penyedia = () => {
   }, []);
 
   // Hitung data untuk chart berdasarkan produk real
-  const getMonthlyData = () => {
-    const monthCounts = {};
-    produkList.forEach(produk => {
+  const getMonthlyData = (): DataBulan[] => {
+    const monthCounts: Record<string, number> = {};
+    produkList.forEach((produk: Produk) => {
       const month = new Date(produk.created_at || Date.now()).toLocaleString('id-ID', { month: 'short' });
       monthCounts[month] = (monthCounts[month] || 0) + 1;
     });
@@ -96,13 +138,11 @@ const Dashboard_penyedia = () => {
     }));
   };
 
-  const dataStatus = [
-    { name: "Diterima", value: parseInt(statistik.diterima) || 0 },
-    { name: "Menunggu", value: parseInt(statistik.menunggu) || 0 },
-    { name: "Ditolak", value: parseInt(statistik.ditolak) || 0 },
+  const dataStatus: DataStatus[] = [
+    { name: "Diterima", value: parseInt(String(statistik.diterima)) || 0 },
+    { name: "Menunggu", value: parseInt(String(statistik.menunggu)) || 0 },
+    { name: "Ditolak", value: parseInt(String(statistik.ditolak)) || 0 },
   ];
-
-  const COLORS = ["#22C55E", "#FACC15", "#EF4444"];
 
   if (loading) {
     return (
@@ -234,7 +274,7 @@ const Dashboard_penyedia = () => {
               <p className="text-gray-500 text-center py-8">Belum ada produk</p>
             ) : (
               <div className="space-y-3">
-                {produkList.slice(0, 5).map((p) => (
+                {produkList.slice(0, 5).map((p: Produk) => (
                   <div key={p.id} className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 flex justify-between">
                     <div>
                       <p className="font-semibold">{p.nama_produk}</p>

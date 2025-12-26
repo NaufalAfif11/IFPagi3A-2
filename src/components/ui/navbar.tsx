@@ -80,7 +80,7 @@ export default function Navbar() {
     { name: "Profil", href: "/profile" },
     { name: "Katalog Produk", href: "/katalog" },
     { name: "Riset", href: "/riset" },
-    { name: "Informasi", href: "/information" },
+    { name: "Panduan", href: "/information" },
     { name: "Layanan", href: "/layanan" },
     { name: "Hubungi Kami", href: "/hubungi-kami" },
   ];

@@ -20,6 +20,9 @@ import {
   Cell,
 } from "recharts";
 
+// =====================
+// TYPES
+// =====================
 interface Statistik {
   totalUsulan: number;
   usulanBaru: number;
@@ -29,11 +32,23 @@ interface Statistik {
 interface DataStatus {
   name: string;
   value: number;
+  [key: string]: string | number;
 }
 
 interface DataBulan {
   bulan: string;
   jumlah: number;
+}
+
+interface ApiStatusItem {
+  name: string;
+  value: number;
+}
+
+interface ApiResponse {
+  statistik: Statistik;
+  dataBulan: DataBulan[];
+  statusData: ApiStatusItem[];
 }
 
 const COLORS = ["#FACC15", "#22C55E"]; // Menunggu, Dikerjakan
@@ -51,29 +66,53 @@ const Dashboard_pengguna = () => {
     { name: "Dikerjakan", value: 0 },
   ]);
 
- useEffect(() => {
-  fetch("http://localhost:5000/api/dashboard-pengguna")
-    .then(res => res.json())
-    .then(data => {
-      console.log(data); // cek apakah data muncul di console
-      setStatistik(data.statistik);
-      setDataUsulan(data.dataBulan);
-
-      const statusTemplate = [
-        { name: "Menunggu", value: 0 },
-        { name: "Dikerjakan", value: 0 },
-      ];
-
-      data.statusData.forEach((item: any) => {
-        const index = statusTemplate.findIndex(s => s.name === item.name);
-        if (index >= 0) statusTemplate[index].value = item.value;
-      });
-
-      setDataStatus(statusTemplate);
-    })
-    .catch(err => console.log(err));
-}, []);
-
+      useEffect(() => {
+        const fetchDashboardData = async () => {
+          try {
+            const token = localStorage.getItem("token");
+            if (!token) throw new Error("Token tidak ada");
+      
+            const res = await fetch(
+              "http://localhost:5000/api/dashboard-pengguna",
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+      
+            const data = await res.json();
+            console.log("RAW API RESPONSE:", data);
+      
+            // 🔒 GUARD WAJIB
+            if (!data.statistik || !data.statusData || !data.dataBulan) {
+              console.error("FORMAT API SALAH:", data);
+              return;
+            }
+      
+            setStatistik(data.statistik);
+            setDataUsulan(data.dataBulan);
+      
+            const statusTemplate = [
+              { name: "Menunggu", value: 0 },
+              { name: "Dikerjakan", value: 0 },
+            ];
+      
+            data.statusData.forEach((item: any) => {
+              const i = statusTemplate.findIndex(s => s.name === item.name);
+              if (i !== -1) statusTemplate[i].value = item.value;
+            });
+      
+            setDataStatus(statusTemplate);
+          } catch (err) {
+            console.error("Fetch dashboard error:", err);
+          }
+        };
+      
+        fetchDashboardData();
+      }, []);
+      
+    
 
   return (
     <div className="flex h-screen">
@@ -154,7 +193,7 @@ const Dashboard_pengguna = () => {
                     label
                   >
                     {dataStatus.map((entry, index) => (
-                      <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip />

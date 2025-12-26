@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/ui/navbar";
 import Footer from "@/components/ui/footer";
 import {
@@ -11,6 +12,7 @@ import {
   MessageCircle,
   ChevronLeft,
   ChevronRight,
+  Lock,
 } from "lucide-react";
 
 /* ================== TYPES ================== */
@@ -36,6 +38,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 /* ================== PAGE ================== */
 export default function KatalogPage() {
+  const router = useRouter();
   const [inovasiList, setInovasiList] = useState<Inovasi[]>([]);
   const [categories, setCategories] = useState<Kategori[]>([]);
 
@@ -44,9 +47,18 @@ export default function KatalogPage() {
 
   const [selected, setSelected] = useState<Inovasi | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  /* ================== CHECK AUTH ================== */
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsAuthenticated(!!token);
+  }, []);
 
   /* ================== FETCH CATEGORIES ================== */
   const fetchCategories = async () => {
@@ -102,7 +114,7 @@ export default function KatalogPage() {
           id: item.id,
           title: item.nama_produk,
           desc: item.deskripsi,
-          images: allImages.filter(Boolean), // filter out empty strings
+          images: allImages.filter(Boolean),
           harga: `Rp ${Number(item.harga).toLocaleString("id-ID")}`,
           kategori: item.nama_kategori || 'Tanpa Kategori',
           penyedia: item.penyedia_name || `User #${item.user_id}`,
@@ -127,6 +139,16 @@ export default function KatalogPage() {
     const t = setTimeout(fetchInovasi, 500);
     return () => clearTimeout(t);
   }, [fetchInovasi]);
+
+  /* ================== HANDLE CARD CLICK ================== */
+  const handleCardClick = (item: Inovasi) => {
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+    } else {
+      setSelected(item);
+      setCurrentImageIndex(0);
+    }
+  };
 
   /* ================== RENDER ================== */
   return (
@@ -200,11 +222,8 @@ export default function KatalogPage() {
             {inovasiList.map((item) => (
               <div
                 key={item.id}
-                onClick={() => {
-                  setSelected(item);
-                  setCurrentImageIndex(0);
-                }}
-                className="bg-white rounded-lg shadow hover:shadow-lg cursor-pointer transition-all"
+                onClick={() => handleCardClick(item)}
+                className="bg-white rounded-lg shadow hover:shadow-lg cursor-pointer transition-all relative group"
               >
                 {item.images.length > 0 && item.images[0] ? (
                   <img
@@ -217,6 +236,14 @@ export default function KatalogPage() {
                     <span className="text-5xl">📦</span>
                   </div>
                 )}
+                
+                {/* Lock overlay for non-authenticated users */}
+                {!isAuthenticated && (
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all rounded-t-lg flex items-center justify-center">
+                    <Lock className="w-8 h-8 text-white opacity-0 group-hover:opacity-70 transition-all" />
+                  </div>
+                )}
+                
                 <div className="p-3">
                   <h3 className="text-sm font-medium line-clamp-2">
                     {item.title}
@@ -231,9 +258,56 @@ export default function KatalogPage() {
 
       <Footer />
 
+      {/* ================== AUTH REQUIRED MODAL ================== */}
+      <AnimatePresence>
+        {showAuthModal && (
+          <motion.div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowAuthModal(false)}
+          >
+            <motion.div
+              className="bg-white rounded-2xl w-full max-w-md p-8 shadow-2xl"
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="text-center">
+                <div className="w-16 h-16 bg-[#1F4E73]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Lock className="w-8 h-8 text-[#1F4E73]" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                  Login Diperlukan
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  Anda perlu login terlebih dahulu untuk melihat detail produk dan menghubungi penjual.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowAuthModal(false)}
+                    className="flex-1 border-2 border-gray-300 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-50 transition-all"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    onClick={() => router.push('/login')}
+                    className="flex-1 bg-[#1F4E73] text-white py-3 rounded-lg font-medium hover:bg-[#163A56] transition-all"
+                  >
+                    Login Sekarang
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ================== MODAL DETAIL ================== */}
       <AnimatePresence>
-        {selected && (
+        {selected && isAuthenticated && (
           <motion.div
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 overflow-y-auto"
             initial={{ opacity: 0 }}
@@ -378,7 +452,7 @@ export default function KatalogPage() {
                       </h3>
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between items-center">
-                          <span className="text-gray-600">Nama pembuat</span>
+                          <span className="text-gray-600">Nama penyedia</span>
                           <span className="font-medium text-gray-800">
                             {selected.penyedia}
                           </span>

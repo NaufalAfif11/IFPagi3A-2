@@ -5,15 +5,12 @@ import SidebarAdmin from "@/components/ui/sidebar_admin";
 import {
   BarChart,
   Bar,
-  AreaChart,
-  Area,
   CartesianGrid,
   XAxis,
   YAxis,
   Tooltip,
   ResponsiveContainer,
   Cell,
-  Legend,
 } from "recharts";
 import {
   Download,
@@ -26,14 +23,20 @@ import autoTable from "jspdf-autotable";
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
+// =====================
+// TYPES
+// =====================
+interface KategoriItem {
+  kategori: string;
+  jumlah: number;
+  color: string;
+}
 
-// =====================
-// Custom Tooltip
-// =====================
 interface PengajuanItem {
   bulan: string;
-  jumlah: number | string;
-  diterima: number | string;
+  jumlah: number;
+  diterima: number;
+  ditolak: number;
 }
 
 interface TooltipPayloadItem {
@@ -42,12 +45,23 @@ interface TooltipPayloadItem {
   color?: string;
   dataKey?: string;
 }
+
 interface CustomTooltipProps {
   active?: boolean;
   payload?: TooltipPayloadItem[];
   label?: string;
 }
 
+interface StatCardProps {
+  title: string;
+  value: number;
+  gradient: string;
+  icon: string;
+}
+
+// =====================
+// Custom Tooltip
+// =====================
 const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     return (
@@ -71,11 +85,27 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   return null;
 };
 
+// =====================
+// STAT CARD COMPONENT
+// =====================
+const StatCard = ({ title, value, gradient, icon }: StatCardProps) => (
+  <div className={`bg-gradient-to-br ${gradient} text-white p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105`}>
+    <div className="flex items-center justify-between mb-3">
+      <h3 className="text-base font-semibold opacity-90">{title}</h3>
+      <span className="text-3xl">{icon}</span>
+    </div>
+    <p className="text-4xl font-bold">{value.toLocaleString()}</p>
+    <div className="mt-3 pt-3 border-t border-white border-opacity-20">
+      <p className="text-xs opacity-75">Data terkini</p>
+    </div>
+  </div>
+);
+
 const DashboardAdmin = () => {
-  const dropdownRef = useRef(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const [showExportDropdown, setShowExportDropdown] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   // =====================
   // STATE DATA
@@ -86,8 +116,8 @@ const DashboardAdmin = () => {
     totalProduk: 0,
   });
   
-  const [kategoriData, setKategoriData] = useState([]);
-  const [dataPengajuan, setDataPengajuan] = useState([]);
+  const [kategoriData, setKategoriData] = useState<KategoriItem[]>([]);
+  const [dataPengajuan, setDataPengajuan] = useState<PengajuanItem[]>([]);
 
   // =====================
   // COLOR PALETTE
@@ -111,13 +141,12 @@ const DashboardAdmin = () => {
         }
 
         const response = await fetch("http://localhost:5000/api/dashboard/dashboard-admin", {
-  method: "GET",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
-  },
-});
-
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -129,7 +158,7 @@ const DashboardAdmin = () => {
         setStatistik(data.statistik);
 
         // Set kategori dengan warna
-        const kategoriWithColors = data.kategori.map((item: any, index: number) => ({
+        const kategoriWithColors: KategoriItem[] = data.kategori.map((item: any, index: number) => ({
           kategori: item.kategori,
           jumlah: Number(item.jumlah),
           color: colors[index % colors.length],
@@ -137,19 +166,18 @@ const DashboardAdmin = () => {
         setKategoriData(kategoriWithColors);
 
         // Set data pengajuan
-        setDataPengajuan(
-          data.pengajuan.map((item: PengajuanItem) => ({
-            bulan: item.bulan,
-            jumlah: Number(item.jumlah),
-            diterima: Number(item.diterima),
-          }))
-        );
-        
+        const pengajuanData: PengajuanItem[] = data.pengajuan.map((item: any) => ({
+          bulan: item.bulan,
+          jumlah: Number(item.jumlah),
+          diterima: Number(item.diterima),
+          ditolak: Number(item.ditolak),
+        }));
+        setDataPengajuan(pengajuanData);
 
         setError(null);
       } catch (err) {
         console.error("Error fetching dashboard data:", err);
-        setError(err.message || "Gagal memuat data dashboard");
+        setError((err as Error).message || "Gagal memuat data dashboard");
       } finally {
         setLoading(false);
       }
@@ -164,31 +192,31 @@ const DashboardAdmin = () => {
   const exportToPDF = () => {
     const doc = new jsPDF();
     
-    // Header
-    doc.setFontSize(18);
-    doc.setFont(undefined, 'bold');
-    doc.text("Laporan Dashboard Admin", 14, 20);
-    
-    doc.setFontSize(11);
-    doc.setFont(undefined, 'normal');
-    doc.text(`Tanggal: ${new Date().toLocaleDateString('id-ID')}`, 14, 28);
-    
-    // Statistik
-    doc.setFontSize(14);
-    doc.setFont(undefined, 'bold');
-    doc.text("Statistik", 14, 40);
-    
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-    doc.text(`Total Penyedia: ${statistik.totalPenyedia}`, 14, 48);
-    doc.text(`Total Pengguna: ${statistik.totalPengguna}`, 14, 54);
-    doc.text(`Total Produk: ${statistik.totalProduk}`, 14, 60);
-    
-    // Tabel Kategori
-    doc.setFontSize(14);
-    doc.setFont(undefined, 'bold');
-    doc.text("Kategori Layanan", 14, 72);
-    
+   // Header
+doc.setFontSize(18);
+doc.setFont("helvetica", "bold");
+doc.text("Laporan Dashboard Admin", 14, 20);
+
+doc.setFontSize(11);
+doc.setFont("helvetica", "normal");
+doc.text(`Tanggal: ${new Date().toLocaleDateString("id-ID")}`, 14, 28);
+
+// Statistik
+doc.setFontSize(14);
+doc.setFont("helvetica", "bold");
+doc.text("Statistik", 14, 40);
+
+doc.setFontSize(10);
+doc.setFont("helvetica", "normal");
+doc.text(`Total Penyedia: ${statistik.totalPenyedia}`, 14, 48);
+doc.text(`Total Pengguna: ${statistik.totalPengguna}`, 14, 54);
+doc.text(`Total Produk: ${statistik.totalProduk}`, 14, 60);
+
+// Tabel Kategori
+doc.setFontSize(14);
+doc.setFont("helvetica", "bold");
+doc.text("Kategori Layanan", 14, 72);
+
     autoTable(doc, {
       startY: 76,
       head: [["Kategori", "Jumlah"]],
@@ -201,10 +229,12 @@ const DashboardAdmin = () => {
     });
     
     // Tabel Pengajuan
-    const finalY = (doc as any).lastAutoTable.finalY || 76;
-    doc.setFontSize(14);
-    doc.setFont(undefined, 'bold');
-    doc.text("Tren Pengajuan Produk", 14, finalY + 10);
+const finalY = (doc as any).lastAutoTable?.finalY ?? 76;
+
+doc.setFontSize(14);
+doc.setFont("helvetica", "bold");
+doc.text("Tren Pengajuan Produk", 14, finalY + 10);
+
     
     autoTable(doc, {
       startY: finalY + 14,
@@ -267,7 +297,7 @@ const DashboardAdmin = () => {
   // =====================
   // LOADING STATE
   // =====================
-    if (loading) {
+  if (loading) {
     return (
       <div className="flex h-screen bg-white">
         <SidebarAdmin />
@@ -289,7 +319,7 @@ const DashboardAdmin = () => {
   // =====================
   // ERROR STATE
   // =====================
-    if (error) {
+  if (error) {
     return (
       <div className="flex h-screen bg-white">
         <SidebarAdmin />
@@ -322,9 +352,8 @@ const DashboardAdmin = () => {
           <div className="flex items-center justify-between mb-10">
             <div>
               <h1 className="text-4xl font-bold text-[#1F4E73]">
-  Dashboard Admin
-</h1>
-
+                Dashboard Admin
+              </h1>
               <p className="text-sm text-gray-600 mt-2 flex items-center gap-2">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                 Selamat datang Admin — pantau data kategori & laporan
@@ -550,21 +579,5 @@ const DashboardAdmin = () => {
     </div>
   );
 };
-
-// =====================
-// SMALL COMPONENT
-// =====================
-const StatCard = ({ title, value, gradient, icon }) => (
-  <div className={`bg-gradient-to-br ${gradient} text-white p-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105`}>
-    <div className="flex items-center justify-between mb-3">
-      <h3 className="text-base font-semibold opacity-90">{title}</h3>
-      <span className="text-3xl">{icon}</span>
-    </div>
-    <p className="text-4xl font-bold">{value.toLocaleString()}</p>
-    <div className="mt-3 pt-3 border-t border-white border-opacity-20">
-      <p className="text-xs opacity-75">Data terkini</p>
-    </div>
-  </div>
-);
 
 export default DashboardAdmin;

@@ -3,17 +3,42 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+// =====================
+// TYPES
+// =====================
+interface FormData {
+  namaLengkap: string;
+  email: string;
+  noTelepon: string;
+}
+
+interface ProfileApiResponse {
+  name: string | null;
+  email: string | null;
+  no_handphone: string | null;
+  foto_profil: string | null;
+}
+
+interface UpdateApiResponse {
+  user?: {
+    name: string;
+    email: string;
+    no_handphone: string;
+  };
+  message?: string;
+}
+
 export default function ProfileEdit() {
   const router = useRouter();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     namaLengkap: "",
     email: "",
     noTelepon: "",
   });
 
-  const [photoPreview, setPhotoPreview] = useState(null);
-  const [photoFile, setPhotoFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -31,7 +56,7 @@ export default function ProfileEdit() {
           },
         });
 
-        const data = await res.json();
+        const data: ProfileApiResponse = await res.json();
 
         setFormData({
           namaLengkap: data.name ?? "",
@@ -61,8 +86,8 @@ export default function ProfileEdit() {
   };
 
   // UPLOAD FOTO
-  const handleUpload = (e) => {
-    const file = e.target.files[0];
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
     setPhotoFile(file);
@@ -89,7 +114,7 @@ export default function ProfileEdit() {
         body: form,
       });
 
-      const data = await res.json();
+      const data: UpdateApiResponse = await res.json();
 
       if (data.user) {
         alert("Profil berhasil diperbarui!");

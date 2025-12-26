@@ -16,7 +16,7 @@ import profileRoutes from "./src/routes/profileRoutes.js";
 import minatPenyediaRoutes from "./src/routes/minatPenyediaRoutes.js";
 import produkPenyediaRoutes from './src/routes/produkpenyediaRoutes.js';
 import adminProdukRoutes from './src/routes/adminProdukRoutes.js';
-import publicProdukRoutes from './src/routes/publicProdukRoutes.js';
+import publicProdukRoutes from './src/routes/publicprodukRoutes.js';
 import berandaRoutes from "./src/routes/berandaRoutes.js";
 import dashboardAdminRoutes from "./src/routes/dashboardAdminRoutes.js";
 import dashboardPenggunaRoutes from "./src/routes/dashboardPenggunaRoutes.js";

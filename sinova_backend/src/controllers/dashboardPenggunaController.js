@@ -8,19 +8,32 @@ import {
 
 export const getDashboardPengguna = async (req, res) => {
   try {
-    const totalUsulan = await getTotalUsulan();
-    const usulanBaru = await getUsulanBaru();
-    const history = await getHistory();
-    const statusData = await getStatusData();
-    const dataBulan = await getDataBulan();
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const penggunaId = req.user.id;
+
+    const totalUsulan = await getTotalUsulan(penggunaId);
+    const usulanBaru = await getUsulanBaru(penggunaId);
+    const history = await getHistory(penggunaId);
+    const statusData = await getStatusData(penggunaId);
+    const dataBulan = await getDataBulan(penggunaId);
 
     res.json({
-      statistik: { totalUsulan, usulanBaru, history },
+      statistik: {
+        totalUsulan,
+        usulanBaru,
+        history,
+      },
       statusData,
       dataBulan,
     });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Gagal mengambil data dashboard" });
+  } catch (err) {
+    console.error("DASHBOARD PENGGUNA ERROR:", err.message);
+    res.status(500).json({
+      message: "Gagal ambil dashboard pengguna",
+      error: err.message,
+    });
   }
 };
