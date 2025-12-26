@@ -1,43 +1,14 @@
 "use client";
 
-import { X, Edit, Trash2, Users, Package, Mail, Phone, MapPin, ArrowRight, FileText, Calendar, DollarSign, Building } from "lucide-react";
+import { X, Edit, Trash2, Users, Package, Mail, Phone, MapPin, ArrowRight, FileText, Building } from "lucide-react";
 import type { Usulan } from "@/types/usulan";
 
 interface DetailUsulanModalProps {
-  usulan: Usulan &{
-    id: number;
-    nama: string;
-    alamat: string;
-    email: string;
-    noTelp: string;
-    jabatan: string;
-    namaPerusahaan: string;
-    emailPerusahaan: string;
-    noTelpPerusahaan: string;
-    alamatPerusahaan: string;
-    kapanDigunakan: string;
-    jenisProdukanDiusulkan: string;
-    deskripsiKebutuhan: string;
-    dokumen: string | null;
-    tanggal: string;
-    status: string;
-    statusDetail: string;
-    peminat: number;
-    kategori_id: string;
-    nama_kategori: string;
-    estimasiBudget: string;
-    penyediaDikerjakan: {
-      id: string;
-      nama: string;
-      tanggalAmbil: string;
-      estimasiSelesai: string;
-  } | null;
-};
+  usulan: Usulan;
   onClose: () => void;
   onEdit?: (usulan: string) => void;
   onDelete?: (id: number) => void;
   onOpenPeminat?: (kebutuhanId: number) => void;
-  showAjukanProposal?: boolean;
   onAjukanProposal?: (kebutuhanId: number) => void;
 }
 
@@ -213,7 +184,7 @@ export default function DetailUsulanModal({
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">Email</p>
-                    <p className="font-medium text-gray-900">{usulan.email}</p>
+                    <p className="text-sm text-gray-900">{usulan.email}</p>
                   </div>
                 </div>
                 
@@ -223,7 +194,7 @@ export default function DetailUsulanModal({
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">Telepon</p>
-                    <p className="font-medium text-gray-900">{usulan.noTelp}</p>
+                    <p className="text-sm text-gray-900">{usulan.noTelp}</p>
                   </div>
                 </div>
               </div>
@@ -235,7 +206,7 @@ export default function DetailUsulanModal({
                   </div>
                   <div>
                     <p className="text-xs text-gray-600 mb-1">Alamat Lengkap</p>
-                    <p className="text-gray-700">{usulan.alamat}</p>
+                    <p className="text-sm text-gray-900">{usulan.alamat}</p>
                   </div>
                 </div>
               </div>
@@ -252,19 +223,19 @@ export default function DetailUsulanModal({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <p className="text-xs text-gray-600 mb-1">Nama Perusahaan</p>
-                  <p className="font-medium text-gray-900">{usulan.namaPerusahaan || '-'}</p>
+                  <p className="font-medium text-sm text-gray-900">{usulan.namaPerusahaan || '-'}</p>
                 </div>
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <p className="text-xs text-gray-600 mb-1">Email Perusahaan</p>
-                  <p className="font-medium text-gray-900">{usulan.emailPerusahaan || '-'}</p>
+                  <p className="font-medium text-sm text-gray-900">{usulan.emailPerusahaan || '-'}</p>
                 </div>
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <p className="text-xs text-gray-600 mb-1">Telepon Perusahaan</p>
-                  <p className="font-medium text-gray-900">{usulan.noTelpPerusahaan || '-'}</p>
+                  <p className="font-medium text-sm text-gray-900">{usulan.noTelpPerusahaan || '-'}</p>
                 </div>
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <p className="text-xs text-gray-600 mb-1">Alamat Perusahaan</p>
-                  <p className="font-medium text-gray-900">{usulan.alamatPerusahaan || '-'}</p>
+                  <p className="font-medium text-sm text-gray-900">{usulan.alamatPerusahaan || '-'}</p>
                 </div>
               </div>
             </div>
@@ -322,13 +293,13 @@ export default function DetailUsulanModal({
             <div className="flex flex-wrap gap-3 justify-end">
               {/* AJUKAN PROPOSAL Button */}
               {isTersedia && onAjukanProposal && (
-  <button 
-    onClick={handleAjukanProposal}
-    className="px-4 py-2 bg-gradient-to-r from-[#3e81aa] to-[#1F4E73] text-white rounded font-bold hover:shadow-xl transition-all flex items-center gap-2">
-    Ajukan Proposal
-    <ArrowRight className="w-5 h-5" />
-  </button>
-)}
+            <button 
+              onClick={handleAjukanProposal}
+              className="px-4 py-2 bg-gradient-to-r from-[#3e81aa] to-[#1F4E73] text-white rounded font-bold hover:shadow-xl transition-all flex items-center gap-2">
+              Ajukan Proposal
+              <ArrowRight className="w-5 h-5" />
+            </button>
+          )}
 
 
               {/* EDIT Button */}

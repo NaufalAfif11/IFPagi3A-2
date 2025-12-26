@@ -1,38 +1,51 @@
-export type StatusType = "Tersedia" | "Sedang Dikerjakan" | "Selesai"| string;
+export type StatusType =
+  | "Tersedia"
+  | "Sedang Dikerjakan"
+  | "Selesai"
+  | string;
+
+// export interface PenyediaDikerjakan {
+//   id: string;
+//   nama: string;
+//   tanggal_ambil: string;
+//   estimasi_selesai: string;
+// }
 
 export interface Usulan {
-  id: number;
+   id: number;
   nama: string;
   alamat: string;
   email: string;
-  telp: string;
+  noTelp: string;
   jabatan: string;
 
-  nama_perusahaan: string;
-  email_perusahaan: string;
-  alamat_perusahaan: string;
-  telp_perusahaan: string;
-  jenis_produk: string;
-  tanggal_kebutuhan: string;
-  deskripsi: string;
-  dokumen: string | null;
+  namaPerusahaan: string;
+  emailPerusahaan: string;
+  noTelpPerusahaan: string;
+  alamatPerusahaan: string;
+
+  jenisProdukanDiusulkan: string;
+  deskripsiKebutuhan: string;
+  kapanDigunakan: string;
+  estimasiBudget: string | number;
+  tanggal: string;
+
   status: string;
-  status_detail: string;
+  statusDetail: string;
+
   kategori_id: number | null;
   nama_kategori: string;
-  user_id: number | null;
-  kategori: string | null;
-  estimasi_budget: string | null;
+
   peminat: number;
-  created_at: string;
-  user_dikerjakan?: Peminat | null;
-    penyedia_dikerjakan?: {
-        id: string;
-        nama: string;
-        tanggal_ambil: string;
-        estimasi_selesai: string;
-    } | null;
+  dokumen: string | null;
+  penyediaDikerjakan?: {
+    id: string;
+    nama: string;
+    tanggal_ambil: string;
+    estimasi_selesai: string;
+  } | null;
 }
+
 
 export interface Peminat {
   minat_id?: number;

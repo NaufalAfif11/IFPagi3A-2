@@ -6,54 +6,9 @@ import UsulanCard from "@/components/ui/usulan/UsulanCard";
 import FilterUsulan from "@/components/ui/usulan/FilterUsulan";
 import DetailUsulanModal from "@/components/ui/usulan/DetailUsulanModal";
 import MinatPenyediaModal from "@/components/ui/usulan/MinatPenyediaModal";
-import type { Usulan } from "@/types/usulan";
+import type { Usulan, Peminat } from "@/types/usulan";
+import { toast } from "react-hot-toast";
 
-// =====================
-// TYPES
-// =====================
-interface RawUsulan {
-  id: number;
-  nama?: string;
-  alamat?: string;
-  email?: string;
-  telp?: string;
-  jabatan?: string;
-  nama_perusahaan?: string;
-  email_perusahaan?: string;
-  alamat_perusahaan?: string;
-  telp_perusahaan?: string;
-  jenis_produk?: string;
-  deskripsi?: string;
-  tanggal_kebutuhan?: string;
-  estimasi_budget?: number;
-  dokumen?: string;
-  created_at?: string;
-  status?: string;
-  kategori_id?: number | null;
-  nama_kategori?: string;
-  peminat?: number;
-  penyedia_dikerjakan?: string | null;
-}
-
-interface ApiResponse {
-  success?: boolean;
-  message?: string;
-  data?: RawUsulan[];
-}
-
-interface Peminat {
-  minat_id: number;
-  nama: string;
-  email: string;
-  estimasi_biaya: string | number;
-  estimasi_waktu: string | number;
-}
-
-interface FilterCounts {
-  total: number;
-  tersedia: number;
-  dikerjakan: number;
-}
 
 export default function UsulanPenyediaPage() {
   const [usulan, setUsulan] = useState<RawUsulan[]>([]);
@@ -64,7 +19,7 @@ export default function UsulanPenyediaPage() {
   const [search, setSearch] = useState("");
 
   // tambahan state modal peminat
-  const [showPeminatModal, setShowPeminatModal] = useState(false);
+  const [showSetujuProposal, setShowSetujuProposal] = useState(false);
   const [peminatList, setPeminatList] = useState<Peminat[]>([]);
 
   const BASE_URL = "http://localhost:5000";
@@ -97,31 +52,38 @@ export default function UsulanPenyediaPage() {
     fetchUsulan();
   }, [fetchUsulan]);
 
-  const normalizedUsulan: Usulan[] = Array.isArray(usulan)
-    ? usulan.map((u: RawUsulan) => ({
-        id: u.id,
-        nama: u.nama || "",
-        alamat: u.alamat || "",
-        email: u.email || "",
-        noTelp: u.telp || "",
-        jabatan: u.jabatan || "",
-        namaPerusahaan: u.nama_perusahaan || "",
-        emailPerusahaan: u.email_perusahaan || "",
-        alamatPerusahaan: u.alamat_perusahaan || "",
-        noTelpPerusahaan: u.telp_perusahaan || "",
-        jenisProdukanDiusulkan: u.jenis_produk || "",
-        deskripsiKebutuhan: u.deskripsi || "",
-        kapanDigunakan: u.tanggal_kebutuhan || "",
-        estimasiBudget: u.estimasi_budget || 0,
-        dokumen: u.dokumen || "",
-        tanggal: u.created_at || "",
-        status: mapStatus(u.status),
-        kategori_id: u.kategori_id || null,
-        nama_kategori: u.nama_kategori || "Tidak ada kategori",
-        peminat: u.peminat || 0,
-        penyediaDikerjakan: u.penyedia_dikerjakan || null,
-      }))
-    : [];
+    const normalizedUsulan = Array.isArray(usulan)
+  ? usulan.map((u: any) => ({
+      id: u.id,
+      nama: u.nama ?? "",
+      alamat: u.alamat ?? "",
+      email: u.email ?? "",
+      noTelp: u.telp ?? "",
+      jabatan: u.jabatan ?? "",
+
+      namaPerusahaan: u.nama_perusahaan ?? "",
+      emailPerusahaan: u.email_perusahaan ?? "",
+      alamatPerusahaan: u.alamat_perusahaan ?? "",
+      noTelpPerusahaan: u.telp_perusahaan ?? "",
+
+      jenisProdukanDiusulkan: u.jenis_produk ?? "",
+      deskripsiKebutuhan: u.deskripsi ?? "",
+      kapanDigunakan: u.tanggal_kebutuhan ?? "",
+      estimasiBudget: u.estimasi_budget ?? 0,
+
+      dokumen: u.dokumen ?? null,
+      tanggal: u.created_at ?? "",
+
+      status: mapStatus(u.status) ?? "",
+      statusDetail: u.status_detail ?? "",
+
+      kategori_id: u.kategori_id ?? null,
+      nama_kategori: u.nama_kategori ?? "Tidak ada kategori",
+
+      peminat: u.peminat ?? 0,
+      penyediaDikerjakan: u.penyedia_dikerjakan ?? null,
+    }))
+  : [];
 
   const counts: FilterCounts = {
     total: normalizedUsulan.length,
@@ -169,15 +131,15 @@ export default function UsulanPenyediaPage() {
 
       const result: ApiResponse = await res.json();
       if (result.success) {
-        alert("✅ Proposal berhasil diajukan!");
+        toast.success("✅ Proposal berhasil diajukan!");
         setShowMinatPenyediaModal(false);
         fetchUsulan();
       } else {
-        alert("❌ Gagal mengajukan proposal: " + result.message);
+        toast.error("❌ Gagal mengajukan proposal: " + result.message);
       }
     } catch (err) {
       console.error(err);
-      alert("❌ Terjadi kesalahan saat submit proposal");
+      toast.error("❌ Terjadi kesalahan saat submit proposal");
     }
   };
 
@@ -199,14 +161,15 @@ export default function UsulanPenyediaPage() {
 
       const data: Peminat[] = await res.json();
 
-      // backend return ARRAY langsung
-      setPeminatList(data);
-      setShowPeminatModal(true);
-    } catch (err) {
-      console.error(err);
-      alert("❌ Gagal memuat peminat");
-    }
-  };
+    // ✅ backend kamu return ARRAY langsung
+    setPeminatList(data);
+    setShowSetujuProposal(true);
+  } catch (err) {
+    console.error(err);
+    toast.error("❌ Gagal memuat peminat");
+  }
+};
+
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -268,7 +231,7 @@ export default function UsulanPenyediaPage() {
         )}
 
         {/* MODAL PEMINAT */}
-        {showPeminatModal && (
+        {showSetujuProposal && (
           <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl max-w-lg w-full p-6 overflow-y-auto">
               <h2 className="text-xl font-bold mb-4">Daftar Peminat</h2>
@@ -285,7 +248,7 @@ export default function UsulanPenyediaPage() {
                 )}
               </ul>
               <button
-                onClick={() => setShowPeminatModal(false)}
+                onClick={() => setShowSetujuProposal(false)}
                 className="mt-4 bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300"
               >
                 Tutup

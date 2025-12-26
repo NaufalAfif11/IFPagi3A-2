@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Navbar from "@/components/ui/navbar";
 import Footer from "@/components/ui/footer";
+import { toast } from "react-hot-toast";
 
 const BASE_URL = "http://localhost:5000";
 
@@ -86,9 +87,9 @@ export default function LayananPage() {
   };
 
   const validate = () => {
-    if (!formData.kategori_id) { alert("Pilih kategori terlebih dahulu."); return false; }
-    if (!formData.jenis_produk.trim()) { alert("Isi jenis produk."); return false; }
-    if (!formData.deskripsi.trim()) { alert("Isi deskripsi kebutuhan."); return false; }
+    if (!formData.kategori_id) { toast("Pilih kategori terlebih dahulu."); return false; }
+    if (!formData.jenis_produk.trim()) { toast("Isi jenis produk."); return false; }
+    if (!formData.deskripsi.trim()) { toast("Isi deskripsi kebutuhan."); return false; }
     return true;
   };
 
@@ -99,7 +100,7 @@ export default function LayananPage() {
     // Ambil token
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("❌ Anda belum login.");
+      toast.error("❌ Anda belum login.");
       window.location.href = "/login";
       return;
     }
@@ -122,7 +123,7 @@ export default function LayananPage() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message || data.error || `Server returned ${res.status}`);
 
-      alert("✅ Usulan berhasil diajukan!");
+      toast.success("✅ Usulan berhasil diajukan!");
       setFormData({
         nama: "", alamat: "", email: "", telp: "", jabatan: "",
         nama_perusahaan: "", email_perusahaan: "", alamat_perusahaan: "", telp_perusahaan: "",
@@ -131,7 +132,7 @@ export default function LayananPage() {
       });
     } catch (err: any) {
       console.error("submit error:", err);
-      alert("❌ Gagal kirim usulan: " + (err.message || "unknown error"));
+      toast.error("❌ Gagal kirim usulan: " + (err.message || "unknown error"));
     } finally {
       setSubmitting(false);
     }

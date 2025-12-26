@@ -1,268 +1,213 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import SidebarAdmin from "@/components/ui/sidebar_admin";
+import UsulanCard from "@/components/ui/usulan/UsulanCard";
+import FilterUsulan from "@/components/ui/usulan/FilterUsulan";
+import DetailUsulanModal from "@/components/ui/usulan/DetailUsulanModal";
+import MinatPenyediaModal from "@/components/ui/usulan/MinatPenyediaModal";
+import type { Usulan } from "@/types/usulan";
+import { toast } from "react-hot-toast";
 
-export default function UsulanKebutuhanAdmin() {
-  const [usulanData, setUsulanData] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState("semua");
-  const [selectedUsulan, setSelectedUsulan] = useState(null);
-  const [showDetailModal, setShowDetailModal] = useState(false);
+export default function UsulanAdminPage() {
+  const [usulan, setUsulan] = useState<Usulan[]>([]);
+  const [selectedFilter, setSelectedFilter] = useState<string>("semua");
+  const [selectedUsulan, setSelectedUsulan] = useState<Usulan | null>(null);
+  const [showDetailUsulanModal, setShowDetailUsulanModal] = useState(false);
+  const [showMinatPenyediaModal, setShowMinatPenyediaModal] = useState(false);
+  const [search, setSearch] = useState("");
 
-  // ===============================
-  // FETCH DATA RIWAYAT USULAN
-  // ===============================
-  useEffect(() => {
-    const fetchUsulan = async () => {
-      try {
-        const res = await fetch(
-          "http://localhost:5000/api/admin/riwayat-usulan",
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
+  // tambahan state modal peminat
+  const [showPeminatModal, setShowPeminatModal] = useState(false);
+  const [peminatList, setPeminatList] = useState<any[]>([]);
 
-        const json = await res.json();
-        setUsulanData(json.data || []);
-      } catch (error) {
-        console.error("Gagal mengambil data usulan:", error);
-      }
-    };
+  const BASE_URL = "http://localhost:5000";
 
-    fetchUsulan();
-  }, []);
-
-  // ===============================
-  // FILTER DATA
-  // ===============================
-  const filteredUsulan = usulanData.filter((u) => {
-    const matchesSearch =
-      u.judul_usulan.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.nama_pengguna.toLowerCase().includes(searchQuery.toLowerCase());
-
-    let matchesStatus = true;
-
-    if (filterStatus === "menunggu") {
-      matchesStatus = !u.penyedia_dikerjakan || u.penyedia_dikerjakan === "-";
-    }
-
-    if (filterStatus === "dikerjakan") {
-      matchesStatus = u.penyedia_dikerjakan && u.penyedia_dikerjakan !== "-";
-    }
-
-    return matchesSearch && matchesStatus;
-  });
-
-  // ===============================
-  // STATISTIK
-  // ===============================
-  const stats = {
-    semua: usulanData.length,
-    menunggu: usulanData.filter(
-      (u) => !u.penyedia_dikerjakan || u.penyedia_dikerjakan === "-"
-    ).length,
-    dikerjakan: usulanData.filter(
-      (u) => u.penyedia_dikerjakan && u.penyedia_dikerjakan !== "-"
-    ).length,
+  const mapStatus = (status?: string) => {
+    if (status === "Menunggu") return "Tersedia";
+    if (status === "Sedang Dikerjakan") return "Sedang Dikerjakan";
+    if (status === "Selesai") return "Selesai";
+    return "Tersedia";
   };
 
-  // ===============================
-  // STATUS UI
-  // ===============================
-  const statusLabel = (u) =>
-    u.penyedia_dikerjakan && u.penyedia_dikerjakan !== "-"
-      ? "DIKERJAKAN"
-      : "MENUNGGU";
+  const fetchUsulan = useCallback(async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
 
-  const statusColor = (u) =>
-    u.penyedia_dikerjakan && u.penyedia_dikerjakan !== "-"
-      ? "#34D399"
-      : "#F6C343";
+      const res = await fetch(`${BASE_URL}/api/kebutuhan/admin`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const result = await res.json();
+      const list = Array.isArray(result) ? result : result.data;
+      setUsulan(list ?? []);
+    } catch (err) {
+      console.error("Gagal memuat usulan:", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUsulan();
+  }, [fetchUsulan]);
+
+    const normalizedUsulan = Array.isArray(usulan)
+  ? usulan.map((u: any) => ({
+      id: u.id,
+      nama: u.nama ?? "",
+      alamat: u.alamat ?? "",
+      email: u.email ?? "",
+      noTelp: u.telp ?? "",
+      jabatan: u.jabatan ?? "",
+
+      namaPerusahaan: u.nama_perusahaan ?? "",
+      emailPerusahaan: u.email_perusahaan ?? "",
+      alamatPerusahaan: u.alamat_perusahaan ?? "",
+      noTelpPerusahaan: u.telp_perusahaan ?? "",
+
+      jenisProdukanDiusulkan: u.jenis_produk ?? "",
+      deskripsiKebutuhan: u.deskripsi ?? "",
+      kapanDigunakan: u.tanggal_kebutuhan ?? "",
+      estimasiBudget: u.estimasi_budget ?? 0,
+
+      dokumen: u.dokumen ?? null,
+      tanggal: u.created_at ?? "",
+
+      status: mapStatus(u.status) ?? "",
+      statusDetail: u.status_detail ?? "",
+
+      kategori_id: u.kategori_id ?? null,
+      nama_kategori: u.nama_kategori ?? "Tidak ada kategori",
+
+      peminat: u.peminat ?? 0,
+      penyediaDikerjakan: u.penyedia_dikerjakan ?? null,
+    }))
+  : [];
+
+  const counts = {
+    total: normalizedUsulan.length,
+    tersedia: normalizedUsulan.filter((u) => u.status === "Tersedia").length,
+    dikerjakan: normalizedUsulan.filter((u) => u.status === "Sedang Dikerjakan").length,
+  };
+
+  const filteredUsulan = normalizedUsulan.filter((u) => {
+    const s = search.toLowerCase();
+    return (
+      (u.nama.toLowerCase().includes(s) ||
+        u.jenisProdukanDiusulkan.toLowerCase().includes(s) ||
+        u.deskripsiKebutuhan.toLowerCase().includes(s)) &&
+      (selectedFilter === "semua" ? true : u.status === selectedFilter)
+    );
+  });
+
+
+  const handleOpenPeminat = async (kebutuhanId: number) => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    const res = await fetch(
+      `${BASE_URL}/api/minat/kebutuhan/${kebutuhanId}`, // ✅ FIX
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!res.ok) throw new Error("Gagal fetch peminat");
+
+    const data = await res.json();
+
+    // ✅ backend kamu return ARRAY langsung
+    setPeminatList(data);
+    setShowPeminatModal(true);
+  } catch (err) {
+    console.error(err);
+    toast.error("❌ Gagal memuat peminat");
+  }
+};
+
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
+    <div className="flex h-screen bg-gray-100">
       <SidebarAdmin />
 
-      <div style={{ flex: 1, padding: "32px" }}>
-        <h1 style={{ fontSize: 28, fontWeight: "bold", color: "#1F4E73" }}>
-          Riwayat Usulan Kebutuhan
-        </h1>
-        <p style={{ color: "#64748B", marginBottom: 24 }}>
-          Monitoring seluruh usulan kebutuhan inovasi
-        </p>
+      <div className="flex-1 overflow-y-auto">
+        {/* HEADER */}
+        <div className="bg-gradient-to-r from-[#3e81aa] to-[#1F4E73] text-white shadow-xl">
+          <div className="max-w-7xl mx-auto px-4 py-8">
+            <h1 className="text-3xl font-bold">Usulan Kebutuhan</h1>
+            <p className="text-blue-100 text-sm">Selamat datang penyedia! Lihat usulan di sini</p>
+          </div>
+        </div>
 
-        {/* ================= STATISTIK ================= */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: 16,
-            marginBottom: 24,
-          }}
-        >
-          {Object.entries(stats).map(([key, value]) => (
-            <div
-              key={key}
-              onClick={() => setFilterStatus(key)}
-              style={{
-                backgroundColor: "#1F4E73",
-                color: "white",
-                padding: 20,
-                borderRadius: 12,
-                textAlign: "center",
-                cursor: "pointer",
-                opacity: filterStatus === key ? 1 : 0.7,
+        {/* FILTER */}
+        <div className="px-4 pt-6 space-y-6">
+          <FilterUsulan
+            selectedFilter={selectedFilter}
+            setSelectedFilter={setSelectedFilter}
+            search={search}
+            setSearch={setSearch}
+            counts={counts}
+          />
+        </div>
+
+        {/* LIST */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
+          {filteredUsulan.map((u) => (
+            <UsulanCard
+              key={u.id}
+              usulan={u}
+              kategoriName={u.nama_kategori}
+              onClick={() => {
+                setSelectedUsulan(u);
+                setShowDetailUsulanModal(true);
               }}
-            >
-              <div style={{ fontSize: 13, textTransform: "uppercase" }}>
-                {key}
-              </div>
-              <div style={{ fontSize: 28, fontWeight: "bold" }}>{value}</div>
-            </div>
+            />
           ))}
         </div>
 
-        {/* ================= SEARCH ================= */}
-        <input
-          type="text"
-          placeholder="Cari judul usulan atau nama pengusul..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          style={{
-            width: "100%",
-            padding: 14,
-            borderRadius: 8,
-            border: "2px solid #E2E8F0",
-            marginBottom: 20,
-          }}
-        />
+        {/* MODAL DETAIL */}
+        {showDetailUsulanModal && selectedUsulan && (
+          <DetailUsulanModal
+            usulan={selectedUsulan}
+            onClose={() => setShowDetailUsulanModal(false)}
+            onOpenPeminat={handleOpenPeminat}
+          />
+        )}
 
-        {/* ================= TABEL ================= */}
-        <div
-          style={{
-            backgroundColor: "white",
-            padding: 20,
-            borderRadius: 12,
-            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-          }}
-        >
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead style={{ backgroundColor: "#1F4E73", color: "white" }}>
-              <tr>
-                <th style={{ padding: 12 }}>No</th>
-                <th style={{ padding: 12 }}>Tanggal</th>
-                <th style={{ padding: 12 }}>Pengusul</th>
-                <th style={{ padding: 12 }}>Judul Usulan</th>
-                <th style={{ padding: 12 }}>Status</th>
-                <th style={{ padding: 12 }}>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsulan.map((u, i) => (
-                <tr key={u.kebutuhan_id} style={{ borderBottom: "1px solid #E2E8F0" }}>
-                  <td style={{ padding: 12 }}>{i + 1}</td>
-                  <td style={{ padding: 12 }}>
-                    {new Date(u.tanggal_kebutuhan).toLocaleDateString("id-ID")}
-                  </td>
-                  <td style={{ padding: 12 }}>{u.nama_pengguna}</td>
-                  <td style={{ padding: 12 }}>{u.judul_usulan}</td>
-                  <td style={{ padding: 12 }}>
-                    <span
-                      style={{
-                        backgroundColor: statusColor(u),
-                        color: "white",
-                        padding: "6px 14px",
-                        borderRadius: 6,
-                        fontSize: 11,
-                      }}
-                    >
-                      {statusLabel(u)}
-                    </span>
-                  </td>
-                  <td style={{ padding: 12 }}>
-                    <button
-                      onClick={() => {
-                        setSelectedUsulan(u);
-                        setShowDetailModal(true);
-                      }}
-                      style={{
-                        backgroundColor: "#1F4E73",
-                        color: "white",
-                        border: "none",
-                        borderRadius: 8,
-                        padding: "8px 16px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      Lihat
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        {/* MODAL AJUKAN PROPOSAL */}
+        {showMinatPenyediaModal && selectedUsulan && (
+          <MinatPenyediaModal
+            show={showMinatPenyediaModal}
+            selectedUsulan={selectedUsulan}
+            onClose={() => setShowMinatPenyediaModal(false)}
+          />
+        )}
 
-          {filteredUsulan.length === 0 && (
-            <div style={{ textAlign: "center", padding: 40, color: "#94A3B8" }}>
-              Tidak ada data
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* ================= MODAL DETAIL ================= */}
-      {showDetailModal && selectedUsulan && (
-        <div
-          onClick={() => setShowDetailModal(false)}
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0,0,0,0.6)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              backgroundColor: "white",
-              padding: 24,
-              borderRadius: 12,
-              maxWidth: 600,
-              width: "100%",
-            }}
-          >
-            <h2 style={{ color: "#1F4E73", marginBottom: 16 }}>
-              Detail Usulan
-            </h2>
-            <p><b>Pengusul:</b> {selectedUsulan.nama_pengguna}</p>
-            <p><b>Judul:</b> {selectedUsulan.judul_usulan}</p>
-            <p><b>Status:</b> {statusLabel(selectedUsulan)}</p>
-            <p><b>Penyedia:</b> {selectedUsulan.penyedia_dikerjakan}</p>
-
-            <div style={{ textAlign: "right", marginTop: 20 }}>
+        {/* MODAL PEMINAT */}
+        {showPeminatModal && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl max-w-lg w-full p-6 overflow-y-auto">
+              <h2 className="text-xl font-bold mb-4">Daftar Peminat</h2>
+              <ul className="space-y-2">
+                {peminatList.length > 0 ? peminatList.map((p: any) => (
+                  <li key={p.minat_id} className="border-b py-2">
+                    <span className="font-medium">{p.nama}</span> - {p.email} <br />
+                    Estimasi Biaya: {p.estimasi_biaya} | Estimasi Waktu: {p.estimasi_waktu} hari
+                  </li>
+                )) : <li>Tidak ada peminat</li>}
+              </ul>
               <button
-                onClick={() => setShowDetailModal(false)}
-                style={{
-                  border: "2px solid #1F4E73",
-                  background: "white",
-                  color: "#1F4E73",
-                  padding: "8px 20px",
-                  borderRadius: 8,
-                  cursor: "pointer",
-                }}
-              >
+                onClick={() => setShowPeminatModal(false)}
+                className="mt-4 bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300">
                 Tutup
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

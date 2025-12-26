@@ -2,6 +2,7 @@ import {
   createKebutuhan,
   getAllKebutuhanByUser,
   getAllKebutuhanForPenyedia,
+  getAllKebutuhanForAdmin,
   updateKebutuhanByUser,
   deleteKebutuhanByUser,
   getPenyediaByKebutuhan,
@@ -131,6 +132,24 @@ export const removeKebutuhan = async (req, res) => {
   }
 };
 
+
+
+/* ===============================
+   FETCH PENYEDIA BERMINTA
+================================ */
+export const fetchPenyediaByKebutuhan = async (req, res) => {
+  try {
+    const data = await getPenyediaByKebutuhan(req.params.id);
+
+    res.json({
+      total: data.length,
+      data,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 /* ===============================
    READ ALL (PENYEDIA)
 ================================ */
@@ -151,16 +170,23 @@ export const fetchAllKebutuhanForPenyedia = async (req, res) => {
   }
 };
 
-
 /* ===============================
-   FETCH PENYEDIA BERMINTA
+   READ ALL (admin)
 ================================ */
-export const fetchPenyediaByKebutuhan = async (req, res) => {
+export const fetchAllKebutuhanForAdmin = async (req, res) => {
+  console.log("CONTROLLER ADMIN MASUK");
   try {
-    const data = await getPenyediaByKebutuhan(req.params.id);
+    console.log("USER:", req.user);
+
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ message: "Akses hanya untuk admin" });
+    }
+
+    const data = await getAllKebutuhanForAdmin(req.user.id);
+    console.log("DATA ADMIN:", data);
 
     res.json({
-      total: data.length,
+      success: true,
       data,
     });
   } catch (err) {

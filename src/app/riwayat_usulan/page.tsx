@@ -4,11 +4,12 @@ import { useEffect, useState, useCallback } from "react";
 import SidebarPengguna from "@/components/ui/sidebar_pengguna";
 import UsulanCard from "@/components/ui/usulan/UsulanCard";
 import FilterUsulan from "@/components/ui/usulan/FilterUsulan";
-import PeminatModal from "@/components/ui/usulan/PeminatModal";
+import SetujuProposal from "@/components/ui/usulan/SetujuProposal";
 import DetailUsulanModal from "@/components/ui/usulan/DetailUsulanModal";
 import EditUsulanModal from "@/components/ui/usulan/EditUsulanModal";
 import type { PenyediaItem } from "@/types/minat";
-import type { Usulan, Peminat } from "@/types/usulan";
+import type { Usulan } from "@/types/usulan";
+
 
 export default function RiwayatUsulanPage() {
   const [usulan, setUsulan] = useState<Usulan[]>([]);
@@ -17,7 +18,7 @@ export default function RiwayatUsulanPage() {
   const [selectedRawUsulan, setSelectedRawUsulan] = useState<Usulan | null>(null);
   const [editData, setEditData] = useState<Usulan | null>(null);
   const [showDetailUsulanModal, setShowDetailUsulanModal] = useState(false);
-  const [showPeminatModal, setShowPeminatModal] = useState(false);
+  const [showSetujuProposal, setShowSetujuProposal] = useState(false);
   const [listPeminat, setListPeminat] = useState<PenyediaItem[]>([]);
   const [search, setSearch] = useState("");
 
@@ -51,32 +52,39 @@ export default function RiwayatUsulanPage() {
   // ============================================
   // Normalisasi data - GUNAKAN usulan yang sudah dijamin array
   // ============================================
-  const normalizedUsulan = Array.isArray(usulan)
-  ? usulan.map((u) => ({
-    id: u.id,
-    nama: u.nama || "",
-    alamat: u.alamat || "",
-    email: u.email || "",
-    noTelp: u.telp || "",
-    jabatan: u.jabatan || "",
-    namaPerusahaan: u.nama_perusahaan || "",
-    emailPerusahaan: u.email_perusahaan || "",
-    alamatPerusahaan: u.alamat_perusahaan || "",
-    noTelpPerusahaan: u.telp_perusahaan || "",
-    jenisProdukanDiusulkan: u.jenis_produk || "",
-    deskripsiKebutuhan: u.deskripsi || "",
-    kapanDigunakan: u.tanggal_kebutuhan || "",
-    estimasiBudget: u.estimasi_budget || 0,
-    dokumen: u.dokumen || "",
-    tanggal: u.created_at || "",
-    status: u.status,
-    statusDetail: u.status_detail,
-    kategori_id: u.kategori_id || null,
-    nama_kategori: u.nama_kategori || "Tidak ada kategori",
-    peminat: u.peminat || 0,
-    penyediaDikerjakan: u.penyedia_dikerjakan || null
-  }))
+ const normalizedUsulan = Array.isArray(usulan)
+  ? usulan.map((u: any) => ({
+      id: u.id,
+      nama: u.nama ?? "",
+      alamat: u.alamat ?? "",
+      email: u.email ?? "",
+      noTelp: u.telp ?? "",
+      jabatan: u.jabatan ?? "",
+
+      namaPerusahaan: u.nama_perusahaan ?? "",
+      emailPerusahaan: u.email_perusahaan ?? "",
+      alamatPerusahaan: u.alamat_perusahaan ?? "",
+      noTelpPerusahaan: u.telp_perusahaan ?? "",
+
+      jenisProdukanDiusulkan: u.jenis_produk ?? "",
+      deskripsiKebutuhan: u.deskripsi ?? "",
+      kapanDigunakan: u.tanggal_kebutuhan ?? "",
+      estimasiBudget: u.estimasi_budget ?? 0,
+
+      dokumen: u.dokumen ?? null,
+      tanggal: u.created_at ?? "",
+
+      status: u.status ?? "",
+      statusDetail: u.status_detail ?? "",
+
+      kategori_id: u.kategori_id ?? null,
+      nama_kategori: u.nama_kategori ?? "Tidak ada kategori",
+
+      peminat: u.peminat ?? 0,
+      penyediaDikerjakan: u.penyedia_dikerjakan ?? null,
+    }))
   : [];
+
 
   const counts = {
     total: normalizedUsulan.length,
@@ -125,6 +133,8 @@ export default function RiwayatUsulanPage() {
     } as Usulan);
     setShowDetailUsulanModal(false);
   };
+
+  // lihat penyedia yang berminat
   const handleOpenPeminat = async (kebutuhanId: number) => {
     try {
       const token = localStorage.getItem("token");
@@ -142,37 +152,35 @@ export default function RiwayatUsulanPage() {
       console.log("🔥 DATA PEMINAT:", data.data);
   
       setListPeminat(data.data ?? []);
-      setShowPeminatModal(true);
+      setShowSetujuProposal(true);
     } catch (err) {
       console.error(err);
     }
   };
   
+  const handleApprovePenyedia = (p: PenyediaItem) => {
+  const token = localStorage.getItem("token");
+  if (!token) return;
 
-  const handleApprovePenyedia = async (p: PenyediaItem) => {
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
-    await fetch(
-      `${BASE_URL}/api/minat-penyedia/${p.minat_id}/approve`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    alert("Proposal berhasil disetujui");
-
-    setShowPeminatModal(false);
-    setShowDetailUsulanModal(false);
-    fetchUsulan();
-  } catch (err) {
-    console.error(err);
-    alert("Gagal menyetujui proposal");
-  }
+  fetch(
+    `${BASE_URL}/api/minat-penyedia/${p.minat_id}/approve`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  )
+    .then(() => {
+      toast.success("Proposal berhasil disetujui");
+      setShowSetujuProposal(false);
+      setShowDetailUsulanModal(false);
+      fetchUsulan();
+    })
+    .catch((err) => {
+      console.error(err);
+      toast.error("Gagal menyetujui proposal");
+    });
 };
 
 
@@ -231,7 +239,7 @@ export default function RiwayatUsulanPage() {
             onEdit={() => handleEditUsulan(selectedRawUsulan!)}
             onDelete={handleDeleteUsulan}
             onOpenPeminat={() => handleOpenPeminat(selectedUsulan.id)}
-            showAjukanProposal={false}
+
           />
         )}
 
@@ -247,15 +255,15 @@ export default function RiwayatUsulanPage() {
           />
         )}
 
-        {/* MODAL PEMINAT */}
-        {showPeminatModal && (
-  <PeminatModal
-    show={showPeminatModal}
-    penyedia={listPeminat}
-    onClose={() => setShowPeminatModal(false)}
-    onApprove={handleApprovePenyedia}
-  />
-)}
+        {/* MODAL Setuju proposal */}
+        {showSetujuProposal && (
+          <SetujuProposal
+            show={showSetujuProposal}
+            penyedia={listPeminat}
+            onClose={() => setShowSetujuProposal(false)}
+            onApprove={handleApprovePenyedia}
+          />
+        )}
 
       </div>
     </div>

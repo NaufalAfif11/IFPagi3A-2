@@ -15,6 +15,7 @@ const pool = new Pool({
     port: process.env.DB_PORT,
 });
 
+
 const connectDB = async () => {
     try {
         await pool.connect();
@@ -24,5 +25,5 @@ const connectDB = async () => {
     }
 };
 
-export default pool;     // ⬅️ ubah ini
-export { connectDB };    // ⬅️ opsional
+export default pool;  
+export { connectDB };
