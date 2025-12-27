@@ -4,20 +4,25 @@ import { useState, useEffect, useMemo } from 'react';
 import SidebarPenyedia from '@/components/ui/sidebar_penyedia';
 
 const API_URL = "http://localhost:5000/api/riset";
+const KATEGORI_API_URL = "http://localhost:5000/api/kategori";
 
 interface Riset {
   id: string;
   judul: string;
-  periset: string;
-  kategori: string;
-  link: string;
-  tanggalDibuat: string;
-  tahun: number;
-  status: string;
+  nama_periset: string;
+  nama_kategori: string;
+  dokumen_url: string;
+  created_at: string;
+}
+
+interface Kategori {
+  kategori_id: number;
+  nama_kategori: string;
 }
 
 export default function ResearchManagement() {
   const [data, setData] = useState<Riset[]>([]);
+  const [kategoris, setKategoris] = useState<Kategori[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -25,63 +30,96 @@ export default function ResearchManagement() {
   const [isLoading, setIsLoading] = useState(false);
   
   const [searchTerm, setSearchTerm] = useState('');
-  const [filters, setFilters] = useState({
-    judul: true,
-    periset: false,
-    kategori: false
-  });
+  const [selectedKategori, setSelectedKategori] = useState('');
 
   const [formData, setFormData] = useState({
     id: "",
     judul: "",
-    periset: "",
-    kategori: "",
-    file: null as File | null
+    namaPeriset: "",
+    kategoriId: "",
+    dokumenUrl: ""
   });
 
-  // Filtered data based on search
- const filteredData = useMemo(() => {
+  // Get token from localStorage
+  const getToken = () => {
+    return localStorage.getItem('token');
+  };
 
-    if (!searchTerm) return data;
+  // Filtered data based on search - REAL TIME
+  const filteredData = useMemo(() => {
+    let result = data;
 
-    return data.filter(item => {
+    // Filter by kategori dropdown
+    if (selectedKategori) {
+      result = result.filter(item => item.nama_kategori === selectedKategori);
+    }
+
+    // Filter by search term - SEARCH ALL FIELDS
+    if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
-      return (
-        (filters.judul && item.judul.toLowerCase().includes(searchLower)) ||
-        (filters.periset && item.periset.toLowerCase().includes(searchLower)) ||
-        (filters.kategori && item.kategori.toLowerCase().includes(searchLower))
-      );
-    });
-  }, [data, searchTerm, filters]);
+      result = result.filter(item => {
+        return (
+          item.judul.toLowerCase().includes(searchLower) ||
+          item.nama_periset.toLowerCase().includes(searchLower) ||
+          item.nama_kategori.toLowerCase().includes(searchLower)
+        );
+      });
+    }
 
-  // FETCH DATA
+    return result;
+  }, [data, searchTerm, selectedKategori]);
+
+  // FETCH KATEGORI dari Backend API
+  const fetchKategoris = async () => {
+  try {
+    const res = await fetch(KATEGORI_API_URL);
+
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+
+    const json = await res.json();
+
+    // ✅ Backend return array langsung
+    if (Array.isArray(json)) {
+      setKategoris(json);
+      console.log('✅ Kategori berhasil dimuat:', json);
+    } else {
+      console.error('❌ Format response tidak sesuai:', json);
+      setKategoris([]);
+    }
+  } catch (err) {
+    console.error("❌ Fetch kategori error:", err);
+    alert('Gagal mengambil data kategori! Pastikan backend running.');
+    setKategoris([]);
+  }
+};
+
+
+  // FETCH MY DATA (User's own research)
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      console.log('Fetching from:', `${API_URL}?page=${page}`);
-      
-      const res = await fetch(`${API_URL}?page=${page}&limit=10`);
+      const token = getToken();
+      if (!token) {
+        alert('Anda harus login terlebih dahulu!');
+        return;
+      }
+
+      const res = await fetch(`${API_URL}/my?page=${page}&limit=10`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
 
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
 
       const json = await res.json();
-      console.log('Response:', json);
 
       if (json.success && json.data) {
-        const mapped = json.data.map((item: any) => ({
-          id: item.id.toString(),
-          judul: item.judul,
-          periset: item.nama_periset,
-          kategori: item.kategori_riset,
-          link: item.dokumen_url,
-          tanggalDibuat: item.created_at,
-          tahun: new Date(item.created_at).getFullYear(),
-          status: "publik"
-        }));
-
-        setData(mapped);
+        setData(json.data);
         
         if (json.pagination) {
           setTotalPages(json.pagination.totalPages || 1);
@@ -92,7 +130,7 @@ export default function ResearchManagement() {
       
     } catch (err) {
       console.error("Fetch error:", err);
-      alert('Gagal mengambil data! Pastikan backend running di http://localhost:5000');
+      alert('Gagal mengambil data! Pastikan backend running dan Anda sudah login.');
       setData([]);
     } finally {
       setIsLoading(false);
@@ -100,50 +138,57 @@ export default function ResearchManagement() {
   };
 
   useEffect(() => {
+    fetchKategoris(); // Load kategori dari database
     fetchData();
   }, [page]);
 
   // OPEN MODAL
   const openAddModal = () => {
     setIsEdit(false);
-    setFormData({ id: "", judul: "", periset: "", kategori: "", file: null });
+    setFormData({ id: "", judul: "", namaPeriset: "", kategoriId: "", dokumenUrl: "" });
     setIsModalOpen(true);
   };
 
   const openEditModal = (item: Riset) => {
     setIsEdit(true);
+    const kategori = kategoris.find(k => k.nama_kategori === item.nama_kategori);
     setFormData({
       id: item.id,
       judul: item.judul,
-      periset: item.periset,
-      kategori: item.kategori,
-      file: null
+      namaPeriset: item.nama_periset,
+      kategoriId: kategori ? kategori.kategori_id.toString() : "",
+      dokumenUrl: item.dokumen_url
     });
     setIsModalOpen(true);
   };
 
   // CREATE
   const handleCreate = async () => {
-    if (!formData.judul || !formData.periset || !formData.kategori) {
+    if (!formData.judul || !formData.namaPeriset || !formData.kategoriId || !formData.dokumenUrl) {
       alert('Semua field harus diisi!');
       return;
     }
 
     setIsLoading(true);
     try {
-      const fd = new FormData();
-      fd.append("judul", formData.judul);
-      fd.append("namaPeriset", formData.periset);
-      fd.append("kategoriRiset", formData.kategori);
-      if (formData.file) {
-        fd.append("dokumen", formData.file);
+      const token = getToken();
+      if (!token) {
+        alert('Anda harus login terlebih dahulu!');
+        return;
       }
 
-      console.log('Creating...');
-      
       const res = await fetch(API_URL, {
         method: "POST",
-        body: fd,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          judul: formData.judul,
+          namaPeriset: formData.namaPeriset,
+          kategoriId: Number(formData.kategoriId),
+          dokumenUrl: formData.dokumenUrl
+        }),
       });
 
       if (!res.ok) {
@@ -151,12 +196,11 @@ export default function ResearchManagement() {
       }
 
       const json = await res.json();
-      console.log('Create response:', json);
 
       if (json.success) {
         alert('Data berhasil ditambahkan!');
         setIsModalOpen(false);
-        setFormData({ id: "", judul: "", periset: "", kategori: "", file: null });
+        setFormData({ id: "", judul: "", namaPeriset: "", kategoriId: "", dokumenUrl: "" });
         fetchData();
       } else {
         alert(json.message || 'Gagal menambahkan data!');
@@ -171,26 +215,31 @@ export default function ResearchManagement() {
 
   // UPDATE
   const handleUpdate = async () => {
-    if (!formData.judul || !formData.periset || !formData.kategori) {
+    if (!formData.judul || !formData.namaPeriset || !formData.kategoriId || !formData.dokumenUrl) {
       alert('Semua field harus diisi!');
       return;
     }
 
     setIsLoading(true);
     try {
-      const fd = new FormData();
-      fd.append("judul", formData.judul);
-      fd.append("namaPeriset", formData.periset);
-      fd.append("kategoriRiset", formData.kategori);
-      if (formData.file) {
-        fd.append("dokumen", formData.file);
+      const token = getToken();
+      if (!token) {
+        alert('Anda harus login terlebih dahulu!');
+        return;
       }
-
-      console.log('Updating:', formData.id);
 
       const res = await fetch(`${API_URL}/${formData.id}`, {
         method: "PUT",
-        body: fd,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          judul: formData.judul,
+          namaPeriset: formData.namaPeriset,
+          kategoriId: Number(formData.kategoriId),
+          dokumenUrl: formData.dokumenUrl
+        }),
       });
 
       if (!res.ok) {
@@ -202,7 +251,7 @@ export default function ResearchManagement() {
       if (json.success) {
         alert('Data berhasil diupdate!');
         setIsModalOpen(false);
-        setFormData({ id: "", judul: "", periset: "", kategori: "", file: null });
+        setFormData({ id: "", judul: "", namaPeriset: "", kategoriId: "", dokumenUrl: "" });
         fetchData();
       } else {
         alert(json.message || 'Gagal mengupdate data!');
@@ -221,8 +270,17 @@ export default function ResearchManagement() {
 
     setIsLoading(true);
     try {
+      const token = getToken();
+      if (!token) {
+        alert('Anda harus login terlebih dahulu!');
+        return;
+      }
+
       const res = await fetch(`${API_URL}/${id}`, { 
         method: "DELETE",
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
 
       if (!res.ok) {
@@ -245,71 +303,17 @@ export default function ResearchManagement() {
     }
   };
 
-  // FILTER COMPONENT
-  const RisetFilter = () => {
-    return (
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6 border border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Filter Pencarian</h2>
-        
-        <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
-          <div className="flex flex-wrap gap-4 items-center">
-            <label className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                checked={filters.judul}
-                onChange={(e) => setFilters({ ...filters, judul: e.target.checked })}
-                className="w-4 h-4 text-blue-600 rounded"
-              />
-              <span className="text-sm text-gray-700">Judul Riset</span>
-            </label>
-            
-            <label className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                checked={filters.periset}
-                onChange={(e) => setFilters({ ...filters, periset: e.target.checked })}
-                className="w-4 h-4 text-blue-600 rounded"
-              />
-              <span className="text-sm text-gray-700">Nama Periset</span>
-            </label>
-            
-            <label className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                checked={filters.kategori}
-                onChange={(e) => setFilters({ ...filters, kategori: e.target.checked })}
-                className="w-4 h-4 text-blue-600 rounded"
-              />
-              <span className="text-sm text-gray-700">Kategori Riset</span>
-            </label>
-          </div>
-
-          <div className="flex-1 min-w-[200px]">
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Cari..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const [activeMenu, setActiveMenu] = useState("Kelola Riset");
-
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-gray-50">
+      {/* SIDEBAR */}
       <SidebarPenyedia />
 
-      <div className="flex-1 min-h-screen bg-gray-50">
+      <div className="flex-1 min-h-screen">
         {/* HEADER */}
         <div className="bg-gradient-to-r from-[#1F4E73] to-[#3e81aa] text-white py-8 shadow-lg">
           <div className="container mx-auto px-4">
             <h1 className="text-3xl font-bold">Kelola Hasil Riset</h1>
-            <p className="text-blue-100 text-sm">
+            <p className="text-blue-100 text-sm mt-1">
               Selamat datang, Penyedia! Kelola hasil riset Anda di sini
             </p>
           </div>
@@ -317,17 +321,94 @@ export default function ResearchManagement() {
 
         {/* CONTENT */}
         <div className="container mx-auto px-4 py-8">
-          <RisetFilter />
+          {/* FILTER COMPONENT */}
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6 border border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">Filter & Pencarian</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Kategori Dropdown - Dari Database */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Filter Berdasarkan Kategori
+                </label>
+                <select
+                  value={selectedKategori}
+                  onChange={(e) => setSelectedKategori(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                >
+                  <option value="">Semua Kategori</option>
+                  {kategoris.map((kat) => (
+                    <option key={kat.kategori_id} value={kat.nama_kategori}>
+                      {kat.nama_kategori}
+                    </option>
+                  ))}
+                </select>
+                {kategoris.length === 0 && (
+                  <p className="text-xs text-red-500 mt-1">
+                    ⚠️ Tidak ada kategori. Pastikan backend running!
+                  </p>
+                )}
+              </div>
+
+              {/* Search Input - REAL TIME */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Cari (Judul, Periset, atau Kategori)
+                </label>
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Ketik untuk mencari..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Show active filters */}
+            {(searchTerm || selectedKategori) && (
+              <div className="mt-4 flex gap-2 items-center text-sm flex-wrap">
+                <span className="text-gray-600">Filter aktif:</span>
+                {searchTerm && (
+                  <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full">
+                    Pencarian: "{searchTerm}"
+                    <button 
+                      onClick={() => setSearchTerm('')}
+                      className="ml-2 text-blue-600 hover:text-blue-800 font-bold"
+                    >
+                      ×
+                    </button>
+                  </span>
+                )}
+                {selectedKategori && (
+                  <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full">
+                    Kategori: {selectedKategori}
+                    <button 
+                      onClick={() => setSelectedKategori('')}
+                      className="ml-2 text-green-600 hover:text-green-800 font-bold"
+                    >
+                      ×
+                    </button>
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* HEADER TABLE */}
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold">Manajemen Data Riset</h2>
+            <h2 className="text-xl font-bold text-gray-800">
+              Manajemen Data Riset 
+              <span className="text-sm font-normal text-gray-600 ml-2">
+                ({filteredData.length} dari {data.length} data)
+              </span>
+            </h2>
             <button
               onClick={openAddModal}
               disabled={isLoading}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
             >
-              Tambah Riset
+              + Tambah Riset
             </button>
           </div>
 
@@ -345,35 +426,43 @@ export default function ResearchManagement() {
               <table className="w-full">
                 <thead className="bg-gray-200">
                   <tr>
-                    <th className="p-3 text-left">Judul</th>
-                    <th className="p-3 text-left">Periset</th>
-                    <th className="p-3 text-left">Kategori</th>
-                    <th className="p-3 text-left">Dokumen</th>
-                    <th className="p-3 text-center">Aksi</th>
+                    <th className="p-3 text-left font-semibold text-gray-700">Judul</th>
+                    <th className="p-3 text-left font-semibold text-gray-700">Periset</th>
+                    <th className="p-3 text-left font-semibold text-gray-700">Kategori</th>
+                    <th className="p-3 text-left font-semibold text-gray-700">Link Dokumen</th>
+                    <th className="p-3 text-center font-semibold text-gray-700">Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredData.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="p-4 text-center text-gray-500">
-                        Tidak ada data riset
+                      <td colSpan={5} className="p-8 text-center text-gray-500">
+                        {searchTerm || selectedKategori 
+                          ? 'Tidak ada data yang sesuai dengan pencarian' 
+                          : 'Tidak ada data riset'}
                       </td>
                     </tr>
                   ) : (
                     filteredData.map((item) => (
-                      <tr key={item.id} className="border-t hover:bg-gray-50">
+                      <tr key={item.id} className="border-t hover:bg-gray-50 transition-colors">
                         <td className="p-3">{item.judul}</td>
-                        <td className="p-3">{item.periset}</td>
-                        <td className="p-3">{item.kategori}</td>
+                        <td className="p-3">{item.nama_periset}</td>
                         <td className="p-3">
-                          {item.link ? (
+                          <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">
+                            {item.nama_kategori}
+                          </span>
+                        </td>
+                        <td className="p-3">
+                          {item.dokumen_url ? (
                             <a
-                              href={`http://localhost:5000/uploads/${item.link}`}
+                              href={item.dokumen_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-blue-600 underline hover:text-blue-800"
+                              className="text-blue-600 underline hover:text-blue-800 break-all"
                             >
-                              Lihat PDF
+                              {item.dokumen_url.length > 40 
+                                ? item.dokumen_url.substring(0, 40) + '...' 
+                                : item.dokumen_url}
                             </a>
                           ) : (
                             <span className="text-gray-400">-</span>
@@ -383,13 +472,13 @@ export default function ResearchManagement() {
                           <div className="flex gap-2 justify-center">
                             <button
                               onClick={() => openEditModal(item)}
-                              className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                              className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors"
                             >
                               Edit
                             </button>
                             <button
                               onClick={() => handleDelete(item.id)}
-                              className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                              className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
                             >
                               Hapus
                             </button>
@@ -408,17 +497,17 @@ export default function ResearchManagement() {
             <button
               disabled={page === 1 || isLoading}
               onClick={() => setPage(p => p - 1)}
-              className="px-4 py-2 border rounded disabled:bg-gray-200 hover:bg-gray-100"
+              className="px-4 py-2 border rounded disabled:bg-gray-200 hover:bg-gray-100 transition-colors"
             >
               Previous
             </button>
-            <span className="px-4">
+            <span className="px-4 text-gray-700">
               Halaman {page} dari {totalPages}
             </span>
             <button
               disabled={page === totalPages || isLoading}
               onClick={() => setPage(p => p + 1)}
-              className="px-4 py-2 border rounded disabled:bg-gray-200 hover:bg-gray-100"
+              className="px-4 py-2 border rounded disabled:bg-gray-200 hover:bg-gray-100 transition-colors"
             >
               Next
             </button>
@@ -427,66 +516,75 @@ export default function ResearchManagement() {
           {/* MODAL */}
           {isModalOpen && (
             <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-              <div className="bg-white p-6 rounded-lg w-96 shadow-xl">
-                <h3 className="text-xl font-bold mb-4">
+              <div className="bg-white p-6 rounded-lg w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto">
+                <h3 className="text-xl font-bold mb-4 text-gray-800">
                   {isEdit ? "Edit Riset" : "Tambah Riset"}
                 </h3>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block mb-1 font-medium">
+                    <label className="block mb-1 font-medium text-gray-700">
                       Judul <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       value={formData.judul}
                       onChange={(e) => setFormData({ ...formData, judul: e.target.value })}
-                      className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-blue-500"
+                      className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Masukkan judul riset"
                     />
                   </div>
 
                   <div>
-                    <label className="block mb-1 font-medium">
+                    <label className="block mb-1 font-medium text-gray-700">
                       Nama Periset <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
-                      value={formData.periset}
-                      onChange={(e) => setFormData({ ...formData, periset: e.target.value })}
-                      className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-blue-500"
+                      value={formData.namaPeriset}
+                      onChange={(e) => setFormData({ ...formData, namaPeriset: e.target.value })}
+                      className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Masukkan nama periset"
                     />
                   </div>
 
                   <div>
-                    <label className="block mb-1 font-medium">
+                    <label className="block mb-1 font-medium text-gray-700">
                       Kategori <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="text"
-                      value={formData.kategori}
-                      onChange={(e) => setFormData({ ...formData, kategori: e.target.value })}
-                      className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-blue-500"
-                      placeholder="Masukkan kategori"
-                    />
+                    <select
+                      value={formData.kategoriId}
+                      onChange={(e) => setFormData({ ...formData, kategoriId: e.target.value })}
+                      className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">Pilih Kategori</option>
+                      {kategoris.map((kat) => (
+                        <option key={kat.kategori_id} value={kat.kategori_id}>
+                          {kat.nama_kategori}
+                        </option>
+                      ))}
+                    </select>
+                    {kategoris.length === 0 && (
+                      <p className="text-xs text-red-500 mt-1">
+                        ⚠️ Tidak ada kategori tersedia
+                      </p>
+                    )}
                   </div>
 
                   <div>
-                    <label className="block mb-1 font-medium">
-                      Upload PDF {!isEdit && <span className="text-red-500">*</span>}
+                    <label className="block mb-1 font-medium text-gray-700">
+                      Link Dokumen <span className="text-red-500">*</span>
                     </label>
                     <input
-                      type="file"
-                      accept="application/pdf"
-                      onChange={(e) => setFormData({ ...formData, file: e.target.files?.[0] || null })}
-                      className="w-full border px-3 py-2 rounded"
+                      type="url"
+                      value={formData.dokumenUrl}
+                      onChange={(e) => setFormData({ ...formData, dokumenUrl: e.target.value })}
+                      className="w-full border px-3 py-2 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="https://example.com/dokumen.pdf"
                     />
-                    {formData.file && (
-                      <p className="text-sm text-gray-600 mt-1">
-                        File: {formData.file.name}
-                      </p>
-                    )}
+                    <p className="text-xs text-gray-500 mt-1">
+                      Masukkan URL/link lengkap ke dokumen PDF
+                    </p>
                   </div>
                 </div>
 
@@ -494,17 +592,17 @@ export default function ResearchManagement() {
                   <button 
                     onClick={() => {
                       setIsModalOpen(false);
-                      setFormData({ id: "", judul: "", periset: "", kategori: "", file: null });
+                      setFormData({ id: "", judul: "", namaPeriset: "", kategoriId: "", dokumenUrl: "" });
                     }}
                     disabled={isLoading}
-                    className="px-4 py-2 border rounded hover:bg-gray-100"
+                    className="px-4 py-2 border rounded hover:bg-gray-100 transition-colors disabled:bg-gray-200"
                   >
                     Batal
                   </button>
                   <button
                     onClick={isEdit ? handleUpdate : handleCreate}
-                    disabled={isLoading}
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
+                    disabled={isLoading || kategoris.length === 0}
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
                   >
                     {isLoading ? 'Loading...' : (isEdit ? "Update" : "Simpan")}
                   </button>

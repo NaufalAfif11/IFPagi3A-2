@@ -32,7 +32,7 @@ export default function EditUsulanModal({
   onClose,
   onSuccess,
 }: {
-  usulan: Usulan | null;
+  usulan: Usulan;
   onClose: () => void;
   onSuccess: () => void;
 }) {

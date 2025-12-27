@@ -61,3 +61,20 @@ export interface Peminat {
   estimasi_waktu?: string;
   tanggal_minat?: string;
 }
+export type UsulanEdit = {
+  id: number | string;
+  nama: string;
+  email: string;
+  telp?: string;
+  jabatan?: string;
+  alamat?: string;
+  nama_perusahaan?: string;
+  email_perusahaan?: string;
+  telp_perusahaan?: string;
+  alamat_perusahaan?: string;
+  jenis_produk: string;
+  kategori_id: number | string;
+  tanggal_kebutuhan?: string;
+  estimasi_budget?: string;
+  deskripsi: string;
+};

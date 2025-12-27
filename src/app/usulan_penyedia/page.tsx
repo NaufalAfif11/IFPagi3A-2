@@ -9,6 +9,39 @@ import MinatPenyediaModal from "@/components/ui/usulan/MinatPenyediaModal";
 import type { Usulan, Peminat } from "@/types/usulan";
 import { toast } from "react-hot-toast";
 
+interface RawUsulan {
+  id: number;
+  nama?: string;
+  alamat?: string;
+  telp?: string;
+  jabatan?: string;
+  nama_perusahaan?: string;
+  email_perusahaan?: string;
+  alamat_perusahaan?: string;
+  telp_perusahaan?: string;
+  jenis_produk?: string;
+  deskripsi?: string;
+  tanggal_kebutuhan?: string;
+  estimasi_budget?: number;
+  dokumen?: string | null;
+  created_at?: string;
+  status?: string;
+  status_detail?: string;
+  kategori_id?: number | null;
+  nama_kategori?: string;
+  peminat?: number;
+  penyedia_dikerjakan?: number | null;
+}
+interface ApiResponse<T = any> {
+  success: boolean;
+  message?: string;
+  data: T;
+}
+interface FilterCounts {
+  total: number;
+  tersedia: number;
+  dikerjakan: number;
+}
 
 export default function UsulanPenyediaPage() {
   const [usulan, setUsulan] = useState<RawUsulan[]>([]);
@@ -18,6 +51,7 @@ export default function UsulanPenyediaPage() {
   const [showMinatPenyediaModal, setShowMinatPenyediaModal] = useState(false);
   const [search, setSearch] = useState("");
 
+  
   // tambahan state modal peminat
   const [showSetujuProposal, setShowSetujuProposal] = useState(false);
   const [peminatList, setPeminatList] = useState<Peminat[]>([]);

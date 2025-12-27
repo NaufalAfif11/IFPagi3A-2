@@ -92,9 +92,11 @@ const SidebarPengguna = () => {
 
         {/* SIDEBAR */}
         <div
-          className={`bg-gradient-to-b from-[#1F4E73] to-[#163952] text-white h-screen fixed md:static transition-all duration-300 z-40 shadow-2xl
-          ${isOpen ? "w-64" : "w-0 md:w-20"} overflow-hidden`}
-        >
+  className={`bg-gradient-to-b from-[#1F4E73] to-[#163952] text-white h-screen fixed md:static 
+  transition-all duration-300 z-40 shadow-2xl flex flex-col
+  ${isOpen ? "w-64" : "w-0 md:w-20"} overflow-hidden`}
+>
+
           {/* HEADER */}
           <div className={`p-6 border-b border-white/10 backdrop-blur-sm ${isOpen ? "" : "md:p-4"}`}>
             {isOpen ? (
@@ -169,7 +171,8 @@ const SidebarPengguna = () => {
           </nav>
 
           {/* FOOTER */}
-          <div className="border-t border-white/10 p-4 space-y-3 backdrop-blur-sm">
+          <div className="mt-auto border-t border-white/10 p-4 space-y-3 backdrop-blur-sm">
+
             {/* User Profile */}
             <Link href="/edit-profil" className="block">
               <div className={`flex items-center gap-3 p-2 rounded-xl hover:bg-white/10 transition-all duration-300 cursor-pointer group

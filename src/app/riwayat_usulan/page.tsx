@@ -8,7 +8,9 @@ import SetujuProposal from "@/components/ui/usulan/SetujuProposal";
 import DetailUsulanModal from "@/components/ui/usulan/DetailUsulanModal";
 import EditUsulanModal from "@/components/ui/usulan/EditUsulanModal";
 import type { PenyediaItem } from "@/types/minat";
-import type { Usulan } from "@/types/usulan";
+import type { Usulan, UsulanEdit } from "@/types/usulan";
+import { toast } from "react-hot-toast";
+
 
 
 export default function RiwayatUsulanPage() {
@@ -16,7 +18,7 @@ export default function RiwayatUsulanPage() {
   const [selectedFilter, setSelectedFilter] = useState<string>("semua");
   const [selectedUsulan, setSelectedUsulan] = useState<Usulan | null>(null);
   const [selectedRawUsulan, setSelectedRawUsulan] = useState<Usulan | null>(null);
-  const [editData, setEditData] = useState<Usulan | null>(null);
+  const [editData, setEditData] = useState<UsulanEdit | null>(null);
   const [showDetailUsulanModal, setShowDetailUsulanModal] = useState(false);
   const [showSetujuProposal, setShowSetujuProposal] = useState(false);
   const [listPeminat, setListPeminat] = useState<PenyediaItem[]>([]);
@@ -127,12 +129,28 @@ export default function RiwayatUsulanPage() {
   };
 
   const handleEditUsulan = (u: Usulan) => {
-    setEditData({
-      ...u,
-      kategori_id: u.kategori_id ?? 0,
-    } as Usulan);
-    setShowDetailUsulanModal(false);
-  };
+  setEditData({
+    id: u.id,
+    nama: u.nama,
+    email: u.email,
+    telp: u.noTelp,
+    jabatan: u.jabatan,
+    alamat: u.alamat,
+    nama_perusahaan: u.namaPerusahaan,
+    email_perusahaan: u.emailPerusahaan,
+    telp_perusahaan: u.noTelpPerusahaan,
+    alamat_perusahaan: u.alamatPerusahaan,
+    jenis_produk: u.jenisProdukanDiusulkan, // 🔥
+    kategori_id: u.kategori_id ?? "",
+    tanggal_kebutuhan: u.kapanDigunakan,
+    estimasi_budget: String(u.estimasiBudget ?? ""),
+    deskripsi: u.deskripsiKebutuhan, // 🔥
+  });
+
+  setShowDetailUsulanModal(false);
+};
+
+
 
   // lihat penyedia yang berminat
   const handleOpenPeminat = async (kebutuhanId: number) => {

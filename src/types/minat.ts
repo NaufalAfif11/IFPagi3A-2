@@ -9,7 +9,7 @@ export interface PenyediaItem {
   deskripsi: string; // ✅ TAMBAH INI
 
   proposal_file: string;
-  estimasi_biaya: number | null;
+  estimasi_biaya?: number | null;
   estimasi_waktu: string | null;
 
   status: "menunggu" | "diterima" | "ditolak";

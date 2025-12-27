@@ -1,22 +1,31 @@
 import express from "express";
 import RisetController from "../controllers/RisetController.js";
-import upload from "../middleware/upload.js";
+import { authMiddleware } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// GET ALL
-router.get("/", RisetController.getAll);
+/* =====================================================
+   PUBLIC ROUTES (TANPA LOGIN)
+   ===================================================== */
 
-// GET BY ID
+// GET /api/riset - tampil SEMUA riset (public)
+router.get("/", RisetController.getPublic);
+
+/* =====================================================
+   AUTHENTICATED ROUTES (WAJIB LOGIN)
+   ===================================================== */
+
+// ⚠️ HARUS DI ATAS /:id
+router.get("/my", authMiddleware, RisetController.getMyRiset);
+router.post("/", authMiddleware, RisetController.create);
+router.put("/:id", authMiddleware, RisetController.update);
+router.delete("/:id", authMiddleware, RisetController.delete);
+
+/* =====================================================
+   DETAIL ROUTE (PALING BAWAH)
+   ===================================================== */
+
+// GET /api/riset/:id - detail riset (publik)
 router.get("/:id", RisetController.getById);
-
-// CREATE
-router.post("/", upload.single("dokumen"), RisetController.create);
-
-// UPDATE
-router.put("/:id", upload.single("dokumen"), RisetController.update);
-
-// DELETE
-router.delete("/:id", RisetController.delete);
 
 export default router;

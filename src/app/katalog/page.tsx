@@ -220,11 +220,13 @@ export default function KatalogPage() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {inovasiList.map((item) => (
-              <div
-                key={item.id}
-                onClick={() => handleCardClick(item)}
-                className="bg-white rounded-lg shadow hover:shadow-lg cursor-pointer transition-all relative group"
-              >
+             <div
+             key={item.id}
+             onClick={() => handleCardClick(item)}
+             className="bg-white rounded-lg shadow hover:shadow-lg cursor-pointer transition-all relative group
+                        flex flex-col h-full"
+           >
+           
                 {item.images.length > 0 && item.images[0] ? (
                   <img
                     src={item.images[0]}
@@ -244,12 +246,17 @@ export default function KatalogPage() {
                   </div>
                 )}
                 
-                <div className="p-3">
-                  <h3 className="text-sm font-medium line-clamp-2">
-                    {item.title}
-                  </h3>
-                  <p className="text-[#1F4E73] font-bold mt-1">{item.harga}</p>
-                </div>
+                <div className="p-3 flex flex-col flex-1">
+  <h3 className="text-sm font-medium line-clamp-2 mb-2">
+    {item.title}
+  </h3>
+
+  {/* PRICE — selalu di bawah */}
+  <p className="text-[#1F4E73] font-bold mt-auto">
+    {item.harga}
+  </p>
+</div>
+
               </div>
             ))}
           </div>

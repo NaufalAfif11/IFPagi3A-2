@@ -1,20 +1,7 @@
 "use client";
 
 import { X, FileText, CheckCircle, Calendar, Mail, Clock, DollarSign } from "lucide-react";
-
-interface PenyediaItem {
-  minat_id: number;
-  kebutuhan_id: number;
-  penyedia_id: number;
-  nama: string;
-  email: string;
-  deskripsi: string;
-  proposal_file?: string;
-  estimasi_biaya?: string;
-  estimasi_waktu?: string;
-  tanggal_minat: string;
-  status: string;
-}
+import type { PenyediaItem } from "@/types/minat";
 
 interface Props {
   show: boolean;
