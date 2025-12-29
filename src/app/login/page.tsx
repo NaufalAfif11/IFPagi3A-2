@@ -24,7 +24,7 @@ export default function LoginPage() {
   const router = useRouter();
 const BASE_URL =
     process.env.NEXT_PUBLIC_API_URL ??
-    "https://sinovabackend-production.up.railway.app/api";
+    "https://sinovabackend-production.up.railway.app";
 
   console.log("BASE_URL (runtime):", BASE_URL);
 
