@@ -4,13 +4,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FaGoogle, FaGithub } from "react-icons/fa";
 
-const BASE_URL = "http://localhost:5000";
 
 const LOGIN_ENDPOINTS = [
   { role: "pengguna", url: "/auth/pengguna/login" },
   { role: "penyedia", url: "/auth/penyedia/login" },
   { role: "admin", url: "/auth/admin/login" },
-  { role: "super_admin", url: "/auth/superadmin/login" },
 ];
 
 // ============== JWT DECODE ==============
@@ -24,6 +22,11 @@ function decodeJwt(token: string) {
 
 export default function LoginPage() {
   const router = useRouter();
+const BASE_URL =
+    process.env.NEXT_PUBLIC_API_URL ??
+    "https://sinovabackend-production.up.railway.app/api";
+
+  console.log("BASE_URL (runtime):", BASE_URL);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
