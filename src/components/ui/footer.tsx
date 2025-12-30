@@ -1,5 +1,14 @@
 import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from "react-icons/fa";
-
+import Link from "next/link";
+const menuItems = [
+    { name: "Beranda", href: "/" },
+    { name: "Profil", href: "/profile" },
+    { name: "Katalog Produk", href: "/katalog" },
+    { name: "Riset", href: "/riset" },
+    { name: "Panduan", href: "/information" },
+    { name: "Layanan", href: "/layanan" },
+    { name: "Hubungi Kami", href: "/hubungi-kami" },
+  ];
 export default function Footer() {
   return (
     <footer className="text-[#1F4E73]">
@@ -21,18 +30,21 @@ export default function Footer() {
 
           {/* BRIDA */}
           <div className="flex flex-col items-center md:items-start">
-            <h3 className="font-bold text-xl mb-4 uppercase">BRIDA/BAPPEDA</h3>
-            <ul className="text-sm space-y-2">
-              {["BERANDA", "PROFIL", "RISET", "INFORMASI", "LAYANAN"].map((item) => (
-                <li
-                  key={item}
-                  className="hover:text-[#163954] hover:underline cursor-pointer transition-colors duration-200"
-                >
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
+  <h3 className="font-bold text-xl mb-4 uppercase">BRIDA/BAPPEDA</h3>
+  <ul className="text-sm space-y-2">
+    {menuItems.map((item) => (
+      <li key={item.href}>
+        <Link
+          href={item.href}
+          className="hover:text-[#163954] hover:underline cursor-pointer transition-colors duration-200"
+        >
+          {item.name}
+        </Link>
+      </li>
+    ))}
+  </ul>
+</div>
+
 
           {/* Hubungi Kami */}
           <div>
@@ -44,18 +56,7 @@ export default function Footer() {
             <p className="text-sm mb-1">Fax : +62-778-463620</p>
             <p className="text-sm mb-3">Email : info@polibatam.ac.id</p>
 
-            {/* Social Media */}
-            <div className="flex justify-center md:justify-start gap-4 mt-4">
-              {[FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn].map((Icon, idx) => (
-                <a
-                  key={idx}
-                  href="#"
-                  className="bg-[#F3F7FB] border border-[#1F4E73] text-[#1F4E73] p-2 rounded-full hover:bg-[#1F4E73] hover:text-white transition-colors duration-200"
-                >
-                  <Icon size={18} />
-                </a>
-              ))}
-            </div>
+            
           </div>
 
         </div>

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Home, Package, User, LogOut, Menu, X, Lightbulb, FileText } from "lucide-react";
+import Image from "next/image";
 
 const SidebarPenyedia = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -104,9 +105,17 @@ const SidebarPenyedia = () => {
             {isOpen ? (
               <Link href="/" className="block group">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center backdrop-blur-sm group-hover:bg-white/20 transition-all duration-300">
-                    <span className="text-2xl font-bold text-white">S</span>
-                  </div>
+                  <div className="w-10 h-10 bg-white/10 rounded-lg overflow-hidden flex items-center justify-center backdrop-blur-sm group-hover:bg-white/20 transition-all duration-300">
+  <Image
+    src="/logo sinova.jpeg"   // nama file di public
+    alt="Logo SINOVA"
+    width={40}
+    height={40}
+    className="object-cover"
+    priority
+  />
+</div>
+
                   <div>
                     <h1 className="text-xl font-bold tracking-wide">SINOVA</h1>
                     <p className="text-[10px] text-blue-200/80 leading-tight mt-0.5">
@@ -117,9 +126,17 @@ const SidebarPenyedia = () => {
               </Link>
             ) : (
               <div className="hidden md:flex justify-center">
-                <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                  <span className="text-xl font-bold text-white">S</span>
-                </div>
+                <div className="w-10 h-10 bg-white/10 rounded-lg overflow-hidden flex items-center justify-center backdrop-blur-sm group-hover:bg-white/20 transition-all duration-300">
+                <Image
+                  src="/logo sinova jpeg"   // nama file di public
+                  alt="Logo SINOVA"
+                  width={40}
+                  height={40}
+                  className="object-cover"
+                  priority
+                />
+              </div>
+
               </div>
             )}
             

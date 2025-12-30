@@ -140,7 +140,7 @@ const DashboardAdmin = () => {
           throw new Error("Token tidak ditemukan. Silakan login kembali.");
         }
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/dashboard/dashboard-admin`, {
+        const response = await fetch("http://localhost:5000/api/dashboard/dashboard-admin", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

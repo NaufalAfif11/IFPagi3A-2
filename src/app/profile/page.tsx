@@ -9,12 +9,42 @@ export default function Profil() {
   const [activeTab, setActiveTab] = useState("brida");
 
   const timPengembang = [
-    { nama: 'Ir. Ahmad Hamim Thohari, S.T., M.T.', nip: '191943' },
-    { nama: 'Ir. Sudra Irawan S.Pd.Si.,M.Sc.', nip: '181412' },
-    { nama: 'Naufal Afif Al-Yafi', nip: '1100' },
-    { nama: 'Fitri Nabila Aprianti', nip: '1012' },
-    { nama: 'Annisa Fadilla Efendi Harahap', nip: '1024' },
-    { nama: 'Salsa Putri Ajriyanti', nip: '1043' }
+    { 
+      nama: 'Ir. Ahmad Hamim Thohari, S.T., M.T.', 
+      nip: '115143',
+      foto: '/pa hamim.jpeg',
+      label: 'NIK'
+    },
+    { 
+      nama: 'Ir. Sudra Irawan S.Pd.Si.,M.Sc.', 
+      nip: '113110',
+      foto: '/pa sudra.jpeg',
+      label: 'NIK'
+    },
+    { 
+      nama: 'Naufal Afif Al-Yafi', 
+      nip: '3312401100',
+      foto: '/naufal.jpeg',
+      label: 'NIM'
+    },
+    { 
+      nama: 'Fitri Nabila Aprianti', 
+      nip: '3312401012',
+      foto: '/fitri.jpeg',
+      label: 'NIM'
+    },
+    { 
+      nama: 'Annisa Fadilla Efendi Harahap', 
+      nip: '3312401024',
+      foto: '/annisa.jpeg',
+      label: 'NIM'
+    },
+    { 
+      nama: 'Salsa Putri Ajriyanti', 
+      nip: '3312401043',
+      foto: '/salsa.jpeg',
+      label: 'NIM'
+    }
   ];
 
   return (
@@ -183,14 +213,20 @@ export default function Profil() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {timPengembang.map((anggota, index) => (
                 <div key={index} className="text-center group">
-                  <div className="bg-gradient-to-br from-[#1F4E73] to-[#3e81aa] rounded-xl h-64 mb-4 shadow-lg transform group-hover:scale-105 transition-all duration-300 flex items-center justify-center overflow-hidden">
-                    <div className="text-white text-7xl opacity-30">👤</div>
+                  <div className="bg-gradient-to-br from-[#1F4E73] to-[#3e81aa] rounded-xl aspect-square mb-4 shadow-lg transform group-hover:scale-105 transition-all duration-300 flex items-center justify-center overflow-hidden relative">
+                    <Image
+                      src={anggota.foto}
+                      alt={anggota.nama}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
                   </div>
                   <h3 className="font-bold text-gray-900 text-base md:text-lg mb-1 px-2">
                     {anggota.nama}
                   </h3>
                   <p className="text-gray-600 text-sm font-medium">
-                    NIP: {anggota.nip}
+                    {anggota.label}: {anggota.nip}
                   </p>
                 </div>
               ))}
