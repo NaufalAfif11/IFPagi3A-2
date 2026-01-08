@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en-US" xml:lang="en-US">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>View of Mapping Influence Clusters: A Network Analysis of TikTok Influencer  Co-Followership Among University Students</title>
+
+	
+<meta name="generator" content="Open Journal Systems 3.3.0.21" />
+	<link rel="stylesheet" href="https://jurnal.polibatam.ac.id/index.php/JAIC/$$$call$$$/page/page/css?name=stylesheet" type="text/css" /><link rel="stylesheet" href="https://jurnal.polibatam.ac.id/index.php/JAIC/$$$call$$$/page/page/css?name=font" type="text/css" /><link rel="stylesheet" href="https://jurnal.polibatam.ac.id/lib/pkp/styles/fontawesome/fontawesome.css?v=3.3.0.21" type="text/css" /><link rel="stylesheet" href="https://jurnal.polibatam.ac.id/plugins/generic/orcidProfile/css/orcidProfile.css?v=3.3.0.21" type="text/css" /><link rel="stylesheet" href="https://jurnal.polibatam.ac.id/public/journals/7/styleSheet.css?d=2025-07-01+22%3A51%3A49" type="text/css" />
+	<script src="https://jurnal.polibatam.ac.id/lib/pkp/lib/vendor/components/jquery/jquery.min.js?v=3.3.0.21" type="text/javascript"></script><script src="https://jurnal.polibatam.ac.id/lib/pkp/lib/vendor/components/jqueryui/jquery-ui.min.js?v=3.3.0.21" type="text/javascript"></script><script src="https://jurnal.polibatam.ac.id/plugins/themes/default/js/lib/popper/popper.js?v=3.3.0.21" type="text/javascript"></script><script src="https://jurnal.polibatam.ac.id/plugins/themes/default/js/lib/bootstrap/util.js?v=3.3.0.21" type="text/javascript"></script><script src="https://jurnal.polibatam.ac.id/plugins/themes/default/js/lib/bootstrap/dropdown.js?v=3.3.0.21" type="text/javascript"></script><script src="https://jurnal.polibatam.ac.id/plugins/themes/default/js/main.js?v=3.3.0.21" type="text/javascript"></script><script type="text/javascript">
+(function (w, d, s, l, i) { w[l] = w[l] || []; var f = d.getElementsByTagName(s)[0],
+j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; 
+j.src = 'https://www.googletagmanager.com/gtag/js?id=' + i + dl; f.parentNode.insertBefore(j, f); 
+function gtag(){dataLayer.push(arguments)}; gtag('js', new Date()); gtag('config', i); })
+(window, document, 'script', 'dataLayer', 'googleca3325a69dfe4d54');
+</script>
+</head>
+<body class="pkp_page_article pkp_op_view">
+
+		<header class="header_view">
+
+		<a href="https://jurnal.polibatam.ac.id/index.php/JAIC/article/view/10340" class="return">
+			<span class="pkp_screen_reader">
+									Return to Article Details
+							</span>
+		</a>
+
+		<a href="https://jurnal.polibatam.ac.id/index.php/JAIC/article/view/10340" class="title">
+			Mapping Influence Clusters: A Network Analysis of TikTok Influencer  Co-Followership Among University Students
+		</a>
+
+		<a href="https://jurnal.polibatam.ac.id/index.php/JAIC/article/download/10340/3155/36638" class="download" download>
+			<span class="label">
+				Download
+			</span>
+			<span class="pkp_screen_reader">
+				Download PDF
+			</span>
+		</a>
+
+	</header>
+
+	<script type="text/javascript">
+		// Creating iframe's src in JS instead of Smarty so that EZProxy-using sites can find our domain in $pdfUrl and do their rewrites on it.
+		$(document).ready(function() {
+			var urlBase = "https://jurnal.polibatam.ac.id/plugins/generic/pdfJsViewer/pdf.js/web/viewer.html?file=";
+			var pdfUrl = "https://jurnal.polibatam.ac.id/index.php/JAIC/article/download/10340/3155/36638";
+			$("#pdfCanvasContainer > iframe").attr("src", urlBase + encodeURIComponent(pdfUrl));
+		});
+	</script>
+
+	<div id="pdfCanvasContainer" class="galley_view">
+				<iframe src="" width="100%" height="100%" style="min-height: 500px;" title="PDF of Mapping Influence Clusters: A Network Analysis of TikTok Influencer  Co-Followership Among University Students" allow="fullscreen" webkitallowfullscreen="webkitallowfullscreen"></iframe>
+	</div>
+	
+</body>
+</html>

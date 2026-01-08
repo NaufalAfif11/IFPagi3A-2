@@ -12,7 +12,7 @@ export const registerPenyedia = async (req, res) => {
 
         res.json({ message: "Register penyedia berhasil", user: result.rows[0] });
     } catch (err) {
-        res.status(500).json({ error: "Server error" });
+        res.status(500).json({ error: "Email telah digunakan" });
     }
 };
 

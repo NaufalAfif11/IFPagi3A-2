@@ -1,42 +1,35 @@
 "use client";
 
-import React from 'react';
-import { Download } from 'lucide-react';
-import Navbar from '../../components/ui/navbar';
-import Footer from '@/components/ui/footer';
+import React from "react";
+import { Download } from "lucide-react";
+import Navbar from "../../components/ui/navbar";
+import Footer from "@/components/ui/footer";
 
 export default function Info() {
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const itemsPerPage = 5;
-
-  const panduanData = [
-    { id: 1, title: 'Manual Book Sinova Kepulauan Riau (Publik)' },
-    { id: 2, title: 'Manual Book Sinova Kepulauan Riau (Peneliti)' },
-    { id: 3, title: 'Manual Book Sinova Kepulauan Riau (Brida)' },
-    { id: 4, title: 'Manual Book Sinova Kepulauan Riau (Industri)' },
-    { id: 5, title: 'Manual Book Sinova Kepulauan Riau (UMKM)' },
-    { id: 6, title: 'Panduan Penggunaan Dashboard' },
-    { id: 7, title: 'FAQ dan Troubleshooting' },
-    { id: 8, title: 'Kebijakan Privasi dan Data' }
+  const currentItems = [
+    { id: 1, title: "Manual Book Sinova Kepulauan Riau (Publik)" },
+    { id: 2, title: "Manual Book Sinova Kepulauan Riau (Peneliti)" },
   ];
 
-  const totalPages = Math.ceil(panduanData.length / itemsPerPage);
-  
-  // Get current items
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = panduanData.slice(indexOfFirstItem, indexOfLastItem);
-
-  const handleDownload = (id: number) => {
-    console.log(`Downloading document with id: ${id}`);
-    // Implementasi download akan ditambahkan nanti
-    alert(`Download dokumen ID: ${id} akan segera dimulai`);
+  const fileMap: Record<number, string> = {
+    1: "/Manual Book Pengguna Inovasi Aplikasi SINOVA.pdf",
+    2: "/Manual Book Penyedia Inovasi Aplikasi SINOVA.pdf",
   };
 
-  const goToPage = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
+  const handleDownload = (id: number) => {
+    const fileUrl = fileMap[id];
+
+    if (!fileUrl) {
+      alert("File belum tersedia");
+      return;
     }
+
+    const link = document.createElement("a");
+    link.href = fileUrl;
+    link.download = fileUrl.split("/").pop() || "file.pdf";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -76,12 +69,12 @@ export default function Info() {
                 </thead>
                 <tbody>
                   {currentItems.map((item, index) => (
-                    <tr 
-                      key={item.id} 
+                    <tr
+                      key={item.id}
                       className="border-b border-gray-200 hover:bg-blue-50 transition-colors duration-200"
                     >
                       <td className="py-4 px-6 text-gray-800 font-medium">
-                        {indexOfFirstItem + index + 1}.
+                        {index + 1}.
                       </td>
                       <td className="py-4 px-6 text-gray-800">
                         {item.title}
@@ -97,8 +90,7 @@ export default function Info() {
                       </td>
                     </tr>
                   ))}
-                  
-                  {/* Empty state if no data */}
+
                   {currentItems.length === 0 && (
                     <tr>
                       <td colSpan={3} className="py-12 text-center text-gray-500">
@@ -109,51 +101,7 @@ export default function Info() {
                 </tbody>
               </table>
             </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex flex-wrap justify-center items-center gap-2 mt-6 pt-4 border-t">
-                <button
-                  onClick={() => goToPage(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium text-gray-700"
-                >
-                  Previous
-                </button>
-
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => goToPage(page)}
-                    className={`px-4 py-2 rounded-lg transition-colors text-sm font-medium ${
-                      currentPage === page
-                        ? 'bg-[#1F4E73] text-white shadow-md'
-                        : 'border border-gray-300 hover:bg-gray-100 text-gray-700'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-
-                <button
-                  onClick={() => goToPage(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium text-gray-700"
-                >
-                  Next
-                </button>
-              </div>
-            )}
-
-            {/* Info text */}
-            {currentItems.length > 0 && (
-              <div className="text-center mt-4 text-gray-600 text-sm">
-                Menampilkan {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, panduanData.length)} dari {panduanData.length} panduan
-              </div>
-            )}
           </div>
-
-         
         </div>
       </div>
       <Footer />

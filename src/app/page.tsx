@@ -196,18 +196,15 @@ export default function Beranda() {
 
               {/* Stats */}
               <div className="grid grid-cols-3 gap-4">
-                <div className="bg-white rounded-2xl p-6 text-center border border-blue-100 shadow-sm">
+                <div className="bg-white rounded-2xl p-8 text-center border border-blue-100 shadow-sm">
                   <p className="text-4xl font-bold mb-2">{stats ? stats.total : 0}</p>
-                  <p className="text-sm text-gray-600">total produk</p>
+                  <p className="text-sm text-gray-600">Total Produk</p>
                 </div>
-                <div className="bg-white rounded-2xl p-6 text-center border border-blue-100 shadow-sm">
+                <div className="bg-white rounded-2xl p-8 text-center border border-blue-100 shadow-sm">
                   <p className="text-4xl font-bold mb-2">{stats ? stats.diverifikasi : 0}</p>
-                  <p className="text-sm text-gray-600">diverifikasi</p>
+                  <p className="text-sm text-gray-600">Diverifikasi</p>
                 </div>
-                <div className="bg-white rounded-2xl p-6 text-center border border-blue-100 shadow-sm">
-                  <p className="text-4xl font-bold mb-2">—</p>
-                  <p className="text-sm text-gray-600">statistik lain</p>
-                </div>
+                
               </div>
             </div>
           </div>

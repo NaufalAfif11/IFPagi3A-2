@@ -17,7 +17,7 @@ export const registerPengguna = async (req, res) => {
 
     } catch (err) {
         console.error(err);
-        res.status(500).json({ error: "Server error" });
+        res.status(500).json({ error: "Email telah digunakan" });
     }
 };
 export const getPenggunaProfile = async (req, res) => {

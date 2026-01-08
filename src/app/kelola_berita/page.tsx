@@ -224,7 +224,7 @@ export default function KelolaBeritaPage() {
                 className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#1F4E73] focus:outline-none transition-colors font-medium"
               >
                 <option value="all">Semua Status</option>
-                <option value="publik">Publik</option>
+                <option value="publik">Publis</option>
                 <option value="draft">Draft</option>
               </select>
 
@@ -415,7 +415,7 @@ export default function KelolaBeritaPage() {
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#1F4E73] focus:outline-none transition-colors font-medium"
                 >
                   <option value="draft">Draft</option>
-                  <option value="publik">Publik</option>
+                  <option value="publik">Publis</option>
                 </select>
               </div>
 
