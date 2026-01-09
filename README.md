@@ -5,6 +5,6 @@ Anggota- Anggota Kelompok :
     3. 3312401024 – Annisa Fadilla Efendi Harahap                                             
     4. 3312401043 – Salsa Putri Ajriyanti
 
-Link Lainnya             : https://drive.google.com/drive/folders/1NRGrAboPshr15w0tMCyk6RX-rm1TG_tc?usp=sharing
+Link Lainnya             : https://drive.google.com/drive/folders/13dLewD5QRnFWPUFNkUrH4KIKjpFXFnmj
 Link Presentasi Youtube  : https://www.youtube.com/watch?v=qf4ESeoDYvQ
 Link Demo Aplikasi       : https://www.youtube.com/watch?v=xo4xw43bPM4
